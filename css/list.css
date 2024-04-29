@@ -1,0 +1,210 @@
+
+.left {
+    float: left;
+}
+
+.right {
+    margin-right:5px;
+    float: right;
+}
+
+
+body
+{
+	margin: 0;
+    padding: 0;
+    background-color: black;
+	background: linear-gradient(90deg, black 20%, gray 33%, black 35%, black 65%, gray 67%, black 80%);
+	background-size: 3500px;
+	background-position: center;
+	background-repeat: repeat-y;
+	/*background: #000;*/
+	font-family: arial, verdana, tahoma;
+	scroll-margin-top: 10em;
+}
+
+
+.page-container {
+    width: 80%; /* Set your desired width (e.g., 80% of the viewport width) */
+    max-width: 1100px; /* Set a maximum width if needed */
+    margin: 0 auto; /* Center the container horizontally */
+    background-color: #D6C9AF; /* Set your desired background color */
+    padding: 20px; /* Add padding as needed */
+	color: #000;
+
+}
+
+
+
+.left {
+    float: left;
+}
+ 
+.header {
+	margin-left: 40px;
+	text-align: center;
+	padding-top: 20px;
+	width:1000px;
+
+}
+
+
+a:visited{
+    color: black;
+text-decoration: none;
+}
+
+a:link {
+  text-decoration: none;
+}
+
+a:-webkit-any-link {
+    color: black;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.grid{
+	display: grid;
+grid-template-columns: repeat(5, 1fr);
+   -moz-column-count: 4;
+    -moz-column-gap: 0;
+    -webkit-column-count: 4;
+    -webkit-column-gap: 0;
+    column-count: 4;
+    column-gap: 0;
+    margin-top:30px;
+}
+
+
+.box {
+
+/*	
+	*/
+    float: left; 
+	position: relative;
+	padding-top: 4px;
+	text-align: center;
+	width: 230px;
+	margin:10px;
+	background: #D3D3D3;
+	color: black;
+    break-inside: avoid-column;
+	transition: all 0.5s;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+
+.platoon, .blackbox{
+	margin:5px;
+	color: white;
+	text-decoration: none;
+	background: #6e7575;
+	font-size: 15px;
+	display: inline-block;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	text-transform:uppercase;
+	
+}
+
+.blackbox{
+    background:black;
+}
+.title
+{
+    margin:1px;
+    width: 216px;
+	font-weight: bold;
+	padding: 3px 3px;
+	padding-right:10px;
+	box-sizing: border-box;
+    background: white;
+	font-size: 13px;
+    color: black;
+	display: inline-block;
+    border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+}
+
+h2{
+	padding: 2px 2px;
+	text-decoration: none;
+	background: #3D4849;
+	color: white;
+	display: inline-block;
+    width: 500px;
+
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+	
+	text-transform:uppercase;
+}
+
+h3{
+	padding: 5px 2px;
+	margin-top: -20px;
+	text-decoration: none;
+	background: black;
+	color: white;
+	display: inline-block;
+    width: 400px;
+	z-index: 6;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;	
+	border-radius: 8px;
+	
+	text-transform:uppercase;
+}
+
+
+/* Style the navigation menu */
+.topnav {
+	overflow: hidden;
+	background-color: black;
+	position: relative;
+  }
+  
+  /* Hide the links inside the navigation menu (except for logo/home) */
+  .topnav #myLinks {
+	display: none;
+  }
+  
+  /* Style navigation menu links */
+  .topnav a{
+	color: white;
+	padding: 14px 16px;
+	text-decoration: none;
+	font-size: 17px;
+	display: block;
+  }
+  
+   .topnav label {
+		 color: white;
+   }
+  
+  /* Style the hamburger menu */
+  .topnav a.icon {
+	background: black;
+	display: block;
+	position: absolute;
+	right: 0;
+	top: 0;
+  }
+  
+  /* Add a grey background color on mouse-over */
+  .topnav a:hover {
+	background-color: #ddd;
+	color: black;
+  }
+  
+  /* Style the active link (or home/logo) */
+  .active {
+	background-color: white;
+	color: white;
+  } 
+  
