@@ -1,21 +1,21 @@
+
+
 html {
 	scroll-padding-top: 6rem;
-  }
+}
 
-body
-  {
-	  margin: 0;
-	  padding: 0;
-	  background-color: black;
-	  background: linear-gradient(90deg, black 20%, gray 33%, black 35%, black 65%, gray 67%, black 80%);
-	  background-size: 3500px;
-	  background-position: center;
-	  background-repeat: repeat-y;
-	  /*background: #000;*/
-	  font-family: arial,  sans-serif;
-	  scroll-margin-top: 10em;
-	  min-height: 100vh;
-  }
+body {
+	margin: 0;
+	padding: 0;
+	background-color: black;
+	background: linear-gradient(90deg, black 27%, gray 33%, black 35%, black 65%, gray 67%, black 73%);
+	background-size: 3500px;
+	background-position: center;
+	background-repeat: repeat-y;
+	font-family: arial,  sans-serif;
+	scroll-margin-top: 10em;
+	min-height: 100vh;
+}
   
 .loadingDiv {
 	position: fixed;
@@ -31,7 +31,40 @@ body
     color:#fff;
 }
 
+.MSI {
+	margin-top:5px;
+	padding: 1px;
+	width: 40;
+	background: black;
+	display: inline-block;
+	border-radius: 7px;
+	-webkit-border-radius: 7px;
+}
 
+.MSI div{
+	border: 2px solid white;
+	padding: 2px 2px;
+	text-decoration: none;
+    text-align: left;
+	background: white;
+	width: 32;
+	color: black;
+	font-size: 15px;
+	display: inline-block;
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+    text-align: center;
+	background: #dd0000;
+	color: white;
+	font-weight: bold;
+}
+
+.topright {
+	position: absolute;
+	top: -15px;
+	right: -14px;
+	z-index: 10;
+}
 
 .loader {
 	border: 16px solid #f3f3f3; /* Light grey */
@@ -58,27 +91,31 @@ body
 .title img {
     filter: invert(100%);
     padding: 12px 5px 0px 5px;
+	margin-bottom: -4px;
 }
 
 /* Apply specific styles for nation images */
-.nation img {
+.nation img{
     filter: invert(0%);
     padding: 10px 5px 5px 5px;
 }
 
+.optionBox img {
+	filter: invert(0%);
+	padding: 0;
+	margin-bottom: 0;
+ }
+
 /* Apply styles to .card specifically */
 .card {
     padding: 2px;
+	
 }
 
 /* Apply styles to elements with class .img */
 .img {
     object-fit: cover;
     height: 100px;
-}
-
-:root {
-  --doubleboxWidth: 130px;
 }
 
 .left {
@@ -90,7 +127,6 @@ body
     float: right;
 }
 
-
 .page-container {
     width: 80%; /* Set your desired width (e.g., 80% of the viewport width) */
     max-width: 1120px; /* Set a maximum width if needed */
@@ -98,10 +134,7 @@ body
     background-color: #D6C9AF; /* Set your desired background color */
     padding: 5px; /* Add padding as needed */
 	min-height: 100vh;
-}
-
-.box select{ 
-    max-width:200px;
+	text-align: center;
 }
 
 .box b{
@@ -121,22 +154,14 @@ body
     max-width:180px;
 }
 
- 
-.header {
-	margin-left: 40px;
-	text-align: center;
-	width:1000px;
-}
-
 .collapsible {
-  cursor: pointer;
-  width: 1011px;
+	cursor: pointer;
+	width: 1011px;
 	z-index: 1;
-	margin-left: 40px;
- 	margin-top: 20px; 
- 	margin-bottom: 10px;  
- 	position: relative;
- 	background: white;
+	margin-top: 20px; 
+	margin-bottom: 10px;  
+	position: relative;
+	background: white;
 	display: inline-block;
 	border: 2px solid black;
 	text-align: center;
@@ -160,10 +185,14 @@ label {
 	position: relative;
 	box-sizing: border-box;
 	display: inline-block;
-	width: 100%;
+
 }
 
+.box label {
+	width: 100%;
+}
 .platoonImageSpan {
+	position: relative;
 	width: 100%;
 	box-sizing: border-box;
 	display: inline-block;
@@ -187,15 +216,19 @@ label:before {
 	transform: scale(0);
   }
 
-  :checked + label:before {
+:checked + label:before {
 	content: "✓";
-	background-color: rgba(170, 170, 170, 0.6);
+	background-color: rgba(76, 118, 255, 0.6);
 	transform: scale(1);
 	z-index: 3;
-  }
+}
 
 :checked + label img {
 	filter: invert(49%) sepia(74%) saturate(1418%) hue-rotate(157deg) brightness(97%) contrast(99%);
+}
+
+:checked + label .title, :checked + label .cardTitle  {
+	background: rgb(202, 212, 255);
 }
 
 .collapsible:after {
@@ -228,32 +261,7 @@ label:before {
 	width: 100%;
 }
 
-.disclaimer{
-	background: #ede7db;
-	border-radius: 	5px;
-	color: rgb(255, 0, 0);
-	border: 2px solid rgb(255, 0, 0);
-	position: relative;
- 	margin-top: 5px;   
-	z-index: 0;
-	display: inline-block;
-	box-sizing: border-box;
-	text-align: center;
-	width: 100%;
-}
-.disclaimer a {
-	color: rgb(100, 0, 0);
-	text-decoration: none;
-}
 
-.disclaimer a:visited{
-    color: rgb(136, 0, 0);
-	text-decoration: none;
-}
-
-.disclaimer a:link {
-  text-decoration: none;
-}
 
 a:visited{
     color: white;
@@ -277,10 +285,30 @@ a:-webkit-any-link {
 	gap: 12px;
 	column-gap: 19px;
 	margin: 4px;
-    margin-top:30px;
+    /*margin-top:30px;*/
+	transition: all 0.3s ease-in-out;
+}
+
+.topGrid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+}
+
+
+.smallCard {
+	position: absolute;
+	left: -10px;
+	background-color: white;
+	padding: 1px;
+	border: 1px solid black;
+	box-sizing: border-box;
+	border-radius: 2px;
+	top: -5px;
+	font-size: 1px;
 }
 
 .box {
+	position: relative;
 	border: 2px solid #b5b5b5;
 	background: #D3D3D3;
 	color: black;
@@ -292,23 +320,58 @@ a:-webkit-any-link {
 	/*margin:7px;*/
 	grid-row-end: span 6;
 	width: auto;
+	transition: transform 0.3s ease-in-out, grid-row-end 0.3s ease-in-out;
 }
 
 .Formation div{
 	font-size: 14px;
 }
-.blackbox, .platoon {
+
+div.optionBox, div.configBox {
+	position: relative;
+	border-radius: 4px;
+	background: #D3D3D3;
+	box-sizing: border-box;
+	color: black;
+	margin: 1px;
+	margin-top: 0.2em;
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+	font-size: 0.8em;
+	display: grid;
+    gap: 0.6ch;
+}
+
+div.configBox {
+	background: white;
+	padding-top: 0em;
+	padding-bottom: 0em;
+}
+.configBox select, .optionBox select {
+	margin: 0ch;
+	width: 100%;
+}
+
+
+.optionBox label{
+	text-align: left;
+	display: flex;
+	align-items: center;
+}
+
+.blackbox, .platoon{
     margin-top: 5px;
 	margin-bottom: 5px;
 	padding: 2px;
     color: white;
     text-decoration: none;
-
     display: inline-block;
     border-radius: 8px;
 	width: 100%;
 	box-sizing: border-box;
+	position: relative;
 }
+
 
 button.platoon {
 	cursor: pointer;
@@ -343,15 +406,61 @@ button .title {
 	padding: 3px 3px;
 	box-sizing: border-box;
     background: white;
-	
     color: black;
-
     border-radius: 6px;
 	-webkit-border-radius: 6px;
 
 }
+
 .title span {
 	font-size: 12px;
+}
+
+.title span.cardCode {
+	font-size: 0.7em;
+}
+.title {
+    display: grid;
+	grid-template-columns: auto auto;
+	grid-template-rows: auto auto;
+}
+
+.title br {
+	height: 0px;
+}
+
+.title span br {
+	display:initial;
+}
+
+.title span:first-child {
+    grid-column: 1; /* Place in the first column */
+    grid-row: span 2; /* Span two rows */
+}
+
+.title span:nth-child(2) {
+    grid-column: 2; /* Place in the second column */
+    grid-row: 1; /* First row */
+}
+
+.title span:nth-child(3) {
+    grid-column: 2; /* Place in the second column */
+    grid-row: 2; /* Second row */
+}
+
+label .nation img {
+	filter:none;
+}
+
+button.initial {
+	height: 100px;
+	width: 100%;
+	margin: 0px;
+	background-color:#6e7575;
+}
+
+button.initial br {
+	display: block;
 }
 
 h2{
@@ -360,16 +469,23 @@ h2{
 	background: #3D4849;
 	color: white;
 	display: inline-block;
-	width:min(800px, 100%);
+	width: min(1011px, calc(100vw - 100px));
 	-webkit-border-radius: 8px;
 	border-radius: 8px;
 	text-transform:uppercase;
 	margin-block-start: 0;
 }
 
+.collapsible .Points {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+}
+
 h3{
 	padding: 5px 2px;
-	margin-top: -20px;
+	margin-top: 0px;
+	margin-bottom: 0;
 	text-decoration: none;
 	background: black;
 	color: white;
@@ -381,26 +497,65 @@ h3{
 	text-transform:uppercase;
 }
 
+.selectedPlatoon {
+	display: none;
+}
 
+.selected {
+	display: block;
+}
+
+.forceCard label {
+	margin-top: 2px;
+	margin-bottom: 2px;
+	padding: 2px;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+	width: 100%;
+	box-sizing: border-box;
+	display: grid;
+	grid-template-columns: 45px auto;
+	background: #6e7575;
+}
+
+.forceCard label img {
+	filter: invert(100%);
+    padding: 5px;
+}
+
+.cardTitle {
+	display: block;
+	background: white;
+	color: #000;
+	
+	font-weight: bold;
+	font-size: 1.2em;
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+}
+
+.cardPoints {
+	font-style: italic;
+	font-size: 0.7em;
+}
 
 .box .IsHitOn ,.box .Points,.Points, .IsHitOn{
 	margin-top:5px;
 	padding: 1px;
-	width: var(--doubleboxWidth);
+	width: 130px;
 	background: black;
 	display: inline-block;
 	border-radius: 7px;
 	-webkit-border-radius: 7px;
-
 }
 
 .IsHitOn div{
 	border: 2px solid white;
-
 	text-decoration: none;
     text-align: left;
 	background: white;
-	width: calc( var(--doubleboxWidth) - 4px);
+	width: 126px;
 	color: black;
 	font-size: 15px;
 	display: inline-block;
@@ -413,7 +568,7 @@ h3{
 	text-decoration: none;
     text-align: left;
 	background: white;
-	width: calc( var(--doubleboxWidth) - 8px);
+	width: 122px;
 	color: black;
 	font-size: 15px;
 	display: inline-block;
@@ -435,7 +590,7 @@ h3{
     padding: 2px 2px;
     border: 2px solid white;
 	color: white;
-	width: calc( var(--doubleboxWidth) - 8px);
+	width: 122px;
     border-radius: 6px;
 	-webkit-border-radius: 6px;
 }
@@ -480,9 +635,7 @@ h3{
 
 	.grid{
 		grid-template-columns: repeat(4, 1fr);
-
 	}
-	
 }
 
 @media only screen and (max-width: 870px) {
@@ -510,62 +663,6 @@ h3{
 }
 
 
-
-/* Style the navigation menu */
-.topnav {
-  position: fixed;
-  top: 0;
-  width: 100%;    
-  overflow: hidden;
-  background-color: black;
-  z-index:5;
-/*  position: relative;*/
-}
-
-.topnav h3{
-	padding: 5px 2px;
-	margin-top: 5px;
-}
-
-/* Hide the links inside the navigation menu (except for logo/home) */
-.topnav #myLinks {
-  display: none;
-}
-
-/* Style navigation menu links */
-.topnav a{
-  color: white;
-  padding: 14px 16px;
-  text-decoration: none;
-  font-size: 17px;
-  display: block;
-}
-
- .topnav label {
-       color: white;
- }
-
-/* Style the hamburger menu */
-.topnav a.icon {
-  background: black;
-  display: block;
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-
-/* Add a grey background color on mouse-over */
-.topnav a:hover {
-  background-color: #ddd;
-  color: black;
-}
-
-/* Style the active link (or home/logo) */
-.active {
-  background-color: white;
-  color: white;
-} 
-  
  #backToTopButton {
     display: none;
 	position: fixed;
@@ -590,7 +687,7 @@ h3{
     cursor: pointer;
 }
 
- #viewlistOnTop {
+ #process-link {
 
 	position: fixed;
     bottom: 20px;
@@ -610,30 +707,6 @@ h3{
     color: #fff;
 }
 
-.German {
-	background-color: #3f473c;
-}
-.American {
-	background-color: #012846;
-}
-.British {
-	background-color: #531d2d;
-}
-.Soviet {
-	background-color: #5f4c30;
-}
-.Finnish {
-	background-color: #004678;
-}
-.Hungarian {
-	background-color: #27441a;
-}
-.Romanian {
-	background-color: #79242f;
-}
-.Italian {
-	background-color: #07542b;
-}
 
 button.platoon img {
 	padding: 5px 5px 5px 5px;
@@ -648,4 +721,178 @@ button .nation img {
 
 .left img {
 	padding: 2px 2px 5px 5px;
+}
+/*
+.floatingImg {
+	position: relative;
+	width: 0px;
+	height: 0px;
+}
+*/
+
+button .floatingImg img{
+
+	background-color: white;
+    border-radius: 30%;
+    border: 2px solid black;
+	width: 18px;
+    padding: 5px 5px 5px 5px;
+
+}
+
+.addFormButton {
+    background-color: #007BFF;
+    color: white;
+    padding: 8px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+	font-size: larger;
+	
+  }
+
+  #infoOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#infoOverlay.hidden {
+    display: none;
+}
+
+#infoContent {
+    background: #fff;
+    padding: 20px;
+    max-width: 900px;
+	max-height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+	overflow: scroll;
+	scrollbar-width: none; /* Hides scrollbar in Firefox */
+}
+#infoContent::-webkit-scrollbar {
+	display: none; /* Hides scrollbar in WebKit browsers (e.g., Chrome, Safari) */
+  }
+
+#closeOverlay {
+    display: block;
+    margin-bottom: 10px;
+    background: red;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#platoonDetails {
+	border: solid black 1.5px;
+	margin: 0;
+	padding: 0;
+	border-collapse: separate;
+	border-radius: 7px;
+    border-spacing: 0;
+}
+#platoonDetails td {
+	border: solid black 1.5px;
+	margin: 0;
+	padding: 5px;
+	border-radius: 7px;
+    border-spacing: 0;
+}
+
+li {
+	text-align: left;
+	margin-top: 0.5em;
+}
+
+.config {
+	font-weight: bold;
+}
+
+.info-btn {
+	cursor:help;
+	position: absolute;
+	height: 30px;
+	width: 30px;
+	border-radius: 50%;
+	border: solid black 1.5px;
+	left: -10px;
+	top: 20px;
+	font-family: 'Times New Roman', Times, serif;
+	font-weight: bold;
+	font-style: italic;
+	background-color: #a0c2d8c0;
+	z-index: 100;
+}
+
+.hidden {
+	display: none !important;
+}
+
+.disclaimer{
+	background: #ede7db;
+	border-radius: 	5px;
+	color: rgb(255, 0, 0);
+	border: 2px solid rgb(255, 0, 0);
+	position: relative;
+ 	margin-top: 5px;   
+	z-index: 0;
+	display: inline-block;
+	box-sizing: border-box;
+	text-align: center;
+	width: 100%;
+}
+.disclaimer a {
+	color: rgb(100, 0, 0);
+	text-decoration: none;
+}
+
+.disclaimer a:visited{
+    color: rgb(136, 0, 0);
+	text-decoration: none;
+}
+
+.disclaimer a:link {
+  text-decoration: none;
+}
+
+.sponsor{
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	align-items:center;
+	background: white;
+	border-radius: 	5px;
+	padding: 1ch;
+	border: 2px solid black;
+	position: relative;
+ 	margin-top: 5px;   
+	z-index: 0;
+
+	box-sizing: border-box;
+	text-align: center;
+	width: 100%;
+}
+ a .sponsor{
+	color: black;
+	text-decoration: none;
+}
+
+a:visited .sponsor{
+    color: black;
+	text-decoration: none;
+}
+
+a:link .sponsor{
+	color: black;
+  text-decoration: none;
 }

@@ -3,68 +3,85 @@ session_start();
 
 $username = "";
 $email   = "";
-$errors = array(); 
+$errors = []; 
 
 include 'sqlServerinfo.php';
 
 if (isset($_POST['reg_user'])) {
-  $username = $_POST['username'];
-  $email = $_POST['email'];
+  $username = trim($_POST['username']);
+  $email = trim($_POST['email']);
   $password_1 = $_POST['password_1'];
   $password_2 = $_POST['password_2'];
 
- if (empty($email)) { $email="na"; }
- if (empty($username)) { array_push($errors, "Username is required"); }
- $token = bin2hex(random_bytes(50));
-// if (empty($securityQuestion)) { array_push($errors, "Answer the question to verify you are a human"); }
- //if (($securityQuestion != "Duncan Gosling")) { array_push($errors, "Answer the question to verify you are a human"); }
+    // Validate input
+    if (empty($username)) { 
+      $errors[] = "Username is required"; 
+  }
+  if (empty($password_1)) { 
+      $errors[] = "Password is required"; 
+  }
+  if ($password_1 !== $password_2) { 
+      $errors[] = "The two passwords do not match"; 
+  }
+  if (!empty($email)&&!filter_var($email, FILTER_VALIDATE_EMAIL)) { 
+      $errors[] = "Invalid email format"; 
+  }
 
- if (empty($password_1)) { array_push($errors, "Password is required"); }
- if ($password_1 != $password_2) { array_push($errors, "The two passwords do not match"); }
+  // Check if the username already exists
+  $stmt = $pdo->prepare("SELECT 1 FROM users WHERE username = ? LIMIT 1");
+  $stmt->execute([$username]);
+  if ($stmt->fetch()) {
+      $errors[] = "Username already exists";
+  }
 
- $stmt = $pdo->prepare("SELECT * FROM users WHERE username=? LIMIT 1");
- $stmt->execute([$username]);
- $user = $stmt->fetch();
+  // If no errors, proceed with registration
+  if (empty($errors)) {
+      try {
+          // Hash the password securely
+          $password = password_hash($password_1, PASSWORD_DEFAULT);
 
-// $user_check_query = "SELECT * FROM users WHERE username='$username' LIMIT 1";
-// $result = mysqli_query($conn, $user_check_query);
-// $user = mysqli_fetch_assoc($result);
- 
- if ($user) {
-   if ($user['username'] === $username) {
-     array_push($errors, "Username already exists");
-   }
- }
+          // Insert the new user into the database
+          $stmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+          $stmt->execute([$username, $email, $password]);
 
- if (count($errors) == 0) {
-       $password = md5($password_1);
+          // Fetch the new user ID
+          $userId = $pdo->lastInsertId();
 
-       $stmt = $pdo->prepare("INSERT INTO users (username, email, password, remember_token) 
-       VALUES(?, ?, ?, ?)");
-       $stmt->execute([$username, $email, $password, $token]);
+          // Generate a unique token for remember-me functionality
+          $token = bin2hex(random_bytes(50));
+          $expiresAt = date('Y-m-d H:i:s', strtotime('+30 days'));
 
-       $stmt = $pdo->prepare("SELECT * FROM users WHERE username=? LIMIT 1");
-       $stmt->execute([$username]);
-       $user = $stmt->fetch();
+          // Insert the token into the `remember_tokens` table
+          $stmtToken = $pdo->prepare("INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, ?)");
+          $stmtToken->execute([$userId, $token, $expiresAt]);
 
-//       $query = "INSERT INTO users (username, email, password, remember_token) 
-//                        VALUES('$username', '$email', '$password', '$token')";
-//       mysqli_query($conn, $query);
-//       $user_check_query = "SELECT * FROM users WHERE username='$username' LIMIT 1";
-//       $result = mysqli_query($conn, $user_check_query);
-//       $user = mysqli_fetch_assoc($result);
+          // Set the token as a secure cookie
+          setcookie('remember_token', $token, [
+              'expires' => strtotime($expiresAt),
+              'path' => '/',
+              'secure' => isset($_SERVER['HTTPS']), // Secure only if HTTPS
+              'httponly' => true,
+              'samesite' => 'Strict',
+          ]);
 
+          // Set session variables
+          $_SESSION['user_id'] = $userId;
+          $_SESSION['username'] = $username;
+          $_SESSION['success'] = "You are now registered and logged in.";
 
-       $_SESSION['user_id'] = $user["id"];
-       $_SESSION['username'] = $username;
+          // Redirect to the homepage
+          header('location: index.php');
+          exit;
 
-       $_SESSION['success'] = "You are now logged in";
-       header('location: index.php');
- } else {
-    foreach ($errors as $key => $value) {
-      echo $value. "<br>";
-    }
- }
+      } catch (Exception $e) {
+          $errors[] = "An error occurred during registration: " . $e->getMessage();
+      }
+  }
+
+  // Display any errors
+  foreach ($errors as $error) {
+      echo $error . "<br>";
+  }
 }
 $conn->close();
 $pdo = null;

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   width="15.000803"
+   height="15.000001"
+   viewBox="0 0 0.45002408 0.45000002"
+   fill="none"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="clear.svg"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="8.9497432"
+     inkscape:cx="-0.83801287"
+     inkscape:cy="1.3408206"
+     inkscape:window-width="2560"
+     inkscape:window-height="1368"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g10"
+     showgrid="false" />
+  <g
+     id="g10"
+     transform="matrix(1.4793433,0,0,1.4793433,-0.24161667,0.0258887)">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.02027927;stroke-dasharray:none;stroke-opacity:1"
+       d="m 0.4500241,0.13459445 c 0,0.0743342 -0.0602581,0.13459447 -0.13459447,0.13459447 -0.0743365,0 -0.13459447,-0.0602602 -0.13459447,-0.13459447 C 0.18083516,0.06026018 0.24109311,0 0.31542963,0 0.38976615,0 0.4500241,0.06026018 0.4500241,0.13459445 Z"
+       id="path9" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.020274;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect10"
+       width="0.020279268"
+       height="0.15554856"
+       x="0.30807546"
+       y="-0.20564407"
+       ry="0.010139634"
+       transform="rotate(45)" />
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.020274;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect11"
+       width="0.020279268"
+       height="0.15554856"
+       x="0.11773016"
+       y="0.24044082"
+       ry="0.010139634"
+       transform="rotate(-45)" />
+  </g>
+</svg>

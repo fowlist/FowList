@@ -1,0 +1,34 @@
+.MSI {
+	margin-top:5px;
+	padding: 1px;
+	width: 40;
+	background: black;
+	display: inline-block;
+	border-radius: 7px;
+	-webkit-border-radius: 7px;
+}
+
+.MSI div{
+	border: 2px solid white;
+	padding: 2px 2px;
+	text-decoration: none;
+    text-align: left;
+	background: white;
+	width: 32;
+	color: black;
+	font-size: 15px;
+	display: inline-block;
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+    text-align: center;
+	background: #dd0000;
+	color: white;
+	font-weight: bold;
+}
+
+.topright {
+	position: absolute;
+	top: 1px;
+	right: 4px;
+	z-index: 10;
+}

@@ -13,9 +13,9 @@ $servername = "localhost";
 //$servername = "";
 //$servername = "";
 $phpUsername = "root";
-$phpPassword = "";
-$dbname = "Fowlist";
-$userDB  = "users";
+$phpPassword = "8ods398O";
+$dbname = "ki12570048_Fowlist";
+$userDB  = "ki12570048_users";
 
 // Create connection
 if (!isset($pdo)) {

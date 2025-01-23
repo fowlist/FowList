@@ -7,8 +7,11 @@ $userID = $_SESSION['user_id']??"";
 $username = $_SESSION['username']??"";
 include "functions.php";
 include "login.php";
+include "showListsFunctions.php";
+include "cssVersion.php";
 
 $linkQuery = $_SESSION['linkQuery']??"";
+
 
 ?>
 <!DOCTYPE html>
@@ -16,202 +19,162 @@ $linkQuery = $_SESSION['linkQuery']??"";
 <head>
     <title><?=$_SESSION['username']??""?>'s Lists</title>
     <link rel="icon" type="image/x-icon" href="/img/cardSmall.svg">
-    <link rel='stylesheet' href='css/list.css'>
+    <link rel='stylesheet' href="css/menu.css?v=<?=$cssVersion?>">
+    <link rel='stylesheet' href='css/nations.css?v=<?=$cssVersion?>'>
+    <link rel='stylesheet' href='css/list.css?v=<?=$cssVersion?>'>
+    <script src="showListsScripts.js"></script>
 </head>
 <body>
-
 <?php 
 $beta ="";
 include "menu.php"; 
 ?>
-
-<div class="page-container">
-    <div class="header">
-        <h2><?=$_SESSION['username']??""?>'s Lists</h2>
-    </div>
-    <div>
-        <a href="index.php?<?=$linkQuery?>">Back</a>
-    </div>
-    <?php
-
+    <div class="page-container">
+        <div class="leftside"></div>
+        <div class="centerColummn">
+<?php 
 if (isset($_SESSION['username'])) {
-    $Books = $conn->query("
-    SELECT  * 
-    FROM    nationBooks");
+
+
+    $dataColumns = [
+
+            [   "showMobile"=> true,
+            "data-label" => "Period/Nation"], 
+            [   "showMobile"=> true,
+            "data-label" => "Book/Front"], 
+            [   "showMobile"=> true,
+            "data-label" => "Formation"], 
+            [   "showMobile"=> true,
+            "data-label" => "List Name"], 
+            [   "showMobile"=> true,
+            "data-label" => "Points"], 
+            [   "showMobile"=> true,
+            "data-label" => "Save date"], 
+            [   "showMobile"=> true,
+            "data-label" => "Event"]
+    ];
+
     
     $results = $pdo->prepare(
         "SELECT * 
         FROM saved_lists 
         WHERE user_id=?
-        ORDER by url");
+        AND url NOT LIKE '%pd=TY%'
+        ORDER by url, name");
     $results->execute([$userID]);
 
-?>
+    $listArray = generateListArray($results, $conn);
+    ?>
 
-
-
+<div class="header">
+    <h2><?=$_SESSION['username']??""?>'s Lists</h2>
+</div>
+<div class="editRow">
+    <span onclick="openNav()"><div class="menuButton wide"> ☰ </div></span>
+    <form id="deleteForm" method="post" action="delete_selected.php">
+        <button type="submit" id="deleteSelectedButton">Delete Selected</button>
+    </form>
+    <button type="button" id="duplicateSelectedButton" class="delete-confirm">Duplicate Selected</button>
+    <button type="button" id="editSelectedButton" class="delete-confirm">Edit Selected</button>
+    <div class="searchBox"><label for="filterInput">Search:</label><input type="text" id="filterInput"></div>
+    <button id="saveAllBtn" class="delete-confirm" style="display: none;">Save All</button>
+</div>
 
 <table id="listTable">
     <thead>
-        <tr>
-            <th>Period</th>
-            <th>Nation</th>
-            <th>Book</th>
-            <th>List Name</th>
-            <th>Points</th>
-            <th>Rename</th>
-            <th>Delete</th>
-        </tr>
         <tr id="filterRow">
+            <th style="display:none;" data-skip-filter></th>
+            <th id="chenckboxHeaderCell" data-skip-filter ><input type="checkbox" id="selectAll"></th>
+            
+<?php
+foreach ($dataColumns as $value) {
+    if (!empty($value)) {
+        ?>
             <th>
-                <select class="filter-input" data-column-index="0">
+                <span class="sort"><?=$value["data-label"]?></span>
+                <select class="filter-input">
                     <option value="all">All</option>
                 </select>
+                </th>
             </th>
-            <th>
-            <select class="filter-input" data-column-index="1">
-                    <option value="all">All</option>
-                </select>
-            </th>
-            <th>
-            <select class="filter-input" data-column-index="2">
-                    <option value="all">All</option>
-                </select>
-            </th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
+        <?php
+    }
+}
+?>
         </tr>
     </thead>
     <tbody>
 <?php
 
-    foreach ($results as $key => $row) {
-        $parts = parse_url($row['url']);
-        parse_str($parts['query'], $query);
-        $query["BookName"] = "";
-        foreach ($Books as $key => $value) {
-            if ($value['code']==$query["Book"]) {
-                $query["BookName"] = $value["Book"];
-                $query["pd"] = $value["periodLong"];
-
-            }
-        }
-?>
-        <tr>
-            <td><?= $query["pd"] ?></td>
-            <td><?= $query["ntn"] ?></td>
-            <td><?= $query["BookName"] ?></td>
-            <td><a href="<?= $row['url'] ?>"><?= $row['name'] ?></a></td>
-            <td><?= "(" . $row['cost'] . " points)" ?></td>
-            <td>
-                <form method='post' action='rename_url.php'>
-                    <input type='hidden' name='id' value='<?= $row['id'] ?>'>
-                    <input type='text' name='name' value='<?= $row['name'] ?>'>
-                    <button type='submit'>Rename</button>
-                </form>
-            </td>
-            <td>
-                <form method='post' action='delete_url.php'>
-                    <input type='hidden' name='id' value='<?= $row['id'] ?>'>
-                    <button type='submit'>Delete</button>
-                </form>
-            </td>
-        </tr>
-<?php
-    }
-
+echo generateShowListRows($listArray);
 ?>
     </tbody>
 </table>
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h4>Edit/inspect Entry</h4>
+
+        <form id="editForm" method="post">
+            <input type="hidden" name="id" id="entryId">
+            
+            <label for="editName">Rename:</label>
+            <input type="text" name="name" id="editName">
+            <button type="button" id="renameButton" data-action="rename" class="delete-confirm">Rename</button>
+            <div id="platoonStats"></div>
+            <br>
+            <label for="editEvent">Add/Modify event:</label>
+            <input list="eventList" name="event" id="editEvent" />
+            <datalist id="eventList">
+                <!-- Options will be populated dynamically -->
+            </datalist>
+            <button type="button" id="updateEventButton" data-action="updateEvent" class="delete-confirm">Change</button>
+            <br>
+            <button type="button" id="deleteButton" class="delete-confirm">Delete List</button>
+            <button type="button" id="duplicateButton" class="delete-confirm">Duplicate List</button>
+        </form>
+    </div>
+</div>
+
+
+<!-- Edit Selected Modal -->
+<div id="editSelectedModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h4>Edit Selected Entries</h4>
+        <form id="editSelectedForm" method="post">
+
+            <label for="editSelectedEventInput">Event:</label>
+            <input list="eventList"  type="text" id="editSelectedEventInput" name="event">
+            <datalist id="eventList">
+                <!-- Options will be populated dynamically -->
+            </datalist>
+            <br>
+            <label for="editNamePrefix">Name Prefix:</label>
+            <input type="text" id="editNamePrefix" name="namePrefix">
+            <br>
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+</div>
+
 <?php
 } else {
-    echo "You are not logged in.";
+    
+    ?>
+    <span onclick="openNav()"><div id="openMenuButton">☰</div></span>
+You are not logged in.
+    
+    <?php
 }
 $conn->close();
 $pdo = null;
 ?>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const listTable = document.getElementById("listTable");
-        const headers = listTable.querySelectorAll("th");
-        const filterInputs = document.querySelectorAll(".filter-input");
-        
-        headers.forEach((header, index) => {
-            const columnIndex = index; // Column index
-            const filterInput = filterInputs[index];
 
-            // Extract unique values from the column
-            const values = new Set();
-            listTable.querySelectorAll(`tbody td:nth-child(${columnIndex + 1})`).forEach(cell => {
-                values.add(cell.textContent.trim());
-            });
-
-            // Create options for the dropdown
-            values.forEach(value => {
-                const option = document.createElement("option");
-                option.textContent = value;
-                option.value = value.toLowerCase().replace(/\s+/g, "-");
-                filterInput.appendChild(option);
-            });
-
-            // Add event listener for filtering
-            filterInput.addEventListener("change", () => {
-                const filterValue = filterInput.value;
-                const rows = listTable.querySelectorAll("tbody tr");
-                rows.forEach(row => {
-                    const cell = row.children[columnIndex];
-                    if (filterValue === "all" || cell.textContent.trim().toLowerCase().replace(/\s+/g, "-") === filterValue) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
-                });
-            });
-        });
-
-        headers.forEach(header => {
-            header.addEventListener("click", () => {
-                const table = header.closest("table");
-                const columnIndex = Array.prototype.indexOf.call(header.parentNode.children, header);
-                const rows = Array.from(table.querySelectorAll("tr"));
-                const descending = header.dataset.order === "desc";
-                const sortedRows = rows.slice(1).sort((a, b) => {
-                    const aText = a.children[columnIndex].textContent.trim();
-                    const bText = b.children[columnIndex].textContent.trim();
-                    return descending ? bText.localeCompare(aText) : aText.localeCompare(bText);
-                });
-                sortedRows.forEach(row => table.appendChild(row));
-                header.dataset.order = descending ? "asc" : "desc";
-            });
-        });
-
-        const filterInput = document.getElementById("filterInput");
-        filterInput.addEventListener("input", () => {
-            const filterValue = filterInput.value.toLowerCase();
-            const rows = listTable.querySelectorAll("tbody tr");
-            rows.forEach(row => {
-                const cells = row.querySelectorAll("td");
-                let isVisible = false;
-                cells.forEach(cell => {
-                    if (cell.textContent.toLowerCase().includes(filterValue)) {
-                        isVisible = true;
-                    }
-                });
-                row.style.display = isVisible ? "" : "none";
-            });
-        });
-    });
-</script>
-
-    <button onclick="printPage()">Print This Page</button>
+<div class="footer"> </div>
 </div>
-    <script>
-        function printPage() {
-            // Open the print dialog
-            window.print();
-        }
-    </script>
+<div class="rightside"></div>
+</div>
 </body>
 </html>

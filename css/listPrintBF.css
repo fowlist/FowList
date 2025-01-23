@@ -1,0 +1,36 @@
+@import url("listPrnt.css");
+
+td:first-child, th:first-child {
+	padding-left: 1ch;
+}
+
+.list tbody tr:nth-child(2n+1) td {
+	background-color: #eeeeee;
+ 
+  }
+
+.list tbody tr:nth-child(2n+2) td {
+	background-color: unset;
+
+  }
+
+th {
+	text-align: left;
+}
+
+td, th {
+	text-align: left;
+}
+
+.arsenal.list .Points div, .arsenal.list .Points {
+	background-color: unset;
+	color: unset;
+	font-size: unset;
+	text-align: center;
+	padding: unset;
+}
+
+.pointsColumn {
+	text-align: center;
+	width: 5ch;
+}

@@ -1,0 +1,40 @@
+.German {
+    background-color: #3f473c !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.American {
+    background-color: #012846 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.British {
+    background-color: #531d2d !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.Soviet {
+    background-color: #5f4c30 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.Finnish {
+    background-color: #004678 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.Hungarian {
+    background-color: #27441a !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.Romanian {
+    background-color: #79242f !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.Italian {
+    background-color: #07542b !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}

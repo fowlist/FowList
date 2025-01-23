@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="8mm"
+   height="8mm"
+   viewBox="0 0 8.0000001 7.9999999"
+   version="1.1"
+   id="svg47190"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="Hungarian.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview47192"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="187.73685"
+     inkscape:cy="155.91705"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="text33941"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-page="true" />
+  <defs
+     id="defs47187">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath63680-8">
+      <path
+         d="M 0,0 H 595.276 V 841.89 H 0 Z"
+         id="path63678-4" />
+    </clipPath>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-64.034973,-43.235898)">
+    <g
+       inkscape:label="Capa 1"
+       id="layer1-5"
+       transform="matrix(0.01238547,0,0,0.01238547,86.37603,76.630162)">
+      <g
+         id="g4299"
+         transform="translate(1.9492421e-6)">
+        <g
+           id="g31631"
+           transform="matrix(5.4254363,0,0,5.4254363,1570.8141,1953.9589)">
+          <g
+             aria-label="W"
+             id="text33941"
+             style="font-size:157.498px;line-height:1.25;stroke-width:3.93745">
+            <g
+               id="g818"
+               transform="matrix(0.41482121,0,0,0.41482121,-624.69717,-859.80788)">
+              <path
+                 d="M 6.5,102.16666 102.16666,6.500006 h 95.66667 L 293.5,102.16666 v 95.66667 l -95.66667,95.66666 H 102.16666 L 6.5,197.83333 Z"
+                 id="path3853"
+                 style="fill:#d2232c;fill-opacity:1;stroke:none"
+                 inkscape:connector-curvature="0" />
+              <path
+                 d="M 102.16666,6.500006 V 102.16666 H 6.5 v 95.66667 h 95.66666 v 95.66666 h 95.66667 V 197.83333 H 293.5 V 102.16667 H 197.83333 V 6.500006 Z"
+                 id="rect2998"
+                 style="fill:#ffffff;fill-opacity:1;stroke:none"
+                 inkscape:connector-curvature="0" />
+              <path
+                 d="M 127.05161,6.500006 V 127.05162 H 6.5 v 45.89676 h 120.55161 v 120.55161 h 45.89676 V 172.94838 H 293.49999 V 127.05162 H 172.94837 V 6.500006 Z"
+                 id="rect3077"
+                 style="fill:#008d46;fill-opacity:1;stroke:none"
+                 inkscape:connector-curvature="0" />
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
