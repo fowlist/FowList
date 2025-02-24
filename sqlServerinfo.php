@@ -13,7 +13,7 @@ $servername = "localhost";
 //$servername = "";
 //$servername = "";
 $phpUsername = "root";
-$phpPassword = "8ods398O";
+$phpPassword = "";
 $dbname = "ki12570048_Fowlist";
 $userDB  = "ki12570048_users";
 
