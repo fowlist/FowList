@@ -1,4 +1,6 @@
 
+* {margin: 0; padding: 0;}
+
 .card, 
 .platoon img, 
 .blackbox img, .platoon svg, 
@@ -10,13 +12,8 @@
 .card, 
 .platoon img, 
 .blackbox img { 
-	filter:invert(var(--image-style));
+	filter:invert(100%);
 
-}
-
-.formHeader .card {
-	margin: 0;
-	padding: 0;
 }
 .IsHitOn img { 
 	filter:invert(100%);
@@ -39,20 +36,9 @@
 
 .imagerow {
 	vertical-align:middle;
-	filter:invert(var(--image-style-alt));
 }
 
-.formHeader{
-	padding: 5px 2px;
-	margin-top: 0px;
-	margin-bottom: 0;
-	color: white;
-	text-decoration: none;
-	text-transform:uppercase;
-	display: flex;
-	align-items: center;
-	gap: 1ch;
-}
+
 
 .MSI {
 
@@ -76,7 +62,7 @@
 	padding: 2px 2px;
 	text-decoration: none;
 	font-weight: bold;
-	background: #994949;
+	background: #dd0000;
 	width:100%;
 	color: white;
 	font-size: 8px;
@@ -112,6 +98,36 @@
     top: -8px;
 }
 
+.loadingDiv {
+	position: fixed;
+    left:0;
+    top:0;
+    z-index:1000;
+    width:100%;
+    height:100%;
+    min-height:100%;
+    background:#000;
+    opacity:0.8;
+    text-align:center;
+    color:#fff;
+}
+
+.loader {
+	border: 16px solid #f3f3f3; /* Light grey */
+	border-top: 16px solid #3498db; /* Blue */
+	border-radius: 50%;
+	width: 120px;
+	height: 120px;
+	animation: spin 2s linear infinite;
+}
+
+.loader {
+	margin: 0;
+	position: absolute;
+	top: calc(50% - 76px);
+	left: calc(50% - 76px);
+}
+
 @keyframes spin {
 	0% { transform: rotate(0deg); }
 	100% { transform: rotate(360deg); }
@@ -128,7 +144,7 @@
 	grid-template-columns: 86px;
 	margin-top: 1px;
 	font-size: 9px;
-    background-color: var(--optionBox-background-color);
+    background: white;
 }
 
 .doubleGrids {
@@ -137,9 +153,10 @@
 	grid-template-columns: 80px auto;
 	margin-top: 1px;
 	font-size: 9px;
-	background-color: var(--optionBox-background-color);
-
+    background: white;
 }
+
+
 
 .mot-grid-item {
 	font-style: italic;
@@ -147,20 +164,9 @@
 	border-left: 1.5px solid black;
 	border-right: 1.5px solid black;
 	margin-bottom: -2px;
+
 	text-align: center;
 }
-
-.mot-first-grid-item {
-	font-style: italic;
-	font-size: 6px;
-	text-align: center;
-	border-left: 1.5px solid black;
-	border-right: 1.5px solid black;
-	border-top: 1.5px solid black;
-	border-top-left-radius: 6px;
-	border-top-right-radius: 6px;
-}
-
 .mot-grid-item span {
 	font-size: 6px;
 	padding-right: 10px;
@@ -197,7 +203,7 @@
 	text-align: left;	
 	
 	font-weight: bold;
-	
+    background: #dd0000;
 	color: white;
 	border: 1.5px solid black;
     border-radius: 5px;
@@ -206,7 +212,9 @@
 }
 
 .grid-addon {
+	background: #fff;
 	margin-left: 1px;
+	padding: 2px;
 	font-weight: bold;
 	position: relative;
 	top: -7px;
@@ -217,9 +225,6 @@
 	padding: 1.5px;
 	border: 1.5px solid white;
 	border-radius: 4px;
-	background-color: #994949 !important;
-	print-color-adjust: exact;
-	-webkit-print-color-adjust: exact;
 }
 .b {
 	font-weight: bold;
@@ -229,6 +234,11 @@
 	visibility: hidden;
 }
 
+/*.img {
+   	object-fit: cover;
+   	height: 100px;
+}
+*/
 .nation img { 
 	filter:invert(0%); 
 	padding: 2px 2px 2px 2px;
@@ -257,24 +267,35 @@
 
   }
 
-.collapsible, .header {
-
-	cursor: pointer;
-	width: 100%;
+.collapsible {
+  	cursor: pointer;
+  	width:  98%;
 	z-index: 1;
-	margin-top: 10px; 
-	position: relative;
-	background-color: var(--accent-color);
-	display: flex;
-  	justify-content: space-between;
-	gap: 1ch;
-	align-items: center;
-	/*border: 2px solid black;*/
+	margin-left: 30px;
+ 	margin-top: 5px; 
+ 	margin-bottom: 0px;  
+ 	position: relative;
+ 	background: white;
+	display: inline-block;
+	border: 1.5px solid black;
 	text-align: center;
-	border-radius: 	5px 5px 0px 0px;
-	padding-left: 1ch;
-	padding-right: 1ch;
-	box-sizing: border-box;
+	width: 93%;
+	border-radius: 	5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px; 
+}
+
+.collapsible:after {
+	content: "\2796"; /* Unicode character for "plus" sign (+) */
+	font-size: 13px;
+	color: white;
+	float: right;
+	margin-left: 5px;
+	margin-top: 10px;
+}
+
+.active:after {
+  	content: '\02795'; /* Unicode character for "minus" sign (-) */
 }
 
 /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
@@ -309,20 +330,30 @@ a:visited {
 	-moz-border-radius: 8px;
 }
 
-body {
+body
+{
+	margin: 0;
+    padding: 0;
+    background: linear-gradient(90deg, black 30%, gray 39%, black 39.5%,#D6C9AF 39.5%, #D6C9AF 60.5%, black 60.5%, gray 61%, black 70%);
+	background-size: 3500px 10000px;
+	background-position: center;
+	background-repeat: no-repeat;
 	font-size: 10px;
 	font-family: arial, verdana, tahoma;
+	scroll-margin-top: 10em;
 }
 
 
 .page-container {
 
-	width: 726px;
-	margin: 0 auto;
-	padding: 0 3px;
+	width: 720px;
+	margin: 0 auto; 
+	padding: 0px;
 	page-break-inside: auto;
 	page-break-inside: auto;
-    background-color: var(--background-color-alt);
+    background-color: #D6C9AF; /* Set your desired background color */
+
+
 }
 
 .IsHitOn , .Points{
@@ -338,6 +369,8 @@ body {
 }
 
 .Points .Points1{
+
+
 	font-size: 8px;
 	padding: 1px;
 	border-radius: 3px;
@@ -345,13 +378,14 @@ body {
 	box-sizing: border-box;
 	text-decoration: none;
 	font-weight: bold;
-	background: rgb(18, 83, 18);
+	background: green;
 	width: 100%;
 	color: white;
 	display: inline-block;
 	text-transform:uppercase;
 	print-color-adjust: exact;
 	-webkit-print-color-adjust: exact;
+
 }
 
 .box select{
@@ -363,6 +397,7 @@ body {
 
 .header {
 	text-align: center;
+	padding-top: 20px;
 	width: 100%;
 	page-break-before: avoid;
 	page-break-after: avoid;
@@ -370,19 +405,13 @@ body {
 
 
 .Formation{
-	border: none;
-	padding-top: 0.5ch;
-
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
 	margin: 0px;
-	background-color: var(--background-color);
+	background: white;
 	display: inline-block;
-
-    border-radius: 	0  0 5px 5px;
+    border:solid black 1.5px;
+    border-radius:7px;
 	text-align: center;
 	width: 100%;
-	box-sizing: border-box;
 
 }
 
@@ -396,6 +425,14 @@ body {
 	position: relative;
 	float: left; text-align: center;
 	width: 67%;
+}
+.box {
+
+	background: #D3D3D3;
+	color: black;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
 }
 
 
@@ -423,7 +460,7 @@ body {
 }
 
 .images {
-	text-wrap: pretty;
+	text-wrap: balance;
 }
 
 .images .inf:nth-of-type(2n+2) {
@@ -457,7 +494,7 @@ img.scale {
 	display:none;
 }
 .grid{
-	width: 720px;
+	max-width: 720px;
 	font-size: 8px;
 }
 
@@ -472,18 +509,13 @@ img.scale {
 	margin-bottom: 5px;
 	padding-bottom: 2px;
 	border-radius: 5px;
-
+	background: #D3D3D3;
+	color: black;
     break-inside: avoid-column;
 	text-align: center;
 	width: 226px;
 	print-color-adjust: exact;
 	-webkit-print-color-adjust: exact;
-
-	background: var(--box-background-color);
-	color: var(--text-color);
-	border-radius: 8px;
-	-webkit-border-radius: 8px;
-	-moz-border-radius: 8px;
 }
 
 
@@ -509,19 +541,21 @@ img.scale {
     display: inline-block;
     border-radius: 4px;
 	width: calc(100% - 4px);
-
 }
+
+
 
 .title
 {
+	
     margin:1px;
 /*	font-weight: bold; */
 	padding: 3px 3px;
 	padding-right:10px;
 	box-sizing: border-box;
-    background: var(--optionBox-background-color);
+    background: white;
 	font-size: 13px;
-    color: var(--text-color);
+    color: black;
 	display: inline-block;
 	text-transform:none;
 	-webkit-border-radius: 6px;
@@ -539,8 +573,8 @@ h2{
 	background: #3D4849;
 	color: white;
 	display: inline-block;
-	padding-left: 2ch;
-	padding-right: 2ch;
+    width: 500px;
+	
 	-webkit-border-radius: 8px;
 	-moz-border-radius: 8px;
 	border-radius: 8px;
@@ -599,7 +633,7 @@ h3{
 	padding: 2px 2px;
 	text-decoration: none;
 	font-weight: bold;
-	background: #994949;
+	background: #dd0000;
 	width:100%;
 	color: white;
 	font-size: 8px;
@@ -611,7 +645,7 @@ h3{
 }
 
 .box .Points div, td .Points div , .cell .Points div{
-	background: rgb(18, 83, 18);
+	background: green;
 	cursor: pointer;
 	font-size: 8px;
 	border-radius: 3px;
@@ -694,7 +728,7 @@ tr td {
 }
 
 .arsenal tr:nth-child(2n+2) td {
-	background-color: var(--box-background-color);
+	background-color: #eeeeee;
 	border-top:none;
 }
 
@@ -704,9 +738,9 @@ tr:nth-child(2n+2) {
 
 table {
     border-collapse:separate;
-    background: var(--background-color);
+    background: white;
     border:solid black 1.5px;
-    border-radius:0 0 5px 5px;
+    border-radius:7px;
     border-spacing: 0;
     width: 100%;
 }
@@ -764,16 +798,17 @@ td .Armour div ,.cell .Armour div{
 	text-align: left;
 	box-sizing: border-box;
 
-    border: 1.5px ;
+    border: 1.5px solid white;
 	background: white;
 	color: black;
 	width:100%;
+    border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+}
 
-}
-.teamHeader {
-	text-align: left; 
-	background-color: var(--box-background-color);
-}
 
 
 .komTbl td, .komTbl tr{
@@ -805,7 +840,6 @@ tr .firstWeaponrow {
 	print-color-adjust: exact;
 	-webkit-print-color-adjust: exact;
 	padding: 2px;
-	margin: 1px;
 	border-radius: 2px;
 	width: 58px;
 	font-size: 6px;
@@ -816,7 +850,7 @@ tr .firstWeaponrow {
     margin-right:2px;
     float: right;
 	font-size: 10px;
-
+	margin-top: -1px;
 }
 
 .Armour div {
@@ -867,8 +901,14 @@ th:first-child,
 td:first-child {
     border-left: none;
 }
+/* Rounded corners for header row */
+tr:first-child th:first-child {
+    border-top-left-radius: 6px;
+}
 
-
+tr:first-child th:last-child {
+    border-top-right-radius: 6px;
+}
 
 /* Avoid breaking inside elements */
 .page-break {
@@ -887,29 +927,93 @@ td:first-child {
 	background-color: blue;
 }
 
-tbody {
-	background-color: var(--optionBox-background-color);
-}
-
-
 @media screen and (min-width: 1200px) {
-
+	body {
+		background: linear-gradient(90deg, black 27%, gray 33%, black 34%,#D6C9AF 34%, #D6C9AF 66%, black 66%, gray 67%, black 73%);
+		background-size: 3500px 7500px;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
 	table, .Formation {
 
-		border: none;
-
+		border: solid black 2px;
+		border-radius: 9px;
 	}
-    .page-container, nav{
+    .page-container {
+
         transform: scale(1.5); 
 		transform-origin: 50% 0;
     }
-
 }
 
-@media (pointer: coarse) {
+@media screen and (max-width: 1200px) {
 .changed, .Points.selected.changed div{
 		 font-size: 2em;
 	}
+
+
+	 /* The switch - the box around the slider */
+	 .switch {
+		position: relative;
+		display: inline-block;
+		width: 60px;
+		height: 34px;
+	  }
+	  
+	  /* Hide default HTML checkbox */
+	  .switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	  }
+	  
+	  /* The slider */
+	  .slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #ccc;
+		-webkit-transition: .4s;
+		transition: .4s;
+	  }
+	  
+	  .slider:before {
+		position: absolute;
+		content: "";
+		height: 26px;
+		width: 26px;
+		left: 4px;
+		bottom: 4px;
+		background-color: white;
+		-webkit-transition: .4s;
+		transition: .4s;
+	  }
+	  
+	  input:checked + .slider {
+		background-color: #2196F3;
+	  }
+	  
+	  input:focus + .slider {
+		box-shadow: 0 0 1px #2196F3;
+	  }
+	  
+	  input:checked + .slider:before {
+		-webkit-transform: translateX(26px);
+		-ms-transform: translateX(26px);
+		transform: translateX(26px);
+	  }
+	  
+	  /* Rounded sliders */
+	  .slider.round {
+		border-radius: 34px;
+	  }
+	  
+	  .slider.round:before {
+		border-radius: 50%;
+	  } 
 }
 
 @media print {
@@ -932,7 +1036,7 @@ tbody {
 		background-color: #ffff; 
 		transform: scale(1); /* default scale */
 	}
-	button, .rearrangeSwitch {
+	button {
 		display: none;
 	}
 	.grids {
@@ -984,4 +1088,3 @@ tbody {
     width: calc(100% - 42px); /* Subtract padding */
     box-sizing: border-box;
 }
-

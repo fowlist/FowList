@@ -1,19 +1,42 @@
-
-:root {
-	--doubleboxWidth: 130px;
-  }
+@import url("menu1.css?v=1.4");
+@import url("nations.css");
 
 * {margin: 0; padding: 0;}
-.card, .platoon img, .blackbox img  { filter:invert(100%); padding: 10px 5px 5px 5px;}
-.IsHitOn img { filter:invert(100%);}
-.title img { filter:invert(0%); padding: 0px 0px 0px 0px;}
+
+.card, 
+.platoon img, 
+.blackbox img  { 
+	filter:invert(100%); 
+	padding: 5px 2px 0px 2px;
+	margin-bottom: -5px;
+}
+.IsHitOn img { 
+	filter:invert(100%);
+}
+.title img { 
+	filter:invert(0%); 
+	padding: 0px 0px 0px 0px;
+}
 .collapsible img {
 	height: 20px;
 	width: auto;
 }
 
-.platoon .nation img, .blackbox .nation img{
+.teamHeader {
+	background-color: #eeeeee;
+    padding: 2px 0px 1px 1px;
+	font-size: 11px;
+	font-weight: bold;
+}
 
+.imagerow {
+	vertical-align:middle;
+}
+
+.platoon 
+.nation img, 
+.blackbox 
+.nation img{
 	position: absolute;
     top: -10px;
     left: 0px;
@@ -23,7 +46,6 @@
 	position: relative;
 	width: 0px;
 	height: 0px;
-
 }
 
 .floatingImg img{
@@ -78,33 +100,45 @@
 
 
 .grids {
+
 	display: grid;
-	grid-template-columns: 140px;
-	margin-top: 5px;
+	grid-template-columns: 86px;
+	margin-top: 1px;
+	font-size: 9px;
     background: white;
-	font-size: 15px;
 }
 
-.grid-item {
+.doubleGrids {
+
+	display: grid;
+	grid-template-columns: 80px auto;
+	margin-top: 1px;
+	font-size: 9px;
+    background: white;
+}
+
+
+
+.mot-grid-item {
 	background: #fff;
 	font-style: italic;
-	font-size: 14px;
-	border-left: 2px solid black;
-	border-right: 2px solid black;
+	font-size: 9px;
+	border-left: 1px solid black;
+	border-right: 1px solid black;
 	margin-bottom: -2px;
 }
 
-.grid-item span {
-	font-size: 10px;
+.mot-grid-item span {
+	font-size: 6px;
 	
 }
 
-.grid-item.b span {
-	font-size: 14px;
+.mot-grid-item.b span {
+	font-size: 8px;
 	font-style: normal;
 }
 
-.grid-item .right, .grid-item.b .right, .grid-bottom .right {
+.mot-grid-item .right, .mot-grid-item.b .right, .grid-bottom .right {
 	position: relative;
 	top: -5px;
 
@@ -115,9 +149,9 @@
 	background: #fff;
 	padding-bottom: 2px;
 	font-weight: bold;
-	border-left: 2px solid black;
-	border-right: 2px solid black;
-	border-bottom: 2px solid black;
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+	border-bottom: 1px solid black;
 	border-bottom-left-radius: 6px;
 	border-bottom-right-radius: 6px;
 }
@@ -128,10 +162,9 @@
 	font-weight: bold;
     background: #dd0000;
 	color: white;
-	border: 2px solid black;
-    border-radius: 6px;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
+	border: 1px solid black;
+    border-radius: 5px;
+	print-color-adjust: exact;
 }
 
 .grid-addon {
@@ -157,43 +190,47 @@
 	visibility: hidden;
 }
 
-.img {
-   object-fit: cover;
-   height: 100px;
+/*.img {
+   	object-fit: cover;
+   	height: 100px;
 }
-
+*/
 .nation img { 
 	filter:invert(0%); 
-	padding: 10px 5px 5px 5px;
+	padding: 2px 2px 2px 2px;
 }
 
 :nth-child(1 of .grid-addon) {
-	border: 2px solid black;
+	border: 1px solid black;
 	border-bottom: none;
-	border-top-left-radius: 6px;
-	border-top-right-radius: 6px;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+}
+
+:nth-child(2 of .grid-addon) {
+	border: 1px solid black;
+	border-bottom: none;
+	border-top: none;
 }
 
 :nth-last-child(1 of .grid-addon) {
 
-	border-bottom: 2px solid black;
-	border-right: 2px solid black;
-	border-left: 2px solid black;
-	border-bottom-left-radius: 6px;
-	border-bottom-right-radius: 6px;
+	border-bottom: 1px solid black;
+	border-right: 1px solid black;
+	border-left: 1px solid black;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
 
   }
 
 .collapsible {
-
-  cursor: pointer;
-  width:  98%;
+  	cursor: pointer;
+  	width:  98%;
 	z-index: 1;
 	margin-left: 40px;
- 	margin-top: 20px; 
+ 	margin-top: 5px; 
  	margin-bottom: 0px;  
  	position: relative;
-
  	background: white;
 	display: inline-block;
 	border: 2px solid black;
@@ -205,44 +242,41 @@
 }
 
 .collapsible:after {
-  content: "\2796"; /* Unicode character for "plus" sign (+) */
-  font-size: 13px;
-  color: white;
-  float: right;
-  margin-left: 5px;
-  margin-top: 10px;
+	content: "\2796"; /* Unicode character for "plus" sign (+) */
+	font-size: 13px;
+	color: white;
+	float: right;
+	margin-left: 5px;
+	margin-top: 10px;
 }
 
 .active:after {
-  content: '\02795'; /* Unicode character for "minus" sign (-) */
+  	content: '\02795'; /* Unicode character for "minus" sign (-) */
 }
 
 /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
 .active, .collapsible:hover {
-  background-color: #ccc;
+  	background-color: #ccc;
 }
 
-
 a:link {
-  color: white;
-  text-decoration: none;
+  	color: white;
+  	text-decoration: none;
 }
 
 a:visited {
-  color: white;
-  text-decoration: none;
+  	color: white;
+  	text-decoration: none;
 }
 
 .left {
     float: left;
 }
 .mid {
-	margin-top: 10px;
-
+	margin-top: 0px;
 }
  
   /* list */
-
 
 .frame {
     width: 50px;
@@ -250,30 +284,30 @@ a:visited {
 	border-radius: 8px;
 	-webkit-border-radius: 8px;
 	-moz-border-radius: 8px;
-    
 }
 
 body
 {
 	margin: 0;
     padding: 0;
-    background: linear-gradient(90deg, black 20%, gray 32%, black 35%, black 65%, gray 68%, black 80%);
+    background: linear-gradient(90deg, black 25%, gray 32%, black 35%, black 65%, gray 68%, black 75%);
 	background-size: 3500px;
 	background-position: center;
 	background-repeat: no-repeat;
-	/*background: #000;*/
+	font-size: 10px;
 	font-family: arial, verdana, tahoma;
 	scroll-margin-top: 10em;
 }
 
 
 .page-container {
-	page-break-inside: auto;
 
-    width: 1200px; /* Set a maximum width if needed */
-    margin: 0 auto; /* Center the container horizontally */
+	width: 720px;
+	margin: 0 auto; 
+	padding: 0px;
+	page-break-inside: auto;
+	page-break-inside: auto;
     background-color: #D6C9AF; /* Set your desired background color */
-    padding: 5px; /* Add padding as needed */
 
 
 }
@@ -288,30 +322,29 @@ body
 	border-radius: 8px;
 	-webkit-border-radius: 8px;
 	-moz-border-radius: 8px;
-
+	print-color-adjust: exact;
 }
 
 .Points .Points1{
+
+
+	font-size: 10px;
+	padding: 1px;
+	border-radius: 3px;
+	border: 1px solid white;
 	box-sizing: border-box;
-	border: 2px solid white;
-	padding: 2px 2px;
 	text-decoration: none;
 	font-weight: bold;
 	background: green;
 	width: 100%;
 	color: white;
-	font-size: 15px;
 	display: inline-block;
-	
-	border-radius: 6px;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
-	
 	text-transform:uppercase;
+	print-color-adjust: exact;
 
 }
 
-.box select{
+.grid-item select{
     max-width:200px;
 }
 .title select{
@@ -322,14 +355,14 @@ body
 	margin-left: 40px;
 	text-align: center;
 	padding-top: 20px;
-	width:1000px;
+	width: 100%;
 	page-break-before: avoid;
 	page-break-after: avoid;
 }
 
 
 .Formation{
-
+	margin: 0px;
 	background: white;
 	display: inline-block;
 	border: 2px solid black;
@@ -351,7 +384,7 @@ body
 	float: left; text-align: center;
 	width: 67%;
 }
-.box {
+.grid-item {
 
 	float: left; text-align: center;
 	width: max(315px,32.2%);
@@ -368,10 +401,10 @@ body
 }
 
 
-.outerBox .box {
+.outerBox .grid-item {
 	width: 98%;
 }
-.secondBox .box {
+.secondBox .grid-item {
 	width: 48.5%;
 }
 
@@ -387,6 +420,7 @@ body
 	-webkit-border-radius: 8px;
 	-moz-border-radius: 8px;
 	text-transform:uppercase;
+	print-color-adjust: exact;
 }
 
 .grid{
@@ -396,35 +430,34 @@ body
 
 }
 
-.box {
+.grid-item {
+	margin: 5px;
+	border-radius: 5px;
 	background: #D3D3D3;
 	color: black;
     break-inside: avoid-column;
 	transition: all 0.5s;
-	border-radius: 8px;
-
 	text-align: center;
-	margin:10px;
 	grid-row-end: span 15;
 	width: auto;
 }
 
 .blackbox, .platoon {
-    margin: 5px;
+    margin: 2px;
     color: white;
     text-decoration: none;
     font-size: 15px;
     display: inline-block;
-    border-radius: 8px;
-	width: calc(100% - 10px);
+    border-radius: 4px;
+	width: calc(100% - 4px);
 }
 
 
 
 .title
 {
+	
     margin:1px;
-    width: max(303px,calc(100% - 2px));
 /*	font-weight: bold; */
 	padding: 3px 3px;
 	padding-right:10px;
@@ -434,14 +467,16 @@ body
     color: black;
 	display: inline-block;
 	text-transform:none;
-    border-radius: 6px;
 	-webkit-border-radius: 6px;
 	-moz-border-radius: 6px;
+	width: calc(100% - 2px);
+	border-radius: 4px;
 }
 .title b{
     text-transform:uppercase;
 }
 h2{
+	font-size: 12px;
 	padding: 2px 2px;
 	text-decoration: none;
 	background: #3D4849;
@@ -454,11 +489,13 @@ h2{
 	border-radius: 8px;
 	
 	text-transform:uppercase;
+	print-color-adjust: exact;
 }
 
 h3{
+	font-size: 10px;
+	margin: 0px;
 	padding: 2px 2px;
-	margin: -20px;	
 	text-decoration: none;
 	background: black;
 	color: white;
@@ -470,9 +507,10 @@ h3{
 	border-radius: 8px;
 	
 	text-transform:uppercase;
+	print-color-adjust: exact;
 }
 
-.box .IsHitOn ,.box  .Points{
+.grid-item .IsHitOn ,.grid-item  .Points{
 	/*margin-top:5px;*/
 	box-sizing: border-box;
 	padding: 2px 2px;
@@ -485,10 +523,11 @@ h3{
 	border-radius: 8px;
 	-webkit-border-radius: 8px;
 	-moz-border-radius: 8px;
+	print-color-adjust: exact;
 
 }
 
-.box .IsHitOn div, .box .Points div, .box .Points div{
+.grid-item .IsHitOn div, .grid-item .Points div, .grid-item .Points div{
 	border: 2px solid white;
 	box-sizing: border-box;
 	padding: 2px 2px;
@@ -509,31 +548,32 @@ h3{
 }
 
 
-.box .Points div{
+.grid-item .Points div{
 	background: green;
 	cursor: pointer;
+	font-size: 10px;
+	border-radius: 3px;
+	border: 1px solid white;
 }
 
 
 .Formation div{
-	font-size: 14px;
+	font-size: 8px;
 }
 
 tr td {
 	border-top:solid black 1px;
-}
-.arsenal tr:nth-child(2n+2) td {
-  background-color: #eeeeee;
-  border-top:none;
+	print-color-adjust: exact;
 }
 
+.arsenal tr:nth-child(2n+2) td {
+	background-color: #eeeeee;
+	border-top:none;
+}
 
 tr:nth-child(2n+2) {
-  break-after: avoid;
+	break-after: avoid;
 }
-
-
-
 
 table {
     border-collapse:separate;
@@ -545,7 +585,7 @@ table {
 }
 
 td, th {
-    padding: 5px 5px 5px 5px;
+    padding: 1px 1px 1px 1px;
     border-left:solid black 1px;
     border-top:solid black 1px;
     border-top: none;
@@ -573,35 +613,21 @@ h5 {
 
 
 td .Armour {
+
 	display: grid;
-	grid-template-columns: 136px;
+	grid-template-columns: 80px;
 	margin-top: 5px;
+	font-size: 8px;
+	width: 84px;
+	border: 1px solid black;
+	border-radius: 3px;
     background: white;
-	font-size: 15px;
-	border: 2px solid black;
-	border-radius: 6px;
 	box-sizing: border-box;
-	width: 140px;
 }
-
-
-
-
-/*
-	text-align: left;	
-	
-	font-weight: bold;
-    background: #dd0000;
-	color: white;
-	border: 2px solid black;
-    border-radius: 6px;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
-*/
 
 td .Armour div {
 	font-weight: bold;
-	font-size: 15px;
+	font-size: 8px;
 
 	text-transform:uppercase;
 	text-align: left;
@@ -633,29 +659,30 @@ td .Armour div {
 }
 
 tr .firstWeaponrow {
-    border-top:solid black 1px;
+    padding-left: 5px;
+	border-top:solid black 1px;
+	print-color-adjust: exact;
+
 }
 
 .bgBlack {
-     text-align: left;
-
-
+    text-align: left;
     box-sizing: border-box;
-    padding: 2px 2px 2px 2px;
     background: black;
 	color: white;
-    border-radius: 4px;
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	display: inline-block;
-	width: 104px;    
-	font-size: 12px;
+	display: inline-block; 
+	print-color-adjust: exact;
+	padding: 2px;
+	border-radius: 2px;
+	width: 58px;
+	font-size: 6px;
+
 }
 
-.right, .grid-item.b span.right{
+.right, .mot-grid-item.b span.right{
     margin-right:5px;
     float: right;
-	font-size: 17px;
+	font-size: 10px;
 }
 
 .Armour div {
@@ -678,114 +705,50 @@ tr .firstWeaponrow {
 	margin-bottom: 0px;
 }
 
+.right {
+	margin-right: 5px;
+	float: right;
+	font-size: 8px;
+}
 
-/* Style the navigation menu */
-.topnav {
-	position: fixed;
-	top: 0;
-	width: 100%;    
-	overflow: hidden;
-	background-color: black;
-	position: relative;
-  }
-  
-  /* Hide the links inside the navigation menu (except for logo/home) */
-  .topnav #myLinks {
-	display: none;
-  }
-  
-  /* Style navigation menu links */
-  .topnav a{
-	color: white;
-	padding: 14px 16px;
-	text-decoration: none;
-	font-size: 17px;
-	display: block;
-  }
-  
-   .topnav label {
-		 color: white;
-   }
-  
-  /* Style the hamburger menu */
-  .topnav a.icon {
-	background: black;
-	display: block;
-	position: absolute;
-	right: 0;
-	top: 0;
-  }
-  
-  /* Add a grey background color on mouse-over */
-  .topnav a:hover {
-	background-color: #ddd;
-	color: black;
-  }
-  
-  /* Style the active link (or home/logo) */
-  .active {
-	background-color: white;
-	color: white;
-  } 
-  
-  
-  .German {
-	  background-color: #3f473c;
-  }
-  .American {
-	  background-color: #012846;
-  }
-  .British {
-	  background-color: #531d2d;
-  }
-  .Soviet {
-	  background-color: #5f4c30;
-  }
-  .Finnish {
-	  background-color: #004678;
-  }
-  .Hungarian {
-	  background-color: #27441a;
-  }
-  .Romanian {
-	  background-color: #79242f;
-  }
-  .Italian {
-	  background-color: #07542b;
-  }
+.Points {
+	width: 78px;
+	border-radius: 6px;
+}
+
+.grid-item .Points {
+	width: 66px;
+	border-radius: 6px;
+}
+.motivationColumn2 {
+	grid-template-columns: 86px auto;
+}
+
 
 @media print {
-	
-	body{
-		margin:0px;
-		background: none;}
 
-    .Formation {
-    	margin: 0px;
-    }
+	body{
+		background: none;
+	}
 	.collapsible:after {
 		display: none;
 	}
-	.topnav {
-		display: none;
-	}
-
 	.page-container {
-		width: 1200px;
-		margin: 0 auto; 
 		background-color: #ffff; 
-		padding: 0px;
-		page-break-inside: auto;
-		transform: scale(0.8);
-		transform-origin: top left;
 	}
 	button {
 		display: none;
 	}
-    
+	.grids {
+		background: white;
+	}
+	.doubleGrids {
+		background: white;
+	}
 }
 
-.box .Points.selected div {
+.grid-item .Points.selected div {
 	background: blue;
 	cursor: pointer;
+	print-color-adjust: exact;
 }

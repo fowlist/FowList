@@ -152,39 +152,49 @@ if (isset($_SESSION['user_id'])) {
 
 $userID = $_SESSION['user_id']?? "";
 $username = $_SESSION['username'] ?? "";
-$saved_url = $_SERVER['REQUEST_URI'];
+$saved_url = $_POST['updated_url'] ?? "";
 $listName =  $_POST['listName']??"";
 
 if (isset($userID)) {
-    if ($userID == 1) {
-        echo "<!--{$username}-->\n";
-        include_once "sqlServerinfo.php";
-        $usersEval = $pdo->prepare("SELECT * FROM users");
-        $usersEval->execute();
-        $usersEval1 =[];
-        foreach ($usersEval as $key => $value) {
-            echo "<!--{$value["username"]}-->\n";
-            $usersEval1[]=$value;
-        }
-        $numberOfUsers = $usersEval ->rowCount() ;
-        echo "<!--{$numberOfUsers}-->\n";
-        $allUsersListsQuery = $pdo->prepare("SELECT * FROM saved_lists WHERE saveDate=? ORDER BY name");
-        $allUsersListsQuery->execute([date("Y-m-d",time())]);
-        foreach ($allUsersListsQuery as $key => $list) {
-            
-            echo "<!--{$list["user_id"]}-->\n";
-            foreach ($usersEval1 as $user) {
-                if ($user["id"] == $list["user_id"]) {
-                    echo "<!--{$user["username"]}----{$list["name"]}-->\n";
-                }
-            }
-        }
-        $numberOflists = $allUsersListsQuery ->rowCount() ;
-        echo "<!--{$numberOflists}-->\n";
-    }
 
+    if (isset($_POST['save_url'])) {
+        $saved_url = $_POST['updated_url'];
+        unset($_POST['save_url']);
+          $associatedEvent = "";
+          if (!empty($usersEventList)) {
+            foreach ($usersEventList as $eachEvent) {
+              if ($eachEvent["value"]==$_POST["listEventList"]) {
+                $associatedEvent  = $eachEvent["description"];
+              }
+            }
+          }
+
+          $saved_url_to_list = "listPrintGet.php?{$linkQuery}&loadedListName=" . ($query["loadedListName"]??"") .$costArrayStrig;
+          $saveCost = array_sum($formationCost)+$listCardCost;
+
+          $query1 = $pdo->prepare("INSERT INTO saved_lists (user_id, url, urlToList, name, cost, saveDate, tournament) VALUES (?, ?, ?, ?, ?, ?, ?)");
+          $query1->execute([$userID, $saved_url, $saved_url_to_list, $listName, $saveCost, date("Y-m-d",time()),$associatedEvent]);
+          //$query1 = "INSERT INTO saved_lists (user_id, url, name, cost) VALUES ('$userID', '$saved_url', '$listName', '$saveCost')";
+          //mysqli_query($conn, $query1);
+          $newId = $pdo->lastInsertId();
+          echo "URL saved.";
+          $query['loadedListName'] = $listName;
+          $_POST["loadedListName"] = $listName;
+          $_SESSION['loadedListNumber'] =$newId;
+      }
+      if (isset($_POST['updateSelected'])&&isset($_POST["listNameList"])) {
+        $saved_url = $_POST['updated_url'];
+        $saved_url_to_list = "listPrintGet.php?{$linkQuery}&loadedListName=" . ($query["loadedListName"]??"") .$costArrayStrig;
+        $saveCost = array_sum($formationCost)+$listCardCost;
+        $query1 = $pdo->prepare("UPDATE saved_lists SET url = ?, saveDate = ?, urlToList =?, cost=? WHERE id =?");
+        $query1->execute([$saved_url, date("Y-m-d",time()),$saved_url_to_list, $saveCost, $_POST["listNameList"]]);
+        //$query1 = "UPDATE saved_lists SET url = '{$saved_url}' WHERE id ='{$_POST["listNameList"]}' ";
+        //mysqli_query($conn, $query1);
+        echo "<!--URL Updated.-->";
+
+      } 
         // -- all general tables 
-    if (empty($_SESSION["usersListsList"])||isset($_POST['refreshSelected'])) {
+    if (empty($_SESSION["usersListsList"])||isset($_POST['refreshSelected'])||isset($_POST['updateSelected'])||isset($_POST['loadSelected'])) {
         unset($_POST['refreshSelected']);
         include_once "sqlServerinfo.php";
         $usersListsQuery = $pdo->prepare("SELECT * FROM saved_lists WHERE user_id=? ORDER BY name");

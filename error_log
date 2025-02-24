@@ -1,6 +1,0 @@
-[07-Feb-2024 17:42:27 UTC] Pdfcrowd Error: 470 - Invalid value '/printPDF.php' for convertUrlToStream::url. The supported protocols are http:// and https://. Details: https://www.pdfcrowd.com/api/html-to-pdf-php/ref/#convert_url_to_stream
-
-[07-Feb-2024 17:42:31 UTC] Pdfcrowd Error: 470 - Invalid value '/printPDF.php' for convertUrlToStream::url. The supported protocols are http:// and https://. Details: https://www.pdfcrowd.com/api/html-to-pdf-php/ref/#convert_url_to_stream
-
-[07-Feb-2024 17:42:35 UTC] Pdfcrowd Error: 470 - Invalid value '/printPDF.php' for convertUrlToStream::url. The supported protocols are http:// and https://. Details: https://www.pdfcrowd.com/api/html-to-pdf-php/ref/#convert_url_to_stream
-

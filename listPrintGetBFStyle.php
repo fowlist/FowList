@@ -111,7 +111,7 @@ $bookSelected = FALSE;
 
 
 
-    foreach ($Books as $row) if (($row["code"] == $query['Book'])||($row["Book"] == $query['Book'])){
+    foreach ($Books as $row) if (($row["code"] == $query['Book']??"na")||($row["Book"]??"" == $query['Book']??"na")){
         $bookCode = $row["code"]; 
         $bookTitle = $row["Book"]; 
         $bookSelected = true;
@@ -294,22 +294,36 @@ $SummaryOfCards = [];
         
         echo !empty($query['loadedListName'])?"List Name:{$query['loadedListName']}":"";
     ?>
-        <div class="header">
-        <h2 class="<?=$query['ntn']?>"> 
-            <?=$bookTitle?>    
-            <div class='Points'>
-                <div class='Points1'>
-                    <span id="totalPoints"><?php echo ($FormationCost != "") ? array_sum($FormationCost) + $listCost : "" ?></span> points
-                </div>
-            </div>
-                <div class='Points' style="width: fit-content;">
-                    <div class='reservesPoints Points1' style="background-color: blue">
-                    Reserves: <span id="reservesPoints"><?php echo (!empty($FormationCost)) ? round((array_sum($FormationCost) + $listCost)*0.4) : "" ?> points</span>
-                    </div>
-                </div>
-            </h2> 
-            <button value="" onClick="printPage();">Print the page</button>
+
+<div class="header  <?=$query['ntn']?>">
+    <div class="formHeader">
+        <b><?=$bookTitle?></b>    
     </div>
+    <div>
+        <div class='Points'>
+            <div class='Points1'>
+                <span id="totalPoints"><?php echo (!empty($FormationCost)) ? array_sum($FormationCost) + $listCost : "" ?></span> points
+            </div>
+
+        </div>
+        <div class='Points' style="width: fit-content;">
+            <div class='reservesPoints Points1'>
+            Reserves: <span id="reservesPoints"><?php echo (!empty($FormationCost)) ? round((array_sum($FormationCost) + $listCost)*0.4) : "" ?> points</span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="Formation">
+    <?php if (!empty($query['dPs'])) :?>
+        Using Dynamic Points
+    <?php else :?>
+        Using Book Points
+    <?php endif ?>
+    <?php if (!empty($query['loadedListName'])) :?>
+        | List Name:<span id="listName"><?=$query['loadedListName']?></span>
+    <?php endif ?>
+</div>
+
     <?php
     }
 
@@ -795,11 +809,10 @@ $boxAllHTML[$currentBoxInFormation] .= "<tr><td>".$currentConfig. $optionsHTML .
 // ----------- BB support 
 if ($bbEval) {
     $BBSupport_DB = $conn->query(
-        "SELECT  DISTINCT platoon , title, alliedBook AS Book, unitType, Nation
+        "SELECT  DISTINCT platoon , title, alliedBook AS Book, unitType, Nation, relevance 
         FROM formationSupport_DB
         WHERE Book = '{$bookTitle}'
-    GROUP by platoon
-    ORDER BY relevance desc");
+    ORDER BY platoon, relevance  desc");
 }
 if ((isset($BBSupport_DB)&&$BBSupport_DB->num_rows > 0)&&$bbEval) { //  BB support 
 
@@ -1127,9 +1140,12 @@ if (isset($CardsInList)&&count($CardsInList) > 0) { // ------- cards ----------
 ?>
 <div></div>
 <div style='break-inside:avoid;'> 
-<button type="button" class="collapsible">  
-    <h3 class="<?=$query['ntn']?>">Command Cards</h3>
-</button>
+<div class="collapsible <?=$query['ntn']?>">
+    <div class="formHeader"> 
+    Command Cards
+    </div>
+</div>    
+
 <div class="Formation">
 <?php  
     foreach ($CardsInList as $key1 => $row1) {
@@ -1194,9 +1210,11 @@ $platoonSoftStatsInput = [];
     }
     ?>
     <div style='page-break-inside:avoid;'>
-    <button type="button" class="collapsible">  
-        <h3 class="<?=$query['ntn']?>">Arsenal</h3>
-    </button>
+    <div class="collapsible <?=$query['ntn']?>">
+        <div class="formHeader"> 
+        Arsenal
+        </div>
+    </div>
     <?php
 
     foreach ($attachmentsInForce as $key => $attachmentRow) {// ------- soft stats ----------
@@ -1418,9 +1436,11 @@ if ($images instanceof mysqli_result) {
 </div>
 <div></div>
 <div style="break-inside: avoid-page;">
-<button type="button" class="collapsible">  
-    <h3 class="<?=$query['ntn']?>">Weapons</h3>
-</button>
+<div class="collapsible <?=$query['ntn']?>">
+    <div class="formHeader"> 
+    Weapons
+    </div>
+</div>
     <div><?php //------- weapons ----------?>
 <?php            
 $weaponsTeamsInForce =array_unique($weaponsTeamsInForce);
@@ -1453,7 +1473,7 @@ foreach ($weaponsTeamsInForce as $row1) if (( $row1 <> "")&&( $row1 <> "Komissar
 
     </tr>
             <tr style='page-break-inside:avoid;'>
-            <td class='teamHeader' style='text-align: left; background-color: #eeeeee;' colspan='8'>{$teamTeam}
+            <td class='teamHeader' colspan='8'>{$teamTeam}
             </td>
     </tr>";
     }
@@ -1520,10 +1540,12 @@ echo "
 ";
 ?>
 
+<div class="collapsible <?=$query['ntn']?>">
+    <div class="formHeader"> 
+    Rules
+    </div>
+</div>
 
-<button type="button" class="collapsible">  
-    <h3 class="<?=$query['ntn']?>">Rules</h3>
-</button>
 
 <?php  
 
@@ -1658,6 +1680,23 @@ setTimeout(function() { shrinkImagesForPrint(); }, 10);
         
 
 </script>
+<script>
+    let lastScrollTop = 0;
+    const header = document.getElementById('main-header');
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.scrollY || document.documentElement.scrollTop;
+        if (currentScroll > lastScrollTop) {
+            // Scrolling down
+            header.classList.add('hiddenM');
 
+        } else {
+            // Scrolling up
+            header.classList.remove('hiddenM');
+
+        }
+        lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // For mobile or negative scrolling
+    });
+
+</script>
 </body>
 </html>

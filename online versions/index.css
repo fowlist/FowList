@@ -2,62 +2,104 @@
 
 html {
 	scroll-padding-top: 6rem;
+  }
+
+body
+  {
+	  margin: 0;
+	  padding: 0;
+	  background-color: black;
+	  background: linear-gradient(90deg, black 27%, gray 33%, black 35%, black 65%, gray 67%, black 73%);
+	  background-size: 3500px;
+	  background-position: center;
+	  background-repeat: repeat-y;
+	  font-family: arial,  sans-serif;
+	  scroll-margin-top: 10em;
+	  min-height: 100vh;
+  }
+  
+.loadingDiv {
+	position: fixed;
+    left:0;
+    top:0;
+    z-index:1000;
+    width:100%;
+    height:100%;
+    min-height:100%;
+    background:#000;
+    opacity:0.8;
+    text-align:center;
+    color:#fff;
 }
 
-body {
-	min-height: 100vh;
-    overflow-x: hidden;
-}
 .MSI {
-	background-color: var(--box-background-color);
+	margin-top:5px;
+	padding: 1px;
+	width: 40;
+	background: black;
 	display: inline-block;
 	border-radius: 7px;
 	-webkit-border-radius: 7px;
 }
 
 .MSI div{
-	margin: 2px;
-	padding: 0px 2px;
+	border: 2px solid white;
+	padding: 2px 2px;
 	text-decoration: none;
     text-align: left;
 	background: white;
 	width: 32;
 	color: black;
-	font-size: 12px;
+	font-size: 15px;
 	display: inline-block;
 	border-radius: 6px;
 	-webkit-border-radius: 6px;
     text-align: center;
-	background-color: #994949;
+	background: #dd0000;
 	color: white;
 	font-weight: bold;
 }
 
 .topright {
 	position: absolute;
-	top: -15px;
-	right: -14px;
+	top: 1px;
+	right: 4px;
 	z-index: 10;
 }
-	
+
+.loader {
+	border: 16px solid #f3f3f3; /* Light grey */
+	border-top: 16px solid #3498db; /* Blue */
+	border-radius: 50%;
+	width: 120px;
+	height: 120px;
+	animation: spin 2s linear infinite;
+  }
+  .loader {
+	margin: 0;
+	position: absolute;
+	top: calc(50% - 76px);
+	left: calc(50% - 76px);
+  }
+  
+  @keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+  }
+
 /* Apply common styles to elements with images */
-.card, .platoon img, .blackbox img {
-    filter: invert(var(--image-style));
+.card, .platoon img, .blackbox img,	
+.title img {
+    filter: invert(100%);
     padding: 12px 5px 0px 5px;
 	margin-bottom: -4px;
 }
 
 /* Apply specific styles for nation images */
-.nation img{
+.nation img {
     filter: invert(0%);
-    /*padding: 10px 5px 5px 5px;*/
+    padding: 10px 5px 5px 5px;
 }
-
-.optionBox img {
-	filter: invert(0%);
-	padding: 0;
-	margin-bottom: 0;
- }
 
 /* Apply styles to .card specifically */
 .card {
@@ -83,58 +125,53 @@ body {
     width: 80%; /* Set your desired width (e.g., 80% of the viewport width) */
     max-width: 1120px; /* Set a maximum width if needed */
     margin: 0 auto; /* Center the container horizontally */
-    background-color: var(--background-color-alt);
+    background-color: #D6C9AF; /* Set your desired background color */
     padding: 5px; /* Add padding as needed */
 	min-height: 100vh;
-	text-align: center;
-	box-shadow: 0 0px 20px rgba(0, 0, 0, 0.8);
-	overflow-x: hidden;
+}
+
+.box select{ 
+    max-width:200px;
 }
 
 .box b{
 	text-transform: uppercase;
 }
 
-.row-container {
-	font-size: 12px;
-}
-
-.cell-notes {
-	font-size: 12px !important;
-}
-
-.grid-heading {
-	background-color: #994949 !important;
-}
-
-.formConfig {
-	display: flex;
-	justify-content: center;
-	flex-wrap: wrap;
-	gap: 1ch;
+.box::before { 
+  display: block; 
+  content: " "; 
+  margin-top: -285px; 
+  height: 285px; 
+  visibility: hidden; 
+  pointer-events: none;
 }
 
 .title select{
     max-width:180px;
 }
 
-.collapsible {
-	cursor: pointer;
-	width: 100%;
-	z-index: 1;
-	margin-top: 20px; 
-	position: relative;
-	background-color: var(--accent-color);
-	display: flex;
-  	justify-content: space-between;
-	gap: 1ch;
-	align-items: center;
-	/*border: 2px solid black;*/
+ 
+.header {
+	margin-left: 40px;
 	text-align: center;
-	border-radius: 	5px 5px 0px 0px;
-	padding-left: 1ch;
-	padding-right: 1ch;
-	box-sizing: border-box;
+	width:1000px;
+}
+
+.collapsible {
+  cursor: pointer;
+  width: 1011px;
+	z-index: 1;
+	margin-left: 40px;
+ 	margin-top: 20px; 
+ 	margin-bottom: 10px;  
+ 	position: relative;
+ 	background: white;
+	display: inline-block;
+	border: 2px solid black;
+	text-align: center;
+	width: min(1011px, calc(100vw - 100px));
+	border-radius: 	5px;
 }
 
 input[type="checkbox"][id*="box"] {
@@ -153,13 +190,10 @@ label {
 	position: relative;
 	box-sizing: border-box;
 	display: inline-block;
-}
-
-.box label {
 	width: 100%;
 }
+
 .platoonImageSpan {
-	position: relative;
 	width: 100%;
 	box-sizing: border-box;
 	display: inline-block;
@@ -183,35 +217,72 @@ label:before {
 	transform: scale(0);
   }
 
-:checked + label:before {
+  :checked + label:before {
 	content: "✓";
-	background-color: rgba(76, 118, 255, 0.6);
+	background-color: rgba(170, 170, 170, 0.6);
 	transform: scale(1);
 	z-index: 3;
-}
+  }
 
 :checked + label img {
 	filter: invert(49%) sepia(74%) saturate(1418%) hue-rotate(157deg) brightness(97%) contrast(99%);
 }
 
-:checked + label .title, :checked + label .cardTitle  {
-	background: rgba(202, 212, 255, 0.404);
+.collapsible:after {
+  content: "\2796"; /* Unicode character for "plus" sign (+) */
+  font-size: 13px;
+  color: white;
+  float: right;
+  margin-left: 5px;
+}
 
+.active:after {
+  content: '\02795'; /* Unicode character for "minus" sign (-) */
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .collapsible:hover {
+  background-color: #ccc;
 }
 
 .Formation{
-	
-	background-color: var(--background-color);
-	border-radius: 	0  0 5px 5px;
-	padding-top: 0.5ch;
-	/* border: 2px solid #000000; */
+	background: #ede7db;
+	border-radius: 	5px;
+	border: 2px solid black;
 	position: relative;
+ 	margin-top: -20px;   
 	z-index: 0;
 	display: inline-block;
 	box-sizing: border-box;
 	text-align: center;
 	width: 100%;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.disclaimer{
+	background: #ede7db;
+	border-radius: 	5px;
+	color: rgb(255, 0, 0);
+	border: 2px solid rgb(255, 0, 0);
+	position: relative;
+ 	margin-top: 5px;   
+	z-index: 0;
+	display: inline-block;
+	box-sizing: border-box;
+	text-align: center;
+	width: 100%;
+}
+.disclaimer a {
+	color: rgb(100, 0, 0);
+	text-decoration: none;
+}
+
+.disclaimer a:visited{
+    color: rgb(136, 0, 0);
+	text-decoration: none;
+}
+
+.disclaimer a:link {
+  text-decoration: none;
 }
 
 a:visited{
@@ -232,39 +303,22 @@ a:-webkit-any-link {
 .grid{
 	display: grid;
 	grid-template-columns: repeat(5, 1fr);
-	grid-auto-rows: 20px; 
-	gap: 15px;
+	grid-auto-rows: 25px; 
+	gap: 12px;
 	column-gap: 19px;
 	margin: 4px;
     /*margin-top:30px;*/
-	transition: all 0.3s ease-in-out;
-}
-
-.topGrid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
 }
 
 
-.smallCard {
-	position: absolute;
-	left: -10px;
-	background-color: white;
-	padding: 1px;
-	border: 1px solid black;
-	box-sizing: border-box;
-	border-radius: 2px;
-	top: -5px;
-	font-size: 1px;
+.grid button {
+	position: relative;
 }
 
 .box {
-	position: relative;
-	font-size: 14px;
+	border: 2px solid #b5b5b5;
 	background: #D3D3D3;
-	background-color: var(--box-background-color);
 	color: black;
-	color: var(--box-color);
     break-inside: avoid-column;
 	transition: all 0.5s;
 	border-radius: 8px;
@@ -273,64 +327,23 @@ a:-webkit-any-link {
 	/*margin:7px;*/
 	grid-row-end: span 6;
 	width: auto;
-	transition: transform 0.3s ease-in-out, grid-row-end 0.3s ease-in-out, box-shadow 0.2s;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.platoon:hover, .blackbox:hover {
-	transform: translateY(-5px);
-	box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+.Formation div{
+	font-size: 14px;
 }
-
-div.optionBox, div.configBox {
-	position: relative;
-	border-radius: 4px;
-	background: #D3D3D3;
-	background-color: var(--optionBox-background-color);
-	box-sizing: border-box;
-	color: black;
-	color: var(--box-color);
-	margin: 1px;
-	margin-top: 0.2em;
-	padding-top: 0.3em;
-	padding-bottom: 0.3em;
-	font-size: 0.75em;
-	display: grid;
-    gap: 0.4ch;
-}
-
-div.configBox {
-	background: white;
-	padding-top: 0em;
-	padding-bottom: 0em;
-}
-.configBox select, .optionBox select {
-	margin: 0ch;
-	width: 100%;
-}
-
-
-.optionBox label{
-	text-align: left;
-	display: flex;
-	align-items: center;
-}
-
-.blackbox, .platoon{
+.blackbox, .platoon {
     margin-top: 5px;
 	margin-bottom: 5px;
 	padding: 2px;
     color: white;
     text-decoration: none;
+
     display: inline-block;
     border-radius: 8px;
 	width: 100%;
 	box-sizing: border-box;
-	position: relative;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-	transition: transform 0.2s, box-shadow 0.2s;
 }
-
 
 button.platoon {
 	cursor: pointer;
@@ -358,70 +371,22 @@ button .title {
 }
 .title
 {
+	border: 1px solid black;
 	text-transform: uppercase;
     width: 100%;
 	font-weight: bold;
-	padding: 3px 0 0 3px;
+	padding: 3px 3px;
 	box-sizing: border-box;
     background: white;
-	background-color: var(--optionBox-background-color);
+	
     color: black;
-	color: var(--box-color);
+
     border-radius: 6px;
 	-webkit-border-radius: 6px;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
 }
-
 .title span {
-	font-size: 11px;
-}
-
-.title span.cardCode {
-	font-size: 0.7em;
-}
-.title {
-    display: grid;
-
-	grid-template-areas: 
-    "insignia title title title"
-    "insignia cardCode info msi";
-  grid-template-columns: 35px 1fr auto;
-}
-
-.insignia {
-	grid-area: insignia;
-}
-
-.title br {
-	height: 0px;
-}
-
-.title span br {
-	display:initial;
-}
-
-.titleGrid {
-	grid-area: title;
-}
-
-.cardCode {
-	grid-area: cardCode;
-}
-label .nation img {
-	filter:none;
-	padding: 0px;
-}
-
-button.initial {
-	height: 100px;
-	width: 100%;
-	margin: 0px;
-	background-color:#6e7575;
-}
-
-button.initial br {
-	display: block;
+	font-size: 12px;
 }
 
 h2{
@@ -430,69 +395,30 @@ h2{
 	background: #3D4849;
 	color: white;
 	display: inline-block;
-	width: min(1011px, calc(100vw - 100px));
+	width:min(800px, 100%);
 	-webkit-border-radius: 8px;
 	border-radius: 8px;
 	text-transform:uppercase;
 	margin-block-start: 0;
 }
 
-.formHeader{
+h3{
 	padding: 5px 2px;
-	margin-top: 0px;
-	margin-bottom: 0;
-	color: white;
+	margin-top: -20px;
 	text-decoration: none;
+	background: black;
+	color: white;
+	display: inline-block;
+    width:min(600px, 100%);
+	z-index: 6;
+	-webkit-border-radius: 8px;
+	border-radius: 8px;
 	text-transform:uppercase;
-	display: flex;
-	align-items: center;
-	gap: 1ch;
 }
 
-.selectedPlatoon {
-	display: none;
-}
 
-.selected {
-	display: block;
-}
 
-.forceCard label {
-	margin-top: 2px;
-	margin-bottom: 2px;
-	padding: 2px;
-    color: var(--text-color);
-    text-decoration: none;
-    border-radius: 8px;
-	width: 100%;
-	box-sizing: border-box;
-	display: grid;
-	grid-template-columns: 45px auto;
-	background: #6e7575;
-}
-
-.forceCard label img {
-	filter: invert(100%);
-    padding: 5px;
-}
-
-.cardTitle {
-	display: block;
-	background-color: var(--optionBox-background-color);
-	color: #000;
-	color: var(--text-color);
-	font-weight: bold;
-	font-size: 1.2em;
-	border-radius: 6px;
-	-webkit-border-radius: 6px;
-}
-
-.cardPoints {
-	font-style: italic;
-	font-size: 0.7em;
-}
-
-.box .IsHitOn ,.box .Points, .IsHitOn{
+.box .IsHitOn ,.box .Points,.Points, .IsHitOn{
 	margin-top:5px;
 	padding: 1px;
 	width: 130px;
@@ -500,10 +426,12 @@ h2{
 	display: inline-block;
 	border-radius: 7px;
 	-webkit-border-radius: 7px;
+
 }
 
 .IsHitOn div{
 	border: 2px solid white;
+
 	text-decoration: none;
     text-align: left;
 	background: white;
@@ -554,35 +482,6 @@ h2{
     
 }
 
-#pointsOnTop {
-	position: fixed; 
-	top: 20px; 
-	z-index: 5;
-	right: 40px;
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Optional: Add shadow for visibility */
-	transition: all 0.3s ease; /* Smooth transition for floating */
-  }
-  
-  #pointsOnTop.floating {
-	position: fixed; /* Make it float */
-  }
-
-  .info-btn {
-
-	position: absolute;
-	height: 20px;
-	width: 20px;
-	border-radius: 50%;
-	border: solid black 1.5px;
-	left: -10px;
-	top: 20px;
-	font-family: 'Times New Roman', Times, serif;
-	font-weight: bold;
-	font-style: italic;
-	background-color: #a0c2d8c0;
-	z-index: 100;
-}
-
 @media only screen and (max-width: 1400px) {
 	.page-container {
         width: 100%;
@@ -616,13 +515,9 @@ h2{
 
 	.grid{
 		grid-template-columns: repeat(4, 1fr);
-	}
-	.info-btn {
-
-		height: 35px;
-		width: 35px;
 
 	}
+	
 }
 
 @media only screen and (max-width: 870px) {
@@ -657,7 +552,6 @@ h2{
     left: 20px;
     z-index: 99;
     background-color: #007BFF;
-	background-color: var(--primary-color);
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -665,14 +559,23 @@ h2{
     cursor: pointer;
 }
 
- #process-link {
+ #pointsOnTop {
+	position: fixed;
+    top: 0px;
+    right: 50px;
+    z-index: 99;
+    border: none;
+    padding: 0px 0px;
+    cursor: pointer;
+}
+
+ #viewlistOnTop {
 
 	position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 99;
     background-color: #007BFF;
-	background-color: var(--primary-color);
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -701,111 +604,33 @@ button .nation img {
 .left img {
 	padding: 2px 2px 5px 5px;
 }
-/*
+
 .floatingImg {
 	position: relative;
 	width: 0px;
 	height: 0px;
+
 }
-*/
 
 button .floatingImg img{
-
+	position: absolute;
 	background-color: white;
     border-radius: 30%;
     border: 2px solid black;
 	width: 18px;
     padding: 5px 5px 5px 5px;
-
+    left: 3px;
+    top: 40px;
 }
 
 .addFormButton {
     background-color: #007BFF;
-	background-color: var(--primary-color);
     color: white;
     padding: 8px;
+    margin: 8px 0;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+	font-size: larger;
+	
   }
-
-  #infoOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-#infoOverlay.hidden {
-    display: none;
-}
-
-#infoContent {
-    background: #fff;
-    padding: 20px;
-    max-width: 900px;
-	max-height: 100%;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-	overflow: scroll;
-	scrollbar-width: none; /* Hides scrollbar in Firefox */
-}
-#infoContent::-webkit-scrollbar {
-	display: none; /* Hides scrollbar in WebKit browsers (e.g., Chrome, Safari) */
-  }
-
-#closeOverlay {
-    display: block;
-    margin-bottom: 10px;
-    background: red;
-    color: #fff;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#platoonDetails {
-	border: solid black 1.5px;
-	margin: 0;
-	padding: 0;
-	border-collapse: separate;
-	border-radius: 7px;
-    border-spacing: 0;
-}
-#platoonDetails td {
-	border: solid black 1.5px;
-	margin: 0;
-	padding: 5px;
-	border-radius: 7px;
-    border-spacing: 0;
-}
-
-li {
-	text-align: left;
-	margin-top: 0.5em;
-}
-
-.config {
-	font-weight: bold;
-}
-
-.hidden {
-	display: none !important;
-}
-
-.flash-effect {
-    animation: flash-animation 1s ease-in-out;
-}
-
-@keyframes flash-animation {
-    0% { background-color: yellow; }
-    50% { background-color: green; }
-    100% { background-color: green; }
-}

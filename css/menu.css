@@ -1,150 +1,426 @@
+:root {
+  --background-color: #ede7db;
+  --background-color-alt: #D6C9AF;
+  --primary-color: #3498db;
+  --secondary-color: #2980b9;
+  --accent-color: #2c3e50;
+  --text-color: #333;
+  --text-color-alt: #ccc;
+  --image-style: 100%;
+  --image-style-alt: 0%;
+  --box-background-color: #D3D3D3;
+  --box-color: black;
+  --optionBox-background-color: #f1f1f1;
+}
 
-/* Position and style the close button (top right corner) */
-.topnav .closebtn {
-    position: absolute;
-    top: 0;
-    right: 0px;
-    font-size: 30px;
-    margin-left: 50px;
+[data-theme="modern"] {
+  --background-color: #f5f7fa;
+  --background-color-alt: #e9eef4;
+  --primary-color: #3498db;
+  --secondary-color: #2980b9;
+  --accent-color: #2c3e50;
+  --text-color: #333;
+  --box-background-color: #D3D3D3;
+  --box-color: black;
+  --optionBox-background-color: #f1f1f1;
+}
+
+[data-theme="earthy"] {
+  --background-color: #f4f1ea;
+  --background-color-alt: #ede4d9;  
+  --primary-color: #8b5e34;
+  --secondary-color: #d9c4a1;
+  --accent-color: #5a4632;
+  --text-color: #5a4632;
+
+}
+
+[data-theme="dark"] {
+  --background-color: #1e1e2f;
+  --background-color-alt: #252542;
+  --primary-color: #4caf50;
+  --secondary-color: #81c784;
+  --accent-color: #33344b;
+  --text-color: #d1d1d1;
+  --image-style: 80%;
+  --image-style-alt: 80%;
+  --text-color-alt: #ccc;
+  --box-background-color: #252542;
+  --box-color: #f5f5f5;
+  --optionBox-background-color: #1e1e2f;
+}
+
+[data-theme="german"] {
+  --background-color: #d8e0d4; /* Bright olive greenish background */
+  --background-color-alt: #c4d3c0;
+  --primary-color: #3f473c;
+  --secondary-color: #a5b09a;
+  --accent-color: #5a6353;
+  --text-color: #2e352c; /* Darker for contrast */
+
+}
+
+[data-theme="american"] {
+  --background-color: #d6e7f5; /* Bright light blue */
+  --background-color-alt: #bcdcf5;
+  --primary-color: #012846;
+  --secondary-color: #457b9d;
+  --accent-color: #1d3557;
+  --text-color: #002b4a; /* Deep navy for contrast */
+
+}
+
+[data-theme="british"] {
+  --background-color: #f4d7de; /* Bright dusty pink */
+  --background-color-alt: #efbccb;
+  --primary-color: #531d2d;
+  --secondary-color: #a05a6f;
+  --accent-color: #7b243b;
+  --text-color: #531d2d; /* Matches primary for harmony */
+
+}
+
+[data-theme="soviet"] {
+  --background-color: #f5e4cc; /* Bright beige */
+  --background-color-alt: #ead2b8;
+  --primary-color: #5f4c30;
+  --secondary-color: #b98330;
+  --accent-color: #826528;
+  --text-color: #4b3927; /* Warm dark brown for contrast */
+
+}
+
+[data-theme="finnish"] {
+  --background-color: #cfe8fa; /* Bright sky blue */
+  --background-color-alt: #b3d8f4;
+  --primary-color: #004678;
+  --secondary-color: #61a5c2;
+  --accent-color: #006ba6;
+  --text-color: #003458; /* Deep teal for contrast */
+
+}
+
+[data-theme="hungarian"] {
+  --background-color: #d8eed1; /* Bright greenish-white */
+  --background-color-alt: #c3e3be;
+  --primary-color: #27441a;
+  --secondary-color: #81b29a;
+  --accent-color: #52734d;
+  --text-color: #27441a; /* Matches primary for harmony */
+
+}
+
+[data-theme="romanian"] {
+  --background-color: #fbdad8; /* Bright warm peach */
+  --background-color-alt: #f7c8c4;
+  --primary-color: #79242f;
+  --secondary-color: #f04e31;
+  --accent-color: #992b32;
+  --text-color: #72222a; /* Warm maroon for contrast */
+
+}
+
+[data-theme="italian"] {
+  --background-color: #d3f5e4; /* Bright mint green */
+  --background-color-alt: #bff0d5;
+  --primary-color: #07542b;
+  --secondary-color: #3e885b;
+  --accent-color: #07603e;
+  --text-color: #06462a; /* Deep forest green for contrast */
+
+}
+body {
+	font-family: 'Inter', sans-serif;
+	margin: 0;
+	padding: 0;
+	background-color: var(--background-color);
+	color: var(--text-color);
+}
+  
+header {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px 40px;
+	background-color: var(--accent-color);
+	color: #fff;
+	transition: transform 0.3s ease-in-out;
+}
+
+header.hiddenM {
+	transform: translateY(-100%);
+}
+
+header .logo {
+	font-size: 1.5em;
+	font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+}
+header img {
+	filter: invert(100%);
+}
+
+.logo a {
+  color: #fff;
+	text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+}
+
+nav {
+	display: flex;
+	gap: 20px;
+}
+
+nav a {
+	color: #fff;
+	text-decoration: none;
+	font-weight: 400;
+  
+}
+
+nav input {
+  margin: 0;
+}
+
+nav a:hover {
+	text-decoration: underline;
+}
+
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 250px;
+  background-color: var(--accent-color);
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transform: translateX(-100%);
+  -webkit-transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1em;
+}
+
+.sidebar a:hover {
+  text-decoration: underline;
+}
+.closebtn, a.closebtn:hover{
+  font-size: 4ch !important;
+  text-align: right;
+  display: none;
+  text-decoration: none;
+
+}
+
+.closebtn.open {
+  display: block;
+}
+.rearrangeSwitch {
+display: flex;
+align-items: center;
+}
+
+/* Hamburger Menu */
+.hamburger{
+  display: none;
+  background: none;
+  border: none;
+
+  cursor: pointer;
+  z-index: 1100;
+}
+.printButton {
+  cursor: pointer;
+}
+
+
+
+/* Responsive Layout */
+@media (min-width: 1700px) {
+  .sidebar {
+      transform: translateX(0);
   }
 
-/* Style the navigation menu */
-.topnav {
-    height: 100%; /* 100% Full-height */
-    width: 0; /* 0 width - change this with JavaScript */
-    position: fixed; /* Stay in place */
-    z-index: 5; /* Stay on top */
-    top: 0; /* Stay at the top */
-    left: 0;
-    background-color: #000000; /* Black*/
-    overflow-x: hidden; /* Disable horizontal scroll */
-    padding-top: 0; /* Place content 60px from the top */
-    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
-  /*  position: relative;*/
+  .hamburger {
+      display: none;
+  }
+
+  body {
+      padding-left: 250px;
+  }
 }
 
-.topnav h3{
-    padding: 5px 2px;
-    margin-top: 5px;
+@media (max-width: 1700px) {
+  .hamburger {
+      display: block;
+  }
+
+  body {
+      padding-left: 0;
+  }
 }
+@media screen and (max-width: 768px) {
+#fowListLogo, #manualLink, #tyLink {
+    display: none;
+}
+.theme-selector {
+  display: none;
+}
+header {
+  padding: 20px 5px;
+}
+
+}
+
+@media screen and (max-width: 768px) {
+  #fowListLogo, #manualLink, #tyLink {
+      display: none;
+  }
+
+
+}
+.disclaimer{
+  background: #ede7db;
+  border-radius: 	5px;
+  color: rgb(255, 0, 0);
+  border: 2px solid rgb(255, 0, 0);
+  position: relative;
+    margin-top: 5px;   
+  z-index: 0;
+  display: inline-block;
+  box-sizing: border-box;
+  text-align: center;
+  width: 100%;
+}
+.disclaimer a {
+  color: rgb(100, 0, 0);
+  text-decoration: none;
+}
+
+.disclaimer a:visited{
+  color: rgb(136, 0, 0);
+  text-decoration: none;
+}
+
+.disclaimer a:link {
+  text-decoration: none;
+}
+
+.sponsor{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-items:center;
+  background: white;
+  border-radius: 	5px;
+  padding: 1ch;
+  border: 2px solid black;
+  position: relative;
+    margin-top: 5px;   
+  z-index: 0;
+
+  box-sizing: border-box;
+  text-align: center;
+  width: 100%;
+}
+a .sponsor{
+  color: black;
+  text-decoration: none;
+}
+
+a:visited .sponsor{
+  color: black;
+  text-decoration: none;
+}
+
+a:link .sponsor{
+  color: black;
+  text-decoration: none;
+}
+
+#listNameList, #listEventList {
+  width: 100%;
+}
+input[type=text]{
+  width: 100%;
+}
+/* Position and style the close button (top right corner) */
+
 
 /* Hide the links inside the navigation menu (except for logo/home) */
 .open {
   width: 250px;
 }
 
-/* Style navigation menu links */
-.topnav a{
-  color: white;
-  padding: 14px 16px;
-  text-decoration: none;
-  font-size: 17px;
-  display: block;
-}
-
-.topnav label {
-  color: white;
-}
-
-
-.topnav .input-group {
-  color: white;
-  padding: 14px 16px;
-  text-decoration: none;
-  font-size: 17px;
-  display: block;
-}
-
-/* Style the hamburger menu */
-.topnav a.icon {
-  background: black;
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 0;
-  print-color-adjust: exact;
-}
-
-.topnav .slowLink {
-    left: 100;
-    top: 0;
-}
-
-/* Add a grey background color on mouse-over */
-.topnav a:hover {
-background-color: #ddd;
-color: black;
-}
-
 /* Style the active link (or home/logo) */
 .active {
-background-color: white;
-color: white;
-} 
-
-#openMenuButton, #backButton, #listsButton, .printButton, .rearrangeSwitch {
-
-	  position: fixed;
-    top: 2px;
-    left: 20px;
-    z-index: 4;
-    background-color: #007BFF;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.rearrangeSwitch {
-  right: 145px;
-  top: -7px;
-  left: unset;
-}
-
-#backButton {
-    top: 70px;
-}
-
-#listsButton {
-    left: 80px;
-}
-
-.printButton {
-  top: -8px;
-  right: 20px;
-  left: unset;
+  background-color: white;
+  color: white;
 }
 
 
 input[type=text], input[type=password], select {
 
-    padding: 4px;
-    display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
+  padding: 4px;
+  display: inline-block;
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: var(--optionBox-background-color);
+  color: var(--text-color);
+}
+
+button[type=submit]  {
+  width: 100%;
+  background-color: #007BFF;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 8px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
   }
 
-  button[type=submit]  {
-    background-color: #007BFF;
-    color: white;
-    padding: 8px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  @media print {
-    .topnav {
+@media print {
+  .topnav, header, .sidebar {
 		display: none;
 	}
 
-    #openMenuButton, #backButton, #listsButton  {
-
-        display: none;
-    }
-
+  #openMenuButton, #backButton, #listsButton  {
+      display: none;
+  }
+}
+  
+  .pointsSpacer {
+    width: 180px;
   }

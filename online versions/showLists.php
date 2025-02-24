@@ -22,7 +22,7 @@ $linkQuery = $_SESSION['linkQuery']??"";
     <link rel='stylesheet' href="css/menu.css?v=<?=$cssVersion?>">
     <link rel='stylesheet' href='css/nations.css?v=<?=$cssVersion?>'>
     <link rel='stylesheet' href='css/list.css?v=<?=$cssVersion?>'>
-    <script src="showListsScripts.js?v=<?=$cssVersion?>"></script>
+    <script src="showListsScripts.js"></script>
 </head>
 <body>
 <?php 
@@ -33,6 +33,7 @@ include "menu.php";
         <div class="leftside"></div>
         <div class="centerColummn">
 <?php 
+
 if (isset($_SESSION['username'])) {
 
 
@@ -59,27 +60,30 @@ if (isset($_SESSION['username'])) {
         "SELECT * 
         FROM saved_lists 
         WHERE user_id=?
-        AND url NOT LIKE '%pd=TY%'
         ORDER by url, name");
     $results->execute([$userID]);
 
     $listArray = generateListArray($results, $conn);
     ?>
 
-<div class="editRow">
-    <form id="deleteForm" method="post" action="delete_selected.php">
-        <button type="submit" id="deleteSelectedButton">Delete Selected</button>
-    </form>
-    <button type="button" id="duplicateSelectedButton" class="delete-confirm">Duplicate Selected</button>
-    <button type="button" id="editSelectedButton" class="delete-confirm">Edit Selected</button>
-    <div class="searchBox"><label for="filterInput">Search:</label><input type="text" id="filterInput"></div>
-    <button id="saveAllBtn" class="delete-confirm" style="display: none;">Save All</button>
-</div>
+            <div class="header">
+                <h2><?=$_SESSION['username']??""?>'s Lists</h2>
+            </div>
+            <div class="editRow">
+                <span onclick="openNav()"><div class="menuButton wide"> ☰ </div></span>
+                <form id="deleteForm" method="post" action="delete_selected.php">
+                    <button type="submit" id="deleteSelectedButton">Delete Selected</button>
+                </form>
+                <button type="button" id="duplicateSelectedButton" class="delete-confirm">Duplicate Selected</button>
+                <button type="button" id="editSelectedButton" class="delete-confirm">Edit Selected</button>
+                <div class="searchBox"><label for="filterInput">Search:</label><input type="text" id="filterInput"></div>
+                <button id="saveAllBtn" class="delete-confirm" style="display: none;">Save All</button>
+            </div>
 
-<table id="listTable">
-    <thead>
-        <tr id="filterRow">
-            <th style="display:none;" data-skip-filter></th>
+            <table id="listTable">
+                <thead>
+                    <tr id="filterRow">
+                        <th style="display:none;" data-skip-filter></th>
             <th id="chenckboxHeaderCell" data-skip-filter ><input type="checkbox" id="selectAll"></th>
             
 <?php

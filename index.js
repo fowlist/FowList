@@ -2,6 +2,21 @@ $('#submit').click(function(e){
     e.preventDefault();
 });
 
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('open');
+}
+
+
+function updateURL(newUrl) {
+    window.history.pushState({}, '', newUrl);
+    // Update the hidden input with the new URL
+    const hiddenUrlInput = document.getElementById('updated_url');
+    if (hiddenUrlInput) {
+        hiddenUrlInput.value = newUrl;
+    }
+}
+
 function clearParameterAndSubmit(param, form) {
     const dropdowns = document.querySelectorAll(`[id^="${param}"]`);
     const dropdown = document.querySelector(`[name="${param}"]`);
@@ -96,71 +111,80 @@ function updateCostCalculation(selectedPlatoon) {
 
     formationPoints.innerText = newFormationPoints +" Points";
     forcePoints.innerText = newForcePoints +" Points";
+    flashElement(formationPoints);
+    flashElement(forcePoints);
 }
 
 function updatePrerequisites(selectedPlatoon) {
     const allWarriorCheckboxes = document.querySelectorAll("input[type='checkbox'][prerequisite*='Warrior']");
-    
     const allConfigItems = selectedPlatoon.querySelectorAll("input[type='checkbox'], select[class*='Option']") ?? [];
     let warriorChecked = false; // Track if a warrior checkbox is checked globally
+    let prerequisitesChanged = false; // Track if anything changes
 
     allConfigItems.forEach(configItem => {
         const prerequisite = configItem.getAttribute("prerequisite");
-    
+
         if (prerequisite && prerequisite !== "0") {
             const requiredCodes = prerequisite.split('|'); // Split prerequisite into an array
-    
-            // Handle "AddOn" logic
+
+            // 🔹 Handle "AddOn" Logic
             if (prerequisite.includes("AddOn")) {
-                // Check if at least one required code is fulfilled
-                const prerequisitesMet = requiredCodes.some(code => {
-                    return Array.from(allConfigItems).some(otherCheckbox => {
-                        return otherCheckbox.value === code && otherCheckbox.checked;
-                    });
-                });
-    
-                // Disable the configItem only if none of the prerequisites are met
+                const prerequisitesMet = requiredCodes.some(code =>
+                    Array.from(allConfigItems).some(otherCheckbox =>
+                        otherCheckbox.value === code && otherCheckbox.checked
+                    )
+                );
+
                 const wasDisabled = configItem.disabled;
                 configItem.disabled = !prerequisitesMet;
-    
-                // Handle points update logic if the state changes
+
+                // 🔹 Handle points update if the state changes
                 if (wasDisabled !== configItem.disabled) {
+                    prerequisitesChanged = true; // Mark that something changed
+
                     if (configItem.disabled) {
                         if (configItem.checked) {
                             configItem.checked = false;
-                            
-                            updatePoints(configItem, selectedPlatoon);
                         } else if (configItem.options && configItem.options[configItem.selectedIndex]?.value) {
-                            configItem.selectedIndex = false;
-                            updatePoints(configItem, selectedPlatoon);
+                            configItem.selectedIndex = 0;
                         }
                     }
                 }
             }
 
-            // Handle "Warrior" logic globally
+            // 🔹 Handle "Warrior" Logic
             else if (prerequisite.includes("Warrior")) {
                 if (configItem.checked) {
                     warriorChecked = true; // Mark that a warrior checkbox is selected
-                } 
+                }
             }
         }
     });
 
-    // If a warrior is checked, disable all other warriors globally
+    // 🔹 Handle Global Warrior Logic
     if (warriorChecked) {
         allWarriorCheckboxes.forEach(warriorCheckbox => {
             if (!warriorCheckbox.checked) {
                 warriorCheckbox.disabled = true;
+                prerequisitesChanged = true;
             }
         });
     } else {
-        // Re-enable all warrior checkboxes if none are selected
         allWarriorCheckboxes.forEach(warriorCheckbox => {
             warriorCheckbox.disabled = false;
+            prerequisitesChanged = true;
         });
     }
+
+    // 🔹 If prerequisites changed, recalculate the box points
+    if (prerequisitesChanged) {
+        const box = selectedPlatoon.closest(".box");
+        if (box) {
+            recalculateBoxPoints(box);
+        }
+    }
 }
+
 
 function initiatePrerequisites(selectedPlatoon) {
     const allWarriorCheckboxes = document.querySelectorAll("input[type='checkbox'][prerequisite*='Warrior']");
@@ -189,100 +213,253 @@ function updatePoints(selectElement, selectedPlatoon) {
         const isConfigBox = selectElement.parentElement.classList.contains('configBox');
         const isOptionBox = selectElement.parentElement.classList.contains('optionBox');
         const formation = selectedPlatoon.closest('.Formation');
-        const header = formation.previousElementSibling;
-        const points = selectElement.closest('.box').querySelector(".Points").querySelector("div");
-        const formationPoints = header.querySelector(".Points").querySelector("div");
-        const forcePoints = document.getElementById("pointsOnTop").querySelector(".Points").querySelector("div");
-        const oldForcePoints = parseInt(forcePoints.innerText);
-        const oldFormationPoints = parseInt(formationPoints.innerText);
-        const oldPoints = parseInt(points.innerText);
-        const newFormationPoints = oldFormationPoints - oldPoints;
-        const newForcePoints = oldForcePoints - oldPoints;
-        const currentCost = parseInt(selectElement.getAttribute('currentCost') ?? selectElement.getAttribute('cost') ?? '0');
+        const header = formation?.previousElementSibling;
+        const points = selectElement.closest('.box')?.querySelector(".Points div");
+        const formationPoints = header?.querySelector(".Points div");
+        const forcePoints = document.getElementById("pointsOnTop")?.querySelector(".Points div");
 
+        // Ensure all required elements exist
+        if (!points || !formationPoints || !forcePoints) {
+            console.error("updatePoints: Missing elements in the DOM.");
+            resolve();
+            return;
+        }
+
+        // Get previous values before updating
+        const oldForcePoints = parseInt(forcePoints.innerText) || 0;
+        const oldFormationPoints = parseInt(formationPoints.innerText) || 0;
+        const oldPoints = parseInt(points.innerText) || 0;
+
+        // Remove old value from the totals
+        let newFormationPoints = oldFormationPoints - oldPoints;
+        let newForcePoints = oldForcePoints - oldPoints;
+
+        let currentCost = parseInt(selectElement.getAttribute('currentCost') ?? selectElement.getAttribute('cost') ?? '0');
         let newCost = oldPoints;
+
+        // Fix calculation order for team multiplicator
+        if (isConfigBox) {
+            selectedPlatoon.setAttribute('currentNrOfTeams', selectElement.options[selectElement.selectedIndex]?.getAttribute('nrOfTeams') || "1");
+        } else if (isOptionBox) {
+            selectedPlatoon.setAttribute('currentNrOfAddedTeams', selectElement.options[selectElement.selectedIndex]?.getAttribute('value') || "0");
+        }
+
+        // Fix race condition with `perTeamMultiplicator`
         let perTeamMultiplicator = parseFloat(selectElement.getAttribute('pricePerTeam') ?? '0') 
-                                * (parseInt(selectedPlatoon.getAttribute('currentNrOfTeams') ?? '1')
-                                + parseInt(selectedPlatoon.getAttribute('currentNrOfAddedTeams') ?? '0'));
+                                    * (parseInt(selectedPlatoon.getAttribute('currentNrOfTeams') ?? '1'));
 
-        perTeamMultiplicator = (perTeamMultiplicator==0)||(!perTeamMultiplicator)? 1:perTeamMultiplicator;
+        perTeamMultiplicator = (perTeamMultiplicator === 0 || !perTeamMultiplicator) ? 1 : perTeamMultiplicator;
 
+        // Handle different element types
         if (selectElement.type === 'checkbox') {
-            const checkBoxCost = Math.round(parseInt(selectElement.getAttribute('cost')??"0") * perTeamMultiplicator);
+            const checkBoxCost = Math.round((parseInt(selectElement.getAttribute('cost') ?? "0")) * perTeamMultiplicator);
+
             if (selectElement.checked) {
-
-                if (urlParams.has(selectElement.getAttribute("name"))) {
-
-                    newCost +=  checkBoxCost - currentCost;
-                    selectElement.setAttribute('currentCost',checkBoxCost);
-                    if (selectElement.nextElementSibling) {
-                        selectElement.nextElementSibling.querySelector("span").innerHTML = checkBoxCost;
-                    }
-                    
-                } else {
-                    newCost += checkBoxCost;
-                    urlParams.set(selectElement.getAttribute("name"), selectElement.value);
-                }
-                
+                newCost += (urlParams.has(selectElement.getAttribute("name")) ? checkBoxCost - currentCost : checkBoxCost);
+                urlParams.set(selectElement.getAttribute("name"), selectElement.value);
             } else {
                 newCost -= checkBoxCost;
                 urlParams.delete(selectElement.getAttribute("name"));
             }
-        } else if ((selectElement.type??"").toLowerCase() === 'select-one') {
-            // Handle <select> elements
+
+            selectElement.setAttribute('currentCost', checkBoxCost);
+            if (selectElement.nextElementSibling) {
+                const spanElement = selectElement.nextElementSibling.querySelector("span");
+                if (spanElement) spanElement.innerHTML = checkBoxCost;
+            }
+        } 
+        
+        else if (selectElement.tagName.toLowerCase() === 'select') {
             const selectedDropDown = selectElement.options[selectElement.selectedIndex];
-            
             if (isConfigBox) {
                 selectedPlatoon.setAttribute('currentNrOfTeams', selectedDropDown.getAttribute('nrOfTeams'));
 
-            } else if (isOptionBox) {
-                const currentNrOfAddedTeams = parseInt(selectedDropDown.getAttribute('value')) ? parseInt(selectedDropDown.getAttribute('value')) : "0";
-                
-                selectedPlatoon.setAttribute('currentNrOfAddedTeams',currentNrOfAddedTeams);
             }
-            const dropDownCost = parseInt(selectedDropDown.getAttribute('cost') ?? '0');       
-            selectElement.setAttribute('currentCost',dropDownCost);
-            newCost = newCost - currentCost + dropDownCost;
-            
-            urlParams.set(selectElement.getAttribute("name"), selectedDropDown.value);
-            
-        } else if (selectElement.nodeName === 'CARD') {
-            cardCost =  Math.round(parseFloat(selectElement.getAttribute('priceFactor') ?? '0') 
-            * (parseInt(selectedPlatoon.getAttribute('currentNrOfTeams') ?? '1')
-            + parseInt(selectedPlatoon.getAttribute('currentNrOfAddedTeams') ?? '0')));
-            
-            newCost = newCost - currentCost +cardCost;
-            selectElement.setAttribute('currentCost',cardCost);
+            const dropDownCost = parseInt(selectedDropDown.getAttribute('cost') ?? '0');
 
-        }
-        else  {
-            if (selectElement.getAttribute("value").trim() !== "") {
+            newCost = newCost - currentCost + dropDownCost;
+            selectElement.setAttribute('currentCost', dropDownCost);
+            urlParams.set(selectElement.getAttribute("name"), selectedDropDown.value);
+        } 
+        
+        else if (selectElement.nodeName === 'CARD') {
+            const cardCost = Math.round(parseFloat(selectElement.getAttribute('priceFactor') ?? '0') 
+                            * (parseInt(selectedPlatoon.getAttribute('currentNrOfTeams') ?? '1')));
+
+            newCost = newCost - currentCost + cardCost;
+            selectElement.setAttribute('currentCost', cardCost);
+        } 
+        
+        else {
+            if (selectElement.value.trim() !== "") {
                 urlParams.set(selectElement.getAttribute("name"), selectElement.value);
             } else {
                 urlParams.delete(selectElement.getAttribute("name"));
             }
         }
 
+        // Update UI
         points.innerText = `${newCost} Points`;
         selectedPlatoon.setAttribute("lastPrice", newCost);
         formationPoints.innerText = `${newFormationPoints + newCost} Points`;
         forcePoints.innerText = `${newForcePoints + newCost} Points`;
 
-        // ✅ Update the URL in the browser without reloading
-        const newUrl = `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`;
-        window.history.pushState({}, '', newUrl);
-        resolve();
+        // Ensure URL update happens last
+        setTimeout(() => {
+            const newUrl = `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`;
+            updateURL(newUrl);
+            resolve();
+            //
+        }, 50);  // Small delay to ensure attributes are fully updated
     });
 }
+//
+
+function recalculateBoxPoints(box) {
+    return new Promise(resolve => {
+        const points = box.querySelector(".Points div");
+        const formation = box.closest('.Formation');
+        const header = formation?.previousElementSibling;
+        const formationPoints = header?.querySelector(".Points div");
+        const forcePoints = document.getElementById("pointsOnTop")?.querySelector(".Points div");
+
+        // Ensure required elements exist
+        if (!points || !formationPoints || !forcePoints) {
+            console.error("recalculateBoxPoints: Missing elements in the DOM.");
+            resolve();
+            return;
+        }
+
+        // Step 1: Get the **current values** before updating
+        const oldForcePoints = parseInt(forcePoints.innerText) || 0;
+        const oldFormationPoints = parseInt(formationPoints.innerText) || 0;
+        const oldBoxPoints = parseInt(points.innerText) || 0;
+        let newTotalCost = 0;
+
+        // Step 2: Find all selectable elements inside the box
+        const selectableElements = box.querySelectorAll("input[type='checkbox']:checked, select, card");
+        const allSelectableElements = box.querySelectorAll("input[type='checkbox'], select, card");
+
+        // Step 3: Calculate total cost **using Promises**
+        let costPromises = Array.from(selectableElements).map(element => {
+            return new Promise(resolveElement => {
+                let elementCost = 0;
+                let perTeamMultiplicator = null;
+
+                if (element.type === 'checkbox') {
+                    if ((element.getAttribute('pricePerTeam') ?? false) != '0') {
+                        perTeamMultiplicator = parseFloat(element.getAttribute('pricePerTeam') ?? '1') 
+                                                * (parseInt(box.getAttribute('currentNrOfTeams') ?? '1'));
+                    }
+                    elementCost = Math.round(parseInt(element.getAttribute('cost') ?? '0') * (perTeamMultiplicator ?? 1));
+                } 
+                else if (element.tagName.toLowerCase() === 'select') {
+                    const selectedOption = element.options[element.selectedIndex];
+                    elementCost = parseInt(selectedOption.getAttribute('cost') ?? '0');
+
+                    const isConfigBox = element.parentElement.classList.contains('configBox');
+                    if (isConfigBox) {
+                        box.setAttribute('currentNrOfTeams', selectedOption.getAttribute('nrOfTeams'));
+                    }
+                }
+                else if (element.nodeName === 'CARD') {
+                    if ((element.getAttribute('priceFactor') ?? false) !== '0') {
+                        elementCost = Math.round(parseFloat(element.getAttribute('priceFactor') ?? '0') 
+                                    * (parseInt(box.getAttribute('currentNrOfTeams') ?? '1')));
+                    } else {
+                        elementCost = parseInt(element.getAttribute('cost') ?? '0');
+                    }
+                    element.setAttribute('currentCost', elementCost);
+                }
+
+                newTotalCost += elementCost;
+                resolveElement(); // Resolve this element's calculation
+            });
+        });
+
+        // Step 4: Wait for **all calculations to finish** before updating UI
+        Promise.all(costPromises).then(() => {
+            // Apply the flashing effect
+            flashElement(points);
+            flashElement(formationPoints);
+            flashElement(forcePoints);
+
+            // Update the UI **only after all calculations are done**
+            points.innerText = `${newTotalCost} Points`;
+            formationPoints.innerText = `${oldFormationPoints - oldBoxPoints + newTotalCost} Points`;
+            forcePoints.innerText = `${oldForcePoints - oldBoxPoints + newTotalCost} Points`;
+
+            // Save last calculated price in the box
+            box.setAttribute("lastPrice", newTotalCost);
+
+            // Step 5: **Update URL only after all calculations are done**
+            const urlParams = new URLSearchParams(window.location.search);
+            allSelectableElements.forEach(element => {
+
+                const name = element.getAttribute("name");
+                // If no name is defined, skip the element
+                if (!name) return;
+
+                // For checkboxes: if not checked, remove its parameter.
+                if (element.type === 'checkbox') {
+                    if (!element.checked) {
+                        urlParams.delete(name);
+                    } else {
+                        urlParams.set(name, element.value);
+                    }
+                } 
+                // For select elements (or other elements that support value)
+                else if (element.tagName.toLowerCase() === 'select' || element.nodeName.toLowerCase() === 'card') {
+                    const value = element.value.trim();
+                    if (value === "") {
+                        urlParams.delete(name);
+                    } else {
+                        urlParams.set(name, value);
+                    }
+                } 
+                // For any other element, use its value
+                else {
+                    const value = element.value.trim();
+                    if (value === "") {
+                        urlParams.delete(name);
+                    } else {
+                        urlParams.set(name, value);
+                    }
+                }
+                
+
+            });
+
+            const newUrl = `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`;
+            updateURL(newUrl);
+            resolve(); // Resolve the final Promise
+        });
+    });
+}
+/**
+ * 🔹 Flash Effect Function
+ * - Adds the "flash-effect" class to an element.
+ * - Removes it after the animation duration (1 second).
+ */
+function flashElement(element) {
+    if (!element) return;
+    element.classList.add("flash-effect");
+    setTimeout(() => {
+        element.classList.remove("flash-effect");
+    }, 500); // Match animation duration
+}
+
 
 function handleElementChange(selectElement) {
     const selectedPlatoon = selectElement.closest('.selectedPlatoon');
+    const box = selectElement.closest('.selectedPlatoon');
     const platoonSelectElements = selectedPlatoon.querySelectorAll("select, input, card");
     
     // ✅ Update prerequisites
     updatePrerequisites(selectedPlatoon);
     // ✅ Update points and URL
-    updatePoints(selectElement, selectedPlatoon)
+    recalculateBoxPoints(box);
+    /*updatePoints(selectElement, selectedPlatoon)
     .then(() => {
         platoonSelectElements.forEach(element => {
 
@@ -292,13 +469,14 @@ function handleElementChange(selectElement) {
             
         });
     });
+*/
 }
 
-function decreaseNOF() {
-    const nOFSelect = document.getElementById('nOF');
+function decreaseNOF(id) {
+    const nOFSelect = document.getElementById(id);
     const currentVal = parseInt(nOFSelect.value);
 
-    // Increment by 1, ensuring it doesn't exceed the maximum value (3)
+
     if (currentVal > 0) {
         nOFSelect.value = currentVal - 1;
         const hash = "F" + nOFSelect.value;
@@ -310,11 +488,11 @@ function decreaseNOF() {
     }
 }
 
-function incrementNOF() {
-    const nOFSelect = document.getElementById('nOF');
+function incrementNOF(id) {
+    const nOFSelect = document.getElementById(id);
     const currentVal = parseInt(nOFSelect.value);
 
-    // Increment by 1, ensuring it doesn't exceed the maximum value (3)
+    // Increment by 1, ensuring it doesn't exceed the maximum value (6)
     if (currentVal < 6) {
         nOFSelect.value = currentVal + 1;
         const hash = "F" + nOFSelect.value;
@@ -409,9 +587,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 .catch(error => {
                     console.error('Error:', error);
                 });
-            } else {
-                console.log(button.name);
-                
             }
         });
     });
@@ -651,7 +826,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-
+    const gridContainer = this.querySelector('.grid');
+    const computedStyle = window.getComputedStyle(gridContainer);
+    // Parse grid-auto-rows and gap from the CSS (assumed to be in px)
+    const gridAutoRows = parseFloat(computedStyle.getPropertyValue('grid-auto-rows'));
+    const gap = parseFloat(computedStyle.getPropertyValue('gap'));
+    const gridHeight = gridAutoRows+gap;
     grids.forEach(grid => {
         const boxes = grid.querySelectorAll(".box");
         initDistributeGrid(boxes);
@@ -660,19 +840,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function initDistributeGrid(boxes) {
         return new Promise(resolve => {
             requestAnimationFrame(() => {
-                const gridHeight = 37;
+
                 boxes.forEach(box => {
                     box.style.gridRowEnd = "span 1";
                     box.getBoundingClientRect(); // Force reflow
                     
                     const height = box.scrollHeight;
-                    let rowsToSpan = 1;
-    
-                    for (let index = 1; index < Math.floor(height / gridHeight) + 3; index++) {
-                        if ((height + 12) > (gridHeight * index)) {
-                            rowsToSpan = index + 1;
-                        }
-                    }
+                    const rowsToSpan = Math.ceil((height+1) / gridHeight);
                     box.style.gridRowEnd = `span ${rowsToSpan}`;
                 });
                 resolve(); // Complete after adjustment
@@ -867,8 +1041,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
     
                         const newUrl = `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`;
-                        window.history.pushState({}, '', newUrl);
-
+                        updateURL(newUrl);
                         console.log("Updated URL:\n" + newUrl.replaceAll("&", "\n"));
                         resolve();
                     })
@@ -902,8 +1075,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
     
                         const newUrl = `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`;
-                        window.history.pushState({}, '', newUrl);
-
+                        updateURL(newUrl);
                         console.log("Updated URL:\n" + newUrl.replaceAll("&", "\n"));
                         resolve();
                     })
@@ -938,9 +1110,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 // ✅ Update the URL in the browser without reloading
                 
                 const newUrl = `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`;
-                window.history.pushState({}, '', newUrl);
                 // 2. Remove `.selected` class from the platoon config
-                
+                updateURL(newUrl);
                 if (thisCardConfig) {
                     removeChildElements(thisCardConfig)
                     .then(() => redistributeGrid(box))
@@ -978,9 +1149,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 // ✅ Update the URL in the browser without reloading
                 
                 const newUrl = `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`;
-                window.history.pushState({}, '', newUrl);
                 // 2. Remove `.selected` class from the platoon config
-                
+                updateURL(newUrl);
                 if (thisPlatoonConfig) {
                     removeChildElements(thisPlatoonConfig)
                     .then(() => redistributeGrid(box))
@@ -1001,13 +1171,23 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
-    // Show/hide the button based on scroll position
-    window.addEventListener("scroll", function () {
-        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+    let lastScrollTop = 0;
+    const header = document.getElementById('main-header');
+
+    
+
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.scrollY || document.documentElement.scrollTop;
+        if (currentScroll > lastScrollTop) {
+            // Scrolling down
+            header.classList.add('hiddenM');
             document.getElementById("backToTopButton").style.display = "block";
         } else {
+            // Scrolling up
+            header.classList.remove('hiddenM');
             document.getElementById("backToTopButton").style.display = "none";
         }
+        lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // For mobile or negative scrolling
     });
 
     // Scroll to the top when the button is clicked

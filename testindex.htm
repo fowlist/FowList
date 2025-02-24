@@ -74,7 +74,76 @@
         nav a:hover {
             text-decoration: underline;
         }
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+        }
 
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1em;
+        }
+
+        .sidebar a:hover {
+            text-decoration: underline;
+        }
+
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 1.5em;
+            cursor: pointer;
+            z-index: 1100;
+        }
+
+        /* Responsive Layout */
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0);
+            }
+
+            .hamburger {
+                display: none;
+            }
+
+            body {
+                padding-left: 250px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .hamburger {
+                display: block;
+            }
+
+            body {
+                padding-left: 0;
+            }
+        }
         /* Theme Selector */
         .theme-selector {
             margin-left: auto;
@@ -89,10 +158,15 @@
         /* Main Content */
         .container {
             max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
+            flex: 1;
+            padding: 20px;
+            margin: 40px;
         }
-
+        @media (max-width: 767px) {
+            .container {
+                margin-left: 0;
+            }
+        }
         .main-header {
             text-align: center;
             margin-bottom: 40px;
@@ -176,6 +250,15 @@
     </style>
 </head>
 <body data-theme="default">
+    <!-- Sidebar -->
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <nav class="sidebar" id="sidebar">
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+    </nav>
+    <!-- Main Content -->
     <header id="main-header">
         <div class="logo">My Wargame</div>
         <nav>
@@ -302,8 +385,9 @@
     </footer>
 
     <script>
-        function changeTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
         }
 
         let lastScrollTop = 0;
@@ -320,6 +404,34 @@
             }
             lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // For mobile or negative scrolling
         });
+        // Set a cookie
+function setCookie(name, value, days) {
+    const expires = new Date(Date.now() + days * 86400000).toUTCString();
+    document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+}
+
+// Get a cookie
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    console.log(match);
+    
+    return match ? match[2] : null;
+}
+
+// Change theme and save to cookie
+function changeTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    setCookie('theme', theme, 30); // Save theme for 30 days
+}
+
+// Load saved theme from cookie on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = getCookie('theme') || 'default';
+    document.body.setAttribute('data-theme', savedTheme);
+    document.getElementById('theme').value = savedTheme;
+});
+
+
     </script>
 </body>
 </html>

@@ -32,14 +32,10 @@ include "htmlFunctions.php";
 <body>
 
 <?php include "menu.php";
+
 $pdo = null;?>
     <form name="form" id="form" method="get" action="index.php">
-    <input type="hidden" name="lsID" id="lsID" value="">
     <div  id="page-container" class="page-container">
-        <div>
-        <a href="index.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?>">FOWList.com</a>
-        </div>
-    <br>
     <a href="#top">    
         <div id="backToTopButton">
             Back to Top
@@ -50,50 +46,31 @@ $pdo = null;?>
                 View List
         </div>
     </button>
-    <div id="pointsOnTop" costArray="<?=htmlspecialchars(json_encode($dataToTransfer))?>">
-        <div class='Points'>
-            <div>
-                <?=array_sum($formationCost)+$listCardCost?> points 
-            </div>
-        </div>
-    </div>
-    <div class="topGrid">
-    <a href="https://breakthroughassault.co.uk/category/podcast/shoot-and-scoot/">    <div class="sponsor">
-        <div>
-        <img src="https://breakthroughassault.co.uk/wp-content/uploads/2022/07/newlogo_big-150x150.png" alt="shoot and scoot" style="width: 100px;">
-        </div>
-        <div>
-        Thanks to Shoot and scoot podcast for sponsoring the site.
-        </div>
 
-        </div></a>    
-
-        <div class="box disclaimer">Disclamer:<br>
-        This is a free unofficial alternative tool to generate lists for flames of war. It is a complement to the books and cards, bought either physical or from here: <a href="https://forces.flamesofwar.com">the official tool</a>. For validating lists for tournament play use official tool.</div>
-    </div>
-    
     <?php
 // -----------------------------------------------------
 // ----------- Formation print -------------------------
 // -----------------------------------------------------
     ?>
     <div class="header">
-        <h2 class="<?=($query["ntn"]??"")?>">
+        <div  class="header collapsible <?=($query["ntn"]??"")?>">
         <?php if (!empty($query["Book"])) :?> 
-            <input alt="custom name" placeholder="Custom name" name="loadedListName" id="loadedListName" value="<?php echo $query['loadedListName']??""; ?>">
-            <button value="" onClick="setDropdownAndSubmit();">
-                <img src="img/update.svg" alt="update">
-            </button>
-            <button value="" onClick="resetDropdownAndSubmit();">
-                <img src="img/clear.svg" alt="clear">
-            </button>
-            <?=$bookTitle?>
+            <div class="formHeader">
+                <b><?=$bookTitle?></b>
+            </div>
+            
         <?php endif ?>
-        </h2>
+        </div>
         <div class="Formation">
    
             <button value='' onClick='pd.value =0; Book.value =0; ntn.value =0; this.form.submit();'><img src="img/new.svg" alt="new list" title="Clear all and start new list"></button>
-            <span><?=dropdown($Periods,"","period","periodLong",'pd',false,"","",false,"","",$query)?>
+            <span>
+            <select name="pd" id="pd" onchange='this.form.submit()'>
+                <option value='' selected disabled hidden>Select period</option>
+                <?php foreach ($Periods as $period) :?>
+                    <option <?=(isset($query['pd'])&&$query['pd']==$period["period"]) ? "selected='selected' ": ""?> value='<?=$period["period"]?>'><?=$period["periodLong"]?></option>
+                <?php endforeach ?>
+            </select>
             
         <?php if (!empty($query['pd'])) :?>
             <button value='' onClick="clearParameterAndSubmit('pd', this.form)"><img src="img/filter.svg" alt="clear" title="Clear period"></button></span>
@@ -116,14 +93,22 @@ $pdo = null;?>
             <?=((isset($query["dPs"])&&$query["dPs"]=="true")?"checked":"")?>
             onchange='this.form.submit();'
             >(2025) Dynamic Points
-        </label> | Select nr of formation from this book: 
+        </label> 
         <select name='nOF' id='nOF' onchange='this.form.submit();'>
         <?php for ($i = 0; $i <=6; $i++): ?>
+
             <option <?=(isset($query['nOF'])&&($i == $query['nOF'])||((!isset($query['nOF']))&&($i==1))) ? " selected " : ""?> value=<?=$i?>>
-            <?=$i?>
+            <?=$i?> formation<?=($i!=1)?"s":""?> from this book 
             </option>
         <?php endfor ?>
         </select>
+        <select name='nOFoB' id='nOFoB' onchange='this.form.submit();'>
+            <?php for ($i = 0; $i <=3; $i++): ?>
+                <option <?=((($i == $query['nOFoB'])) ? " selected " : "")?>value=<?=$i?>>
+                    <?=$i?> formation<?=(($i!=1)?"s":"")?> from other book
+                </option>
+            <?php endfor ?>
+            </select>
         <?php else :?>
             </span>
         <?php endif ?>
@@ -142,16 +127,16 @@ if (!(isset($Formation_DB)&&(count($Formation_DB) > 0)&&(!($BBSupport_DB instanc
     if (!$bookSelected):
         if (!empty($query['ntn'])): ?>
         <div class="header collapsible">
-            <h3>No Book selected:</h3>
+            <div class="formHeader">No Book selected:</div>
         </div>
         <div class='Formation'>
             <?=(count($Books)> 0)?generateBookBoxes($Books,$query):"" ?>
         </div>
         <?php elseif (!empty($query['pd'])): ?>
     <div class="header collapsible">
-        <h3>
+        <div class="formHeader">
             No nation selected <?php echo $query['pd']?>
-        </h3>
+        </div>
     </div>
     <div class='Formation'>
         <div class="grid">
@@ -176,7 +161,7 @@ if (!(isset($Formation_DB)&&(count($Formation_DB) > 0)&&(!($BBSupport_DB instanc
     </div>
     <?php else: ?>
         <div class="header collapsible">
-            <h3>No period selected</h3>
+            <div class="formHeader">No period selected</div>
         </div>
         <div class="Formation">
             <div class="grid">
@@ -214,20 +199,19 @@ foreach ($boxesPlatoonsData as $formationNr => $formation) {
     ?>
 
     <div id="F<?=$formationNr?>" class="header collapsible <?=$formation["thisNation"]??""?>">
-        <h3>
-            <div class='left'>
+        <div class="formHeader">
             <?php if ((!empty($formation["formCard"]["title"])||(is_numeric(strpos($formation["formationCode"]??"","C"))))) :?>
                 <img class='card' src='img/Card.svg'>
-                <?php endif ?>
+            <?php endif ?>
             <?=generateTitleImanges($insignia, ($formation["formCard"]["title"]??"") . ($formation["formationTitle"]??""), $formation["thisNation"]) ?> 
-            </div>
-            <b>
-                <?=$alliedBooksEval?$formation["thisNation"]:""?>
-                <?=isset($formation["formCard"])&&!empty($formation["formCard"]["title"])&&$formation["formationTitle"] !=$formation["formCard"]["title"]?trim($formation["formCard"]["title"]).": ":""?>
-                <?=$formation["formationTitle"]??"Select Formation:"?>
-            </b>
 
-        </h3>
+        
+            <b>
+                <?=$alliedBooksEval?$formation["thisNation"] . " ally:":""?>
+                <?=isset($formation["formCard"])&&!empty($formation["formCard"]["title"])&&$formation["formationTitle"] !=$formation["formCard"]["title"]?trim($formation["formCard"]["title"]).": ":""?>
+                <?=$formation["formationTitle"]??(!$alliedFormationEval?"Select Book:":"Select Formation:")?>
+            </b>
+        </div>
         <div class="Points">
             <div>
             <?=$formation["formCost"]?> Point<?=$formation["formCost"]>1?"s":""?>
@@ -241,30 +225,46 @@ foreach ($boxesPlatoonsData as $formationNr => $formation) {
 if (isset($formation["boxes"])) {
     ?>
     <div class="Formation" id="<?=$formation["currentFormation"]?>box">
-    <br>
-<?php if ($formationNr>$nrOfFormationsInForce) :?>
-    <?=generateDroppdownHTML($formation["currentFormation"] . "Book", $formation["currentFormation"] . "Book",  $formation["books"],true)?>
-<?php endif ?>
+        <div class="formConfig">
+
+
+    <?php if ($formationNr>$nrOfFormationsInForce) :?>
+        <div>
+            <?=generateDroppdownHTML($formation["currentFormation"] . "Book", $formation["currentFormation"] . "Book",  $formation["books"],true)?>
+        </div>
+    <?php endif ?>
+    
+<div>
     Switch formation: 
-        <select formSelect name="<?=$formation["currentFormation"]?>" id="<?=$formation["currentFormation"]?>" onchange='this.form.submit()'>
-            <option value='' selected>Select Formation</option>
-            <?php foreach ($formation["thisFormationList"] as $option) :?>
-                <option <?=(isset($option["selected"])&&$option["selected"]==1) ? "selected='selected' ": ""?> value='<?=$option["value"]?>'><?=$option["description"]?></option>
-            <?php endforeach ?>
-        </select>
-    <button type='submit' value='' name="F<?=$formationNr?>" onClick="clearParameterAndSubmit('<?=$formation["currentFormation"]?>', this.form)">Clear</button>
+    <select formSelect name="<?=$formation["currentFormation"]?>" id="<?=$formation["currentFormation"]?>" onchange='this.form.submit()'>
+        <option value='' selected>Select Formation</option>
+        <?php foreach ($formation["thisFormationList"] as $option) :?>
+            <option <?=(isset($option["selected"])&&$option["selected"]==1) ? "selected='selected' ": ""?> value='<?=$option["value"]?>'><?=$option["description"]?></option>
+        <?php endforeach ?>
+    </select>
+    <button value='' name="F<?=$formationNr?>" onClick="clearParameterAndSubmit('<?=$formation["currentFormation"]?>', this.form)"><img src="img/filter.svg" alt="clear" title="Clear Formation"></button>
+    
+</div>
+<?php if ( $formationNr == $nrOfFormationsInForce +$query['nOFoB']): ?>
+        <button type="button" class="addFormButton" onclick="decreaseNOF('<?=($query['nOFoB']>0)?'nOFoB':'nOF'?>')">Remove this formation from force</button>
+    <?php endif ?>
 <?php if (isset($formation["formationCard"])) :?>
-    <img src='img/cardSmall.svg'> Formation card:
+    <div>
+        <img src='img/cardSmall.svg'> Formation card:
         <select fCardSelect name="<?=$formationNr?>-Card" id="<?=$formationNr?>-Card" onchange='this.form.submit()'>
             <option value='' selected>Select Card</option>
             <?php foreach ($formation["formationCard"] as $option) :?>
                 <option <?=(isset($option["selected"])&&$option["selected"]==1) ? "selected='selected' ": ""?> value='<?=$option["value"]?>'><?=$option["description"]?></option>
             <?php endforeach ?>
         </select>
+    </div>
+
 
 <?php endif ?>
+        </div>
+
 <?php if (isset($formation["formCard"])): ?>
-    <br>
+
     <?=cardNoteParse($formation["formCard"],false)?>
 <?php endif ?>
     <div class="grid">
@@ -310,7 +310,7 @@ if (isset($formation["boxes"])) {
                         ]??[]))?>">
                 <label for="<?=$boxPositionID?>box<?=$platoonInBox["platoon"]?>">
                     <span class='platoonImageSpan'>
-                    <?=msi($platoonInBox)?>
+                    
                     <?php foreach ($platoonInBox["images"] as $key => $image) :?><img src="img/<?=$image?>.svg"><?php endforeach ?>
                     </span>
                     <?=platoonTitle($platoonInBox,$formation)?>
@@ -340,22 +340,22 @@ if (isset($formation["boxes"])) {
     </div>
     <?php } elseif (!empty($formation["book"])) { ?>
         <div  id="F<?=$formationNr?>" class='header collapsible <?=$formation["thisNation"]??""?>'>
-            <h3>No formation selected:</h3>
+            <div class="formHeader">No formation selected:</div>
         </div>
         <div class='Formation'>
-            <br>
+
             <div class='grid'>
                 <?= generateFormationButtonsHTML($formation["thisFormationList"], $formation["book"], $formation["thisNation"], $formation["currentFormation"], isset($currentPlatoon)?$currentPlatoon:"", isset($currentUnit)?$currentUnit:"", $insignia)?>
             </div>
         </div>
     <?php } elseif ($alliedFormationEval) { ?>
     <div class="Formation">
-        <br>
         <div class='Formation'>
-            
-            <br>
             <?=generateDroppdownHTML($formation["currentFormation"] . "Book", $formation["currentFormation"] . "Book",  $formation["books"],false)?>
             <?=generateDroppdownHTML($formation["currentFormation"], $formation["currentFormation"],  $formation["thisFormationList"],false,"Formation")?>
+            <?php if ( $formationNr == $nrOfFormationsInForce +$query['nOFoB']): ?>
+        <button type="button" class="addFormButton" onclick="decreaseNOF('<?=($query['nOFoB']>0)?'nOFoB':'nOF'?>')">Remove this formation from force</button>
+    <?php endif ?>
             <div class='grid'>
 
                 <?= generateFormationButtonsHTML($formation["thisFormationList"], $formation["BookTitle"], $formation["thisNation"], $formation["currentFormation"], isset($currentPlatoon)?$currentPlatoon:"", isset($currentUnit)?$currentUnit:"", $insignia)?>
@@ -365,8 +365,10 @@ if (isset($formation["boxes"])) {
     <?php } elseif ($alliedBooksEval) { ?>
 
     <div class="Formation">
-        <br>
-        <?=generateDroppdownHTML($formation["currentFormation"] . "Book", $formation["currentFormation"] . "Book",  $formation["books"],false)?>
+        <?=generateDroppdownHTML($formation["currentFormation"] . "Book", $formation["currentFormation"] . "Book",  $formation["books"],false,"Select Allied Book")?>
+        <?php if ( $formationNr == $nrOfFormationsInForce +$query['nOFoB']): ?>
+        <button type="button" class="addFormButton" onclick="decreaseNOF('<?=($query['nOFoB']>0)?'nOFoB':'nOF'?>')">Remove this formation from force</button>
+    <?php endif ?>
         <?=generateBookBoxes($formation["books"],$query,$formation["currentFormation"] . "Book")?>
 
     </div>
@@ -374,24 +376,14 @@ if (isset($formation["boxes"])) {
         
         //echo generateFormationButtonsHTML($formation["books"], $boxesPlatoonsData[$formationNr]["listBook"], $boxesPlatoonsData[$formationNr]["thisNation"], $boxesPlatoonsData[$formationNr]["currentFormation"], isset($currentPlatoon)?$currentPlatoon:"", isset($currentUnit)?$currentUnit:"", $insignia);
     }
-    if ( $formationNr == $nrOfFormationsInForce-1 ): ?>
-        <br><br><br>
-        <div class="Formation">
-        <button type="button" class="addFormButton" onclick="decreaseNOF()">Remove below formation from force</button>
-        </div>
-        <?php endif;
+
     if ( $formationNr == $nrOfFormationsInForce ): ?>
-        <br><br><br>
+        <div  id="F<?=$formationNr?>" class='header collapsible <?=$formation["thisNation"]??""?>'>
+            <div class="formHeader"><b>Aditional formation</b></div>
+        </div>
         <div class="Formation">
-            <button type="button" name="F<?=($nrOfFormationsInForce+1)?>" class="addFormButton" onclick="incrementNOF()">Add <?=$nrOfFormationsInForce>0?"one aditional ":"" ?>formation from <?=$bookTitle?></button>
-            Formation from other book         
-            <select name='nOFoB' id='nOFoB' onchange='this.form.submit();'>
-            <?php for ($i = 0; $i <=3; $i++): ?>
-                <option <?=((($i == $query['nOFoB'])) ? " selected " : "")?>value=<?=$i?>>
-                    <?=$i?> formation<?=(($i!=1)?"s":"")?>
-                </option>
-            <?php endfor ?>
-            </select>
+            <button type="button" name="F<?=($nrOfFormationsInForce+1)?>" class="addFormButton" onclick="incrementNOF('nOF')">Add <?=$nrOfFormationsInForce>0?"one aditional ":"" ?>formation from <?=$bookTitle?></button>
+            <button type="button" name="F<?=($nrOfFormationsInForce+1)?>" class="addFormButton" onclick="incrementNOF('nOFoB')">Add <?=$query['nOFoB']>0?"one aditional ":"" ?>formation from other book</button>
         </div>
     <?php endif;
 }
@@ -402,12 +394,10 @@ if (isset($formation["boxes"])) {
 if (!empty($listCards)) {
 ?>
 <div class="header collapsible <?=$formation["thisNation"]??""?>">
-    <h3>
-        <div class='left'>
+    <div class="formHeader">
         <?=generateTitleImanges($insignia, "", $formation["thisNation"]) ?> 
-        </div>
         <b><?=$bookTitle?> Command Cards</b>
-    </h3>
+    </div>
     <div class="Points">
         <div>
         <?=$listCardCost?> Point<?=$listCardCost>1?"s":""?>
@@ -415,7 +405,7 @@ if (!empty($listCards)) {
     </div>
 </div>
 <div class='Formation'>
-<br>
+
     <div class='grid'>
 
 <?php foreach ($listCards as $cardKey => $eachCard): ?>
@@ -475,12 +465,10 @@ foreach ($supportBoxesPlatoonsData as $formationNr => $formation) {
     if (isset($formation["boxes"])) {
     ?>
     <div class="header collapsible <?=$formation["thisNation"]??""?>">
-        <h3>
-            <div class='left'>
+        <div class="formHeader">
             <?=generateTitleImanges($insignia, "", $formation["thisNation"]) ?> 
-            </div>
             <b><?=$bookTitle?><?=$formation["currentFormation"]=="CdPl"?" Command Card":""?> Support</b>
-        </h3>
+    </div>
         <div class="Points">
             <div>
             <?=$formation["formCost"]?> Point<?=$formation["formCost"]>1?"s":""?>
@@ -529,7 +517,6 @@ foreach ($supportBoxesPlatoonsData as $formationNr => $formation) {
                             ]??[]))?>">
                     <label for="<?=$boxPositionID?>box<?=$platoonInBox["platoon"]?>">
                         <span class='platoonImageSpan'>
-                        <?=msi($platoonInBox)?>
                         <?php foreach ($platoonInBox["images"] as $key => $image) :?><img src="img/<?=$image?>.svg"><?php endforeach ?>
                         </span>
                         <?=platoonTitle($platoonInBox,$formation)?>
@@ -569,10 +556,12 @@ if (isset($BBSupport_DB)&&query_exists($BBSupport_DB)) {
     $outerBoxnumber = 0;
 foreach ($formSupBoxesPlatoonsData as $unique_type => $type_boxes) {
     ?>
-    <div class="header collapsible">
-        <h3>
+    <div class="header collapsible <?=$formation["thisNation"]??""?>">
+
+        <div class="formHeader">
+            <?=generateTitleImanges($insignia, "", $formation["thisNation"]??"") ?> 
             <b>Formation Support: <?=$unique_type?></b>
-        </h3>
+</div>
         <div class="Points">
             <div>
             <?=$type_boxes["formCost"]?> Point<?=$type_boxes["formCost"]>1?"s":""?>
@@ -655,8 +644,6 @@ foreach ($formSupBoxesPlatoonsData as $unique_type => $type_boxes) {
                                 "currentFormation" => $type_boxes["currentFormation"]
                                 ]??[]))?>">
                         <label for="<?=$boxPositionID?>1">
-                            
-                            <?=msi($platoonInBox)?>
                             <?=platoonTitle($platoonInBox,$type_boxes)?>
                         </label>
                         <div class="selectedPlatoon <?=!empty($platoonInBox["selected"])?"selected":""?>" currentNrOfTeams="<?=$platoonInBox["boxSections"]["total"]??""?>" lastPrice="<?=$boxRow["boxCost"]?>" >

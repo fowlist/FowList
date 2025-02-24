@@ -5,13 +5,13 @@
 function msi($platoonInBox) {
     ob_start();
     if (isset($platoonInBox["motivSkillHitOn"])): ?>
-        <span class='topright'>
+
             <div class='MSI'>
                 <div>
                     <?=$platoonInBox["motivSkillHitOn"]?>
                 </div>
             </div>
-        </span>
+
     <?php endif;
     $html = ob_get_clean();
 
@@ -22,13 +22,14 @@ function platoonTitle($platoonInBox,$formation) {
     ob_start();
      ?>
         <div class="title">
-            <span class="left"><?=$platoonInBox["insignia"]??""?></span>
+            <span class="insignia nation"><?=$platoonInBox["insignia"]??""?></span>
             <span class="titleGrid">
             <b>
                 <?=isset($formation["formationCard"])&&!empty($formation["formationCard"]["title"])?trim($formation["formationCard"]["title"]).": ":""?><?=str_replace(" Force","",$platoonInBox["title"]??"")?>
             </b>
             </span>
             <span class="cardCode"><?=$platoonInBox["platoon"]??""?></span>
+            <span><?=msi($platoonInBox)?></span>
         </div>
     <?php
     $html = ob_get_clean();
@@ -253,7 +254,7 @@ function generateFormationButtonsHTML($Formations, $bookTitle, $thisNation, $cur
                 <?php endif ?>
                 </span>
                 <div class='title'>
-                    <span class='left'>
+                    <span class='left nation'>
                         <?= generateTitleImanges($insignia, $row["title"], $ntn)?>
                     <?php if (is_numeric(strpos($row["code"],"CC"))) {
                         ?>

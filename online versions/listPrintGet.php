@@ -15,8 +15,9 @@ if (isset($_SESSION['loadedListName'])) {
     $loadedListName = $_SESSION['loadedListName'];
     if (isset($_SESSION['loadedListNumber'])) {
         $loadedListNumber = $_SESSION['loadedListNumber'];
-    }
-}
+            }            
+    
+        }
 // -- all general tables 
 if (empty($_SESSION["insigniaQuery"])) {
     include_once "sqlServerinfo.php";
@@ -76,17 +77,17 @@ if (isset($loadedListNumber)) {
 $linkQuery ="";
 
 
-foreach($query as $key => $queryRow) {;
-    if ($key !== "cost"&&!empty($queryRow)) {
-        $_SESSION[$key]= (($key == "latestSelectID")? "": $queryRow);
-        $linkQuery .= ($key !== 'lsID') ? "&" . $key . "=" . $queryRow : "";
-        $backQuery .= "&" . $key . "=" . (($key == "latestSelectID")? "": $queryRow);
+foreach($query as $key => $row) {;
+    if ($key !== "cost") {
+        $_SESSION[$key]= (($key == "latestSelectID")? "": $query[$key]);
+        $linkQuery .= ($key !== 'lsID') ? "&" . $key . "=" . $query[$key] : "";
+        $backQuery .= "&" . $key . "=" . (($key == "latestSelectID")? "": $query[$key]);
     }
 }
 
 if ($_GET['cost'] != "") {
     $encodedData = $_GET['cost'];
-    $costArrayStrig = "&cost=" . $encodedData;
+
     // Decode the encoded data
     $decodedData = gzinflate(base64_decode(strtr($encodedData, '-_', '+/')));
 
@@ -94,9 +95,9 @@ if ($_GET['cost'] != "") {
     $dataToTransfer = unserialize($decodedData);
 
     // Now you can work with $dataToTransfer['bCt'], $dataToTransfer['fCt'], and $dataToTransfer['lCt'] as needed
-    $boxCost = $dataToTransfer['bCt']??[];
-    $FormationCost = $dataToTransfer['fCt']??[];
-    $listCost = $dataToTransfer['lCt']??0;
+    $boxCost = $dataToTransfer['bCt'];
+    $FormationCost = $dataToTransfer['fCt'];
+    $listCost = $dataToTransfer['lCt'];
 
     foreach($query as $key => $row) {
         for ($i = 0; $i<= 20; $i++) {
@@ -110,11 +111,11 @@ $bookSelected = FALSE;
 
 
 
-foreach ($Books as $row) if (($row["code"] == $query['Book'])||($row["Book"] == $query['Book'])){
-    $bookCode = $row["code"]; 
-    $bookTitle = $row["Book"]; 
-    $bookSelected = true;
-}
+    foreach ($Books as $row) if (($row["code"] == $query['Book'])||($row["Book"] == $query['Book'])){
+        $bookCode = $row["code"]; 
+        $bookTitle = $row["Book"]; 
+        $bookSelected = true;
+    }
 if ($Books instanceof mysqli_result) {
     mysqli_data_seek($Books ,0);
 }
@@ -151,7 +152,7 @@ if ($bookSelected && !empty($bookTitle)) {
                 break;
             }
         }
-        $maxSupportBoxNr = 0;
+$maxSupportBoxNr = 0;
         if ((!$foundit)&&($value["ogBoxNrs"]!=null)) {
             $SupporboxNrs[]  = ["box_type" => $box_type,"box_nr" => $box_nr];
             if ($box_nr>=$maxSupportBoxNr) {
@@ -210,44 +211,18 @@ if ($bookSelected && $query['Book'] <> "")  {
 "SELECT  * 
         FROM    platoonOptions");
 $platoonOptionHeaders = [];
-$counts = [];
-$seen = []; // Hash map to track unique combinations
-
-// Step 1: Count occurrences of each unique key
-foreach ($platoonOptionOptions as $value) {
-    $code = $value["code"];
-    $description = $value["description"];
-    $oldNr = $value["optCode"];
-
-    // Create a unique key for the current combination
-    $uniqueKey = "{$code}|{$description}|{$oldNr}";
-
-    // Increment the count for this unique key
-    $counts[$uniqueKey] = ($counts[$uniqueKey] ?? 0) + 1;
-}
-
-// Step 2: Build the headers with counts
-foreach ($platoonOptionOptions as $value) {
-    $code = $value["code"];
-    $description = $value["description"];
-    $oldNr = $value["optCode"];
-
-    // Create a unique key for the current combination
-    $uniqueKey = "{$code}|{$description}|{$oldNr}";
-
-    // Add to headers only if not already processed
-    if (!isset($seen[$uniqueKey])) {
-        $platoonOptionHeaders[$code][] = [
-            "code" => $code,
-            "description" => $description,
-            "oldNr" => $oldNr,
-            "nrOfOptions" => $counts[$uniqueKey] // Use the precomputed count for this unique key
-        ];
-
-        $seen[$uniqueKey] = true; // Mark this combination as processed
+    $headerMap = [];
+    foreach ($platoonOptionOptions as $value) {
+        $code = $value["code"];
+        $description = $value["description"];
+        $key = $code . '|' . $description; // Create a unique key for the combination
+        if (isset($headerMap[$key])) {
+            $headerMap[$key]["nrOfOptions"]++;
+        } else {
+            $headerMap[$key] = ["code" => $code, "description" => $description, "nrOfOptions" => 1];
+        }
     }
-}
-
+    $platoonOptionHeaders = array_values($headerMap);
     mysqli_data_seek($platoonOptionOptions, 0);
 }
 
@@ -269,7 +244,7 @@ $SummaryOfCards = [];
     <script src="jquery-3.7.0.min.js"></script>
     <script src="packery.pkgd.min.js"></script>
     <script src="draggabilly.pkgd.min.js"></script>
-    <script src="listPrint.js?v=<?=$cssVersion?>"></script>
+    <script src="listPrint.js"></script>
     <?php
     // Menu
     if (isset($query['F1'])) {
@@ -284,56 +259,53 @@ $SummaryOfCards = [];
     <link rel="icon" type="image/x-icon" href="/img/<?=$query["ntn"]?>.svg">
 </head>
 <body>
-
-
 <?php include "menu.php"; ?>
 
     <div id="page-container" class="page-container">
-
+    
     <?php
     //foreach ($platoonCards as $row) {echo $row["card"];}
     // ----- temporary button during dev.. --------
-    if (!empty($bookTitle)) {?>
-    
-
-        <div class="header  <?=$query['ntn']?>">
-            <div class="formHeader">
-                <b><?=$bookTitle?></b>    
-            </div>
-            <div>
-                <div class='Points'>
-                    <div class='Points1'>
-                        <span id="totalPoints"><?php echo (!empty($FormationCost)) ? array_sum($FormationCost) + $listCost : "" ?></span> points
-                    </div>
-
+    if (!empty($bookTitle)) {
+        
+        if (!empty($query['loadedListName'])) {
+            ?>
+            List Name:<span id="listName"><?=$query['loadedListName']?></span>
+            <?php
+        }
+    ?>
+    <div class="header">
+        <h2 class="<?=$query['ntn']?>"> 
+            <?=$bookTitle?>    
+            <div class='Points'>
+                <div class='Points1'>
+                    <span id="totalPoints"><?php echo ($FormationCost != "") ? array_sum($FormationCost) + $listCost : "" ?></span> points
                 </div>
+            </div>
                 <div class='Points' style="width: fit-content;">
                     <div class='reservesPoints Points1'>
-                    Reserves: <span id="reservesPoints"><?php echo (!empty($FormationCost)) ? round((array_sum($FormationCost) + $listCost)*0.4) : "" ?> points</span>
+                    Reserves: <span id="reservesPoints"><?php echo ($FormationCost != "") ? round((array_sum($FormationCost) + $listCost)*0.4) : "" ?> points</span>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="Formation">
-            <?php if (!empty($query['dPs'])) :?>
-                Using Dynamic Points
-            <?php else :?>
-                Using Book Points
-            <?php endif ?>
-            <?php if (!empty($query['loadedListName'])) :?>
-                | List Name:<span id="listName"><?=$query['loadedListName']?></span>
-            <?php endif ?>
-        </div>
+            </h2> 
+            <button value="" onClick="window.print();">Print the page</button>
+            <!--<button id="generatePdfButton">save pdf</button>-->
+            <label>Rearrange:<label class="switch">
+        <input id="dragToggleSwitch" type="checkbox">
+        <span class="slider round"></span>
+        </label></label>
+                   
 
-        <?php
+    </div>
+    <?php
     }
 
 // ---------------------------------------------------
 //  ------------------- Formation --------------------
 // ---------------------------------------------------
 if ($bookSelected) { //   Formation
-    $nrOfFormationsInForce = ($query['nOF']??0)+($query['nOFoB']??0);
-    $formationsContainer = array_fill(1, ($query['nOF']??0)+($query['nOFoB']??0),[]);
+    $nrOfFormationsInForce = $query['nOF']+$query['nOFoB'];
+    $formationsContainer = array_fill(1, $query['nOF']+$query['nOFoB'],[]);
     $formationTitle=[];
     $formationCardTitley=[];
     $formationCardNote=[];
@@ -389,52 +361,52 @@ if ($bookSelected) { //   Formation
             }
         }
 
-        if (isset($query[$currentFormation])) {
-                $cardPlatoon = $conn->query(
-                "SELECT  boxType as box_type, 
-                            platoon,
-                            cardNr,
-                            Book,
-                            formation,
-                            configChange,
-                            optionChange,
-                            boxNr as box_nr,
-                            card as title,
-                            replaceUnitStats,
-                            unitType,
-                            platoonNation
-                    FROM    cmdCardAddToBox  
-                    WHERE   Book LIKE '%" . $bookTitle . "%'
-                    AND     formation LIKE '%{$query[$currentFormation]}%'");
-        }
+if (isset($query[$currentFormation])) {
+        $cardPlatoon = $conn->query(
+           "SELECT  boxType as box_type, 
+                    platoon,
+                    cardNr,
+                    Book,
+                    formation,
+                    configChange,
+                    optionChange,
+                    boxNr as box_nr,
+                    card as title,
+                    replaceUnitStats,
+                    unitType,
+                    platoonNation
+            FROM    cmdCardAddToBox  
+            WHERE   Book LIKE '%" . $bookTitle . "%'
+            AND     formation LIKE '%{$query[$currentFormation]}%'");
+}
+    
+    if ($Formation_DBSql->num_rows > 0) {
 
-        if ($Formation_DBSql->num_rows > 0) {
-
-        //---- SQL
-        $formationCards= $conn->query(
-            "SELECT  DISTINCT 
-        cmdCardFormationMod.Book AS Book, 
-        cmdCardFormationMod.formation AS formation, 
-        cmdCardFormationMod.card AS card, 
-        cmdCardCost.platoonTypes AS platoonTypes, 
-        cmdCardCost.price AS cost,
-        cmdCardCost.pricePerTeam AS pricePerTeam,
-        cmdCardFormationMod.motivation AS motivation, 
-        cmdCardFormationMod.replaceMotivation AS replaceMotivation, 
-        cmdCardFormationMod.skill AS skill, 
-        cmdCardFormationMod.replaceSkill AS replaceSkill, 
-        cmdCardFormationMod.isHitOn AS isHitOn,
-        cmdCardsText.notes AS notes,
-        cmdCardsText.code AS code,
-        cmdCardsText.title AS title
-        FROM    cmdCardFormationMod
-            LEFT JOIN cmdCardCost
-                LEFT JOIN cmdCardsText
-                ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
-            ON cmdCardCost.Book = cmdCardFormationMod.Book AND cmdCardCost.card = cmdCardFormationMod.card 
-        WHERE   cmdCardsText.Book LIKE '%" . $bookTitle . "%'
-        AND     cmdCardFormationMod.formation LIKE '%" . $query[$currentFormation] . "%'");  
-        }        
+    //---- SQL
+    $formationCards= $conn->query(
+        "SELECT  DISTINCT 
+    cmdCardFormationMod.Book AS Book, 
+    cmdCardFormationMod.formation AS formation, 
+    cmdCardFormationMod.card AS card, 
+    cmdCardCost.platoonTypes AS platoonTypes, 
+    cmdCardCost.price AS cost, 
+    cmdCardCost.pricePerTeam AS pricePerTeam,
+    cmdCardFormationMod.motivation AS motivation, 
+    cmdCardFormationMod.replaceMotivation AS replaceMotivation, 
+    cmdCardFormationMod.skill AS skill, 
+    cmdCardFormationMod.replaceSkill AS replaceSkill, 
+    cmdCardFormationMod.isHitOn AS isHitOn,
+    cmdCardsText.notes AS notes,
+    cmdCardsText.code AS code,
+    cmdCardsText.title AS title
+    FROM    cmdCardFormationMod
+        LEFT JOIN cmdCardCost
+            LEFT JOIN cmdCardsText
+            ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
+        ON cmdCardCost.Book = cmdCardFormationMod.Book AND cmdCardCost.card = cmdCardFormationMod.card 
+    WHERE   cmdCardsText.Book LIKE '%" . $bookTitle . "%'
+    AND     cmdCardFormationMod.formation LIKE '%" . $query[$currentFormation] . "%'");  
+    }        
 
     if ($Formation_DBSql->num_rows > 0) {
     // ------- Formation Title and Note lookup -------------
@@ -475,7 +447,7 @@ if ($bookSelected) { //   Formation
                             $attributeList[$attributeName] = $attributes;
                         }
                     }
-                    $Formation_DB[] = $attributeList;
+                    $Formation_DB[] = $attributeList;               
                     if (!empty($value["platoon"])&&!strpos($sqlTempStatement,$value["platoon"])) {
                         $sqlTempStatement .= (($sqlTempStatement != "")?" OR ":"") . "code LIKE '". $value["platoon"] . "'";
                     }
@@ -527,23 +499,27 @@ if (!isset($formationCardTitle[$formationNr])) {
             }
     //------------------------------------
     ?>
-    <div class="collapsible <?=$formationNation[$formationNr]?>">  
-        <div class="formHeader"> <?php 
+    <button type="button" class="collapsible">  
+        <h3 class="<?=$formationNation[$formationNr]?>"> <?php 
     //---- Title print 
         if ((isset($formationCardTitle[$formationNr]))||(is_numeric(strpos($query[$currentFormation],"C")))) {
-            echo "<img class='card' src='img/Card.svg'>";
+            echo "<div class='left'><img class='card' src='img/Card.svg'></div>";
         }
-        echo generateTitleImanges($insignia, $formationCardTitle[$formationNr] 
-            . $formationsContainer[$formationNr]["FormationTitle"], $formationNation[$formationNr])
-            . ((isset($formationCardTitle[$formationNr])&&($formationCardTitle[$formationNr]!=$formationsContainer[$formationNr]["FormationTitle"])&&(!is_numeric(strpos($formationsContainer[$formationNr]["FormationTitle"],$formationCardTitle[$formationNr])))) ? "\n \t {$formationCardTitle[$formationNr]}: ": "");
-        echo $formationsContainer[$formationNr]["FormationTitle"]; ?>
-        </div>
+        echo "<div class='left'>" . generateTitleImanges($insignia, $formationCardTitle[$formationNr] 
+            . $formationsContainer[$formationNr]["FormationTitle"], $formationNation[$formationNr]) . "</div>"
+            . "<div class='mid'>" . ((isset($formationCardTitle[$formationNr])&&($formationCardTitle[$formationNr]!=$formationsContainer[$formationNr]["FormationTitle"])&&(!is_numeric(strpos($formationsContainer[$formationNr]["FormationTitle"],$formationCardTitle[$formationNr])))) ? "\n \t {$formationCardTitle[$formationNr]}: ": "");
+        
+        echo $formationsContainer[$formationNr]["FormationTitle"] . "</div>"; ?>
+        </h3>
+        <span class="right">    
             <div class='Points'>
                 <div class='Points1'>
                     <?=$FormationCost[$formationNr]?> points 
                 </div>
             </div> 
-    </div>
+        </span>
+
+    </button>
     <div class='Formation'>
         <div class="grid">
     <?php
@@ -556,7 +532,7 @@ if (!isset($formationCardTitle[$formationNr])) {
             $formationsContainer[$formationNr][$currentBoxInFormation] ="";
             if (($row["formation"] == $currentFormationCode) && isset($query[$currentBoxInFormation])&&($query[$currentBoxInFormation] === $row["platoon"])) {
                 if (isset($formationNation[$formationNr])) {
-                    $platoonsInForce[$platoonIndex]["platoonNation"] = $formationNation[$formationNr];
+                $platoonsInForce[$platoonIndex]["platoonNation"] = $formationNation[$formationNr];
                 }
                 $formationsContainer[$formationNr][$currentBoxInFormation]
                 .= "<div class='box'>
@@ -565,23 +541,22 @@ if (!isset($formationCardTitle[$formationNr])) {
                 $platoonsInForce[$platoonIndex]["code"] = $row["platoon"];
                 $platoonsInForce[$platoonIndex]["platoonIndex"] = $platoonIndex;
                 $platoonsInForce[$platoonIndex]["title"] = $row["title"];
-                $platoonsInForce[$platoonIndex]["FormationCardTitle"] = $formationsContainer[$formationNr]["FormationTitle"] . $formationCardTitle[$formationNr]??"" ;
                 $platoonConfigChanged = configChangedGenerate($row, $platoonConfig);
 
                 list($platoonOptionHeadersChanged, $platoonOptionChanged) = platoonOptionChangedAnalysis($row, $platoonOptionHeaders,$platoonOptionOptions);
 
                 foreach ($platoonConfigChanged as $row3) {
-                    if (($row["platoon"]==$row3["platoon"])&&isset($query[$currentBoxInFormation . "c"])&&($row3["shortID"] === $query[$currentBoxInFormation . "c"])) {
+                        if (($row["platoon"]==$row3["platoon"])&&isset($query[$currentBoxInFormation . "c"])&&($row3["shortID"] === $query[$currentBoxInFormation . "c"])) {
                         $cardsHTML = "";
                         $optionsHTML = generatePlatoonOptionsPrintHTML($platoonOptionHeadersChanged, $platoonOptionChanged, $row, $row3, $query, $weaponsTeamsInForce, $attachmentsInForce, $platoonIndex, $currentFormation, $platoonsInForce);
                         actualSectionsEval($row3,$row);
                         printPlatoonCardHTML($platoonCards, $row, $query, $currentBoxInFormation, $platoonIndex, $platoonCardChange, $platoonCardMod, $CardsInList, $platoonsInForce, $formationCardTitle, $attachmentsInForce);
                         list($cardImage, $cardsHTML) = printPlatoonUnitCardHTML($unitCards, $row, $query, $platoonCardMod, $attachmentsInForce, $CardsInList, $currentBoxInFormation, $platoonIndex);
                         list($configCost, $configHTML) = configPrintHTML($row3, $platoonIndex, $weaponsTeamsInForce, $attachmentsInForce, $platoonCardMod);
-// ------------------- image print -----------
+    // ------------------- image print -----------
                         //
                         $boxImageHTML = printBoxImageHTML($row, $row3, $weaponsTeamsInForce, $attachmentsInForce, $platoonIndex, $currentFormation, $cardImage, $platoonCardMod);
-//------- check if the formation have cards for the box --------------
+    //------- check if the formation have cards for the box --------------
                         //
                         $formationCardHTMLtemp = printFormationCardsHTML($formationCards, $formationCardTitle, $formationNr, $platoonIndex, $currentBoxNr, $platoonCardMod, $row, $row3, $query, $CardsInList, $platoonsInForce, $attachmentsInForce);
                         if (isset($platoonCardChange[$platoonIndex])&&isset($platoonCardChange[$platoonIndex]["html"])) {
@@ -589,12 +564,12 @@ if (!isset($formationCardTitle[$formationNr])) {
                         } else {
                             $formationCardHTML = $formationCardHTMLtemp;
                         }
-// ------------ platoon cards (pioneer etc.)
+                        // ------------ platoon cards (pioneer etc.)
                         //
-                        $flag =  generateTitleImanges($insignia, $formationCardTitle[$formationNr] . $formationsContainer[$formationNr]["FormationTitle"] . $platoonsInForce[$platoonIndex]["title"] , ((!empty($row["platoonNation"]))?$row["platoonNation"]:$formationNation[$formationNr]));
-                    
+                        $flag =  generateTitleImanges($insignia, $formationCardTitle[$formationNr] . $platoonsInForce[$platoonIndex]["title"] , ((!empty($row["platoonNation"]))?$row["platoonNation"]:$formationNation[$formationNr]));
+                        
                         $formationsContainer[$formationNr][$currentBoxInFormation] .= 
-                        "<span class='nation'>" . $flag . "</span><div class='images'>" . $boxImageHTML  . 
+                        $flag . "<div class='images'>" . $boxImageHTML  . 
                         "</div>";
                     }
                 }
@@ -602,7 +577,7 @@ if (!isset($formationCardTitle[$formationNr])) {
 
                 if ($platoonConfigChanged instanceof mysqli_result) {
                         mysqli_data_seek($platoonConfigChanged ,0);  
-                } 
+} 
     //--------------------------------------------
     //---------------- name etc. -------------  
                 if (isset($platoonCardMod[$platoonIndex])) {
@@ -616,10 +591,10 @@ if (!isset($formationCardTitle[$formationNr])) {
                         (!is_numeric(strpos(trim($platoonsInForce[$platoonIndex]["title"]),trim($platoonCardMod[$platoonIndex]["title"])))))? 
                         $platoonCardMod[$platoonIndex]["title"] . ": ": "") . 
                         $platoonsInForce[$platoonIndex]["title"]);
-                }
+                    } 
 
                 $formationsContainer[$formationNr][$currentBoxInFormation] .= "
-                <div class='title'>
+                    <div class='title'>
                         <b> 
                             {$platoonsInForce[$platoonIndex]["title"]}
                         </b>
@@ -644,9 +619,9 @@ if (!isset($formationCardTitle[$formationNr])) {
             }
 
         }
-        if ($platoonConfig instanceof mysqli_result) {
-                mysqli_data_seek($platoonConfig ,0); 
-        }
+if ($platoonConfig instanceof mysqli_result) {
+        mysqli_data_seek($platoonConfig ,0); 
+}
         echo "</div>";
         echo "</div>";  
     }
@@ -656,11 +631,11 @@ if (!isset($formationCardTitle[$formationNr])) {
 
 if ($bookSelected && $bookTitle !="") { // ----------- support 
     $formationNr+=2;
-    $currentFormation="Sup";
-    $arrayCdPl =[];
-    $currentPl = 0;
-    $formationCardTitle = "";
-    $cardPlatoon = $conn->query(
+$currentFormation="Sup";
+$arrayCdPl =[];
+$currentPl = 0;
+$formationCardTitle = "";
+        $cardPlatoon = $conn->query(
        "SELECT  boxType as box_type, 
                 platoon,
                 cardNr,
@@ -676,16 +651,16 @@ if ($bookSelected && $bookTitle !="") { // ----------- support
         FROM    cmdCardAddToBox  
         WHERE   Book LIKE '%{$bookTitle}%'
         AND     formation LIKE '%Support%'");
-    $platoonConfigQuery = $conn->query(
+$platoonConfigQuery = $conn->query(
             "SELECT  *
             FROM    platoonConfigSupportDB
             WHERE formation LIKE '%{$bookTitle}%'");
-    $platoonConfig  = [];
-    foreach ($platoonConfigQuery as $kwy => $value) {
-        $platoonConfig[] = $value;
-    }
-    $formationCards = [];
-    
+$platoonConfig  = [];
+foreach ($platoonConfigQuery as $kwy => $value) {
+    $platoonConfig[] = $value;
+}
+$formationCards = [];
+
 //Support Card platoons ( outside of numbered boxes)
     foreach ($query as $key => $value) {
         $position = strpos(" ". $key,"CdPl");
@@ -756,27 +731,27 @@ if ($bookSelected && $bookTitle !="") { // ----------- support
             }
         }
 
-    $bbEval = is_numeric(strpos($parts['query'], "BlackBox"))||is_numeric(strpos($parts['query'], "boxc"));  
+    $bbEval = (is_numeric(strpos($parts['query'], "BlackBox")));  
 
     $supEval = (count($combinedSupportDB) > 0)&&(((is_numeric(strpos($parts['query'], "Sup")))));
-
+    
     if ((count($arrayCdPl) > 0)||$supEval||$bbEval) {
     ?>
-
-    <div class="collapsible <?=$query['ntn']?>">
-        <div class="formHeader"> 
+    <button type="button" class="collapsible">  
+        <h3  class="<?=$query['ntn']?>">     
             <?php foreach ($Support as $row) echo $row["title"]; mysqli_data_seek($Support ,0); ?>
-        </div>
-  
+        </h3>
+        <span class="right">    
             <div class='Points'>
                 <div class='Points1'>
-                    <?php echo (($FormationCost[$formationNr]??0) + ($FormationCost[$formationNr + 1 ]??0) + ($FormationCost[$formationNr+ 2]??0) + ($FormationCost[$formationNr+ 3]??0) ) ?> points 
+                    <?php echo ($FormationCost[$formationNr] + $FormationCost[$formationNr + 1 ] + $FormationCost[$formationNr+ 2] ) ?> points 
                 </div>
             </div> 
-    </div>
+        </span>
+    </button>
 
     <div class='Formation'>
-    <div class="grid">        
+    <div class="grid">
     <?php
     }
 
@@ -784,7 +759,7 @@ if ($bookSelected && $bookTitle !="") { // ----------- support
     //----- generate boxes
         foreach ($combinedSupportDB as $row) {
 
-            $currentBoxNr = $row["box_nr"];            
+            $currentBoxNr = $row["box_nr"];
             $currentBoxInFormation = $currentFormation ."-" . $currentBoxNr;
             if (isset($query[$currentBoxInFormation])&&($query[$currentBoxInFormation] === $row["platoon"])) {
                 $boxAllHTML[$currentBoxInFormation] ="";
@@ -818,11 +793,11 @@ if ($bookSelected && $bookTitle !="") { // ----------- support
                             $formationCardHTML .= ((!is_numeric(strpos($platoonCardChange[$platoonIndex]["html"],$formationCardHTMLtemp)))?$formationCardHTMLtemp:"");
                         } else {
                             $formationCardHTML .= $formationCardHTMLtemp;
-                        }
+                        }                    
 
                         // ------------ platoon cards (pioneer etc.)
                         $flag =  generateTitleImanges($insignia, $platoonCardMod[$platoonIndex]["title"]??"" . ($platoonsInForce[$platoonIndex]["title"]??"") ,(empty($row["platoonNation"])?$query['ntn']:$row["platoonNation"]));
-                        $boxAllHTML[$currentBoxInFormation] .= "<span class='nation'>" . $flag . "</span><div class='images'>" . $boxImageHTML  . 
+                        $boxAllHTML[$currentBoxInFormation] .= $flag . "<div class='images'>" . $boxImageHTML  . 
                         "</div>";
                     }
                 }
@@ -834,7 +809,7 @@ if ($bookSelected && $bookTitle !="") { // ----------- support
         $platoonsInForce[$platoonIndex]["title"] = trim(((isset($platoonCardMod[$platoonIndex]["title"])&&$platoonCardMod[$platoonIndex]["title"]!=""&&
                                                       (trim($platoonCardMod[$platoonIndex]["title"]) != 
                                                        trim($platoonsInForce[$platoonIndex]["title"])))? $platoonCardMod[$platoonIndex]["title"] . ": ": "") . $platoonsInForce[$platoonIndex]["title"]);
-} 
+                } 
                 $boxAllHTML[$currentBoxInFormation] .= "
                     <div  class='title'>
                         <b> 
@@ -865,19 +840,18 @@ if ($bookSelected && $bookTitle !="") { // ----------- support
     //echo "</div>";   
     }
 }
-$formationNr+=1;
 // ----------- BB support 
 if ($bbEval) {
-        $BBSupport_DB = $conn->query(
-            "SELECT  DISTINCT platoon , title, alliedBook AS Book, unitType, Nation, relevance 
-            FROM formationSupport_DB
-            WHERE Book = '{$bookTitle}'
-        ORDER BY platoon, relevance  desc");
-
-    } 
+    $BBSupport_DB = $conn->query(
+        "SELECT  DISTINCT platoon , title, alliedBook AS Book, unitType, Nation
+        FROM formationSupport_DB
+        WHERE Book = '{$bookTitle}'
+    GROUP by platoon
+    ORDER BY relevance desc");
+}
 if ((isset($BBSupport_DB)&&$BBSupport_DB->num_rows > 0)&&$bbEval) { //  BB support 
 
-    
+    $formationNr+=1;
     $currentFormation="BlackBox";
 
 
@@ -885,10 +859,8 @@ if ((isset($BBSupport_DB)&&$BBSupport_DB->num_rows > 0)&&$bbEval) { //  BB suppo
     $sqlTempStatement ="";
     $sqlStatsTempStatement = "";
     foreach ($BBSupport_DB as $currentBoxNr => $row) {
-        $currentBoxInFormationOld = "{$currentFormation}-{$currentBoxNr}";
-        $currentBoxInFormation = $row["platoon"]."box";
-        if ((isset($query[$currentBoxInFormation])&&$query[$currentBoxInFormation] === $row["platoon"])||
-            (isset($query[$currentBoxInFormationOld])&&$query[$currentBoxInFormationOld] === $row["platoon"])) {
+        $currentBoxInFormation = "{$currentFormation}-{$currentBoxNr}";
+        if ((isset($query[$currentBoxInFormation])&&$query[$currentBoxInFormation] === $row["platoon"])) {
             $sqlTempStatement .= ((!empty($BBSupport_DBUsed))?" OR ":"") . "platoon LIKE '". $row["platoon"] . "'";
             $sqlStatsTempStatement .= ((!empty($BBSupport_DBUsed))?" OR ":"") . "code LIKE '". $row["platoon"] . "'";
             $BBSupport_DBUsed[$currentBoxNr] = $row;
@@ -945,7 +917,7 @@ if ((isset($BBSupport_DB)&&$BBSupport_DB->num_rows > 0)&&$bbEval) { //  BB suppo
 
     if ($bookSelected && !empty($bookTitle)&&(is_numeric(strpos(substr($parts['query'],strpos($parts['query'],"Black")), "Card")))) { // -- BB support 
         $formationCards= (empty($sqlStatsTempStatement))?[]:$conn->query(
-            "SELECT  DISTINCT 
+        "SELECT  DISTINCT 
         cmdCardFormationMod.Book AS Book, 
         cmdCardFormationMod.formation AS formation, 
         cmdCardFormationMod.card AS card, 
@@ -970,27 +942,19 @@ if ((isset($BBSupport_DB)&&$BBSupport_DB->num_rows > 0)&&$bbEval) { //  BB suppo
     foreach ($BBSupport_DBUsed as $currentBoxNr => $row) { //  BB support 
         $currentFormationCode ="";
 // --- set general box nr variable
-        $currentBoxInFormationOld = $currentFormation ."-" . $currentBoxNr;
-        $currentBoxInFormation = $row["platoon"]."box";
-
-        if ((isset($query[$currentBoxInFormation])&&$query[$currentBoxInFormation] === $row["platoon"])||
-            (isset($query[$currentBoxInFormationOld])&&$query[$currentBoxInFormationOld] === $row["platoon"])) {
-
-            if (isset($query[$currentBoxInFormationOld])) {
-                $currentBoxInFormation = $currentBoxInFormationOld;
-            }
-
+        $currentBoxInFormation = $currentFormation ."-" . $currentBoxNr;
+        if ((isset($query[$currentBoxInFormation])&&$query[$currentBoxInFormation] === $row["platoon"])) {
 
 //----------------------------------------------
             $platoonConfig = $conn->query(
-                "SELECT  *
-                FROM    platoonConfig
-                LEFT    JOIN    (   SELECT DISTINCT unitType, platoon
-                                    FROM formation_DB )
-                                AS
-                                unitT
-                        ON unitT.platoon = platoonConfig.platoon
-                WHERE platoonConfig.platoon = '{$row["platoon"]}'");
+                    "SELECT  *
+                    FROM    platoonConfig
+                    LEFT    JOIN    (   SELECT DISTINCT unitType, platoon
+                                        FROM formation_DB )
+                                    AS
+                                    unitT
+                            ON unitT.platoon = platoonConfig.platoon
+                    WHERE platoonConfig.platoon = '{$row["platoon"]}'");
 
             list($platoonOptionHeadersChanged, $platoonOptionChanged) = platoonOptionChangedAnalysis($row, $platoonOptionHeaders,$platoonOptionOptions);
 
@@ -1006,7 +970,7 @@ if ((isset($BBSupport_DB)&&$BBSupport_DB->num_rows > 0)&&$bbEval) { //  BB suppo
                     $cardsHTML = "";
                     $row["nrOfTeams"] = $row3["nrOfTeams"];
                     $row["box_nr"] = $currentBoxNr;
-                    $optionsHTML = generatePlatoonOptionsPrintHTML($platoonOptionHeadersChanged, $platoonOptionChanged, $row, $row3, $query, $weaponsTeamsInForce, $attachmentsInForce, $platoonIndex, $currentFormation, $platoonsInForce, $currentBoxInFormation);
+                    $optionsHTML = generatePlatoonOptionsPrintHTML($platoonOptionHeadersChanged, $platoonOptionChanged, $row, $row3, $query, $weaponsTeamsInForce, $attachmentsInForce, $platoonIndex, $currentFormation, $platoonsInForce);
                     $row["teams"] = $row3["teams"];
                     $row["sections"] = $row3["sections"];
                     printPlatoonCardHTML($platoonCards, $row, $query, $currentBoxInFormation, $platoonIndex, $platoonCardChange, $platoonCardMod, $CardsInList, $platoonsInForce, $formationCardTitle, $attachmentsInForce);
@@ -1018,7 +982,7 @@ if ((isset($BBSupport_DB)&&$BBSupport_DB->num_rows > 0)&&$bbEval) { //  BB suppo
                     $formationCardHTML = printFormationCardsHTML($formationCards, $formationCardTitle, $formationNr, $platoonIndex, $currentBoxNr, $platoonCardMod, $row, $row3, $query, $CardsInList, $platoonsInForce, $attachmentsInForce);
                     // ------------ platoon cards (pioneer etc.)
                     $flag =  generateTitleImanges($insignia, (isset($platoonCardMod[$platoonIndex])?($platoonCardMod[$platoonIndex]["title"]??""):"") . $platoonsInForce[$platoonIndex]["title"], $row["Nation"]);
-                    $boxAllHTML[$currentBoxInFormation] .= "<span class='nation'>" . $flag . "</span><div class='images'>" . $boxImageHTML  . 
+                    $boxAllHTML[$currentBoxInFormation] .= $flag . "<div class='images'>" . $boxImageHTML  . 
                         "</div>";
                 }
             }
@@ -1053,7 +1017,7 @@ if ((isset($BBSupport_DB)&&$BBSupport_DB->num_rows > 0)&&$bbEval) { //  BB suppo
             $boxAllHTML[$currentBoxInFormation] .= "
             <div class='Points'>
                 <div>
-                    " . ($boxCost[$formationNr][$row["platoon"]]??($boxCost[$formationNr][$currentBoxNr]??"")) . " points
+                    " . $boxCost[$formationNr][$currentBoxNr] . " points
                 </div>
             </div>";
             echo $boxAllHTML[$currentBoxInFormation] .= "</div>";
@@ -1067,22 +1031,22 @@ if ($bookSelected && $bookTitle <> "") { // ----------- card support
 
     $formationNr+=1;
     $currentFormation="CdPl";
-    $currentBoxNr = 0; 
+    $currentBoxNr = 0;
     $cardSupport = $conn->query(
-        "SELECT  boxType as box_type, 
-                 platoon,
-                 cardNr,
-                 Book,
-                 boxNr,
-                 configChange,
+   "SELECT  boxType as box_type, 
+            platoon,
+            cardNr,
+            Book,
+            boxNr,
+            configChange,
                  optionChange,
-                 card as title,
-                 unitType
-         FROM    cmdCardAddToBox  
-         WHERE   Book LIKE '%" . $bookTitle . "%'
+            card as title,
+            unitType
+    FROM    cmdCardAddToBox  
+    WHERE   Book LIKE '%" . $bookTitle . "%'
          AND     formation LIKE '%Support%'
          AND     boxNr > " . $maxSupportBoxNr);
-    }
+}
 
 // Find the position of the substring
 
@@ -1110,7 +1074,7 @@ $cardPlatoonIndex = 0;
             <div class='platoon {$query["ntn"]}'>{$row["box_type"]}<br>";
             $platoonsInForce[$platoonIndex]["code"] = $row["platoon"];
             $platoonsInForce[$platoonIndex]["platoonIndex"] = $platoonIndex;
-            $platoonConfig = $conn->query(
+$platoonConfig = $conn->query(
                 "SELECT  platoonConfig.*,unitT.unitType
                 FROM    platoonConfig
                 LEFT    JOIN    (   SELECT DISTINCT unitType, platoon
@@ -1119,7 +1083,7 @@ $cardPlatoonIndex = 0;
                                 unitT
                         ON unitT.platoon = platoonConfig.platoon
                 WHERE platoonConfig.platoon = '{$row["platoon"]}'");
-
+                
             $platoonSoftStats= $conn->query(
         "SELECT  * 
                 FROM    platoonsStats
@@ -1134,7 +1098,7 @@ $cardPlatoonIndex = 0;
             list($platoonOptionHeadersChanged, $platoonOptionChanged) = platoonOptionChangedAnalysis($row, $platoonOptionHeaders,$platoonOptionOptions);
 
             foreach ($platoonConfigChanged as $row3) {
-                if (($row["platoon"]==$row3["platoon"])&&($row3["shortID"] === $row["shortID"])) {          
+                if (($row["platoon"]==$row3["platoon"])&&($row3["shortID"] === $row["shortID"])) {
                     $cardsHTML = "";
                     
                     $row["nrOfTeams"] = $row3["nrOfTeams"]??0;
@@ -1151,7 +1115,7 @@ $cardPlatoonIndex = 0;
                     $formationCardHTML = printFormationCardsHTML($formationCards, $formationCardTitle, $formationNr, $platoonIndex, $currentBoxNr, $platoonCardMod, $row, $row3, $query, $CardsInList, $platoonsInForce, $attachmentsInForce);
                     // ------------ platoon cards (pioneer etc.)
                     $flag =  generateTitleImanges($insignia, ($formationCardTitle[$formationNr]??"") . (isset($platoonsInForce[$platoonIndex])?$platoonsInForce[$platoonIndex]["title"]:""), ((!empty($row["platoonNation"]))?$row["platoonNation"]:$query['ntn']));
-                    $boxAllHTML[$currentBoxInFormation] .= "<span class='nation'>" . $flag . "</span><div class='images'>" . $boxImageHTML  . 
+                    $boxAllHTML[$currentBoxInFormation] .= $flag . "<div class='images'>" . $boxImageHTML  . 
                         "</div>";
                 }
             }
@@ -1176,7 +1140,7 @@ $cardPlatoonIndex = 0;
             $boxAllHTML[$currentBoxInFormation] .= "
             <div class='Points'>
                 <div>
-                    " . ($boxCost[$formationNr][$row["platoon"]]??($boxCost[$formationNr][$currentBoxNr]??"")) .  " points
+                    " . $boxCost[$formationNr][$currentBoxNr] . " points
                 </div>
             </div>";
 
@@ -1185,7 +1149,7 @@ $cardPlatoonIndex = 0;
         }
     }
 
-    if ((isset($arrayCdPl)&&count($arrayCdPl) > 0)||(isset($Support_DB)&&$Support_DB->num_rows > 0)&&(((is_numeric(strpos($parts['query'], "Sup"))))||$bbEval)) {
+    if ((isset($arrayCdPl)&&count($arrayCdPl) > 0)||(isset($Support_DB)&&$Support_DB->num_rows > 0)&&(((is_numeric(strpos($parts['query'], "Sup"))))||(is_numeric(strpos($parts['query'], "BlackBox"))))) {
     echo "</div>";    
     echo "</div>";   
 }
@@ -1197,7 +1161,7 @@ $cardPlatoonIndex = 0;
         $temp = $forceCards->num_rows;
         foreach($forceCard as $row){
             foreach ($forceCards as $key5 => $row5) {
-                if ((str_replace("'", "", $row5["card"]) == $row )||($row5["card"] == $row )||($row5["code"] == $row )) { 
+                if ((str_replace("'", "", $row5["card"]) == $row )||($row5["card"] == $row )) { 
                     $row5["thisCost"] = $row5["cost"];
                     array_push($CardsInList,$row5);
                 }
@@ -1208,55 +1172,101 @@ $cardPlatoonIndex = 0;
 }
 
 if (isset($CardsInList)&&count($CardsInList) > 0) { // ------- cards ----------
-
     foreach ($CardsInList as $key => $value) {
         if (strtok($value["card"], ":")) {
             $CardsInList[$key]["card"] = strtok($value["card"], ":");
         }
         if (isset($CardsInList[$key]["thisCost"])) {
             $SummaryOfCards[$CardsInList[$key]["card"]][] = $CardsInList[$key]["thisCost"];
-
         }
         
     }
-
     $tempArr = array_unique(array_column($CardsInList, 'card'));
-    $CardsInList = array_intersect_key($CardsInList,$tempArr);
+    $CardsInList = array_intersect_key($CardsInList,$tempArr);     
 ?>
 <div></div>
-<div class='break-inside-avoid'>
-    <div class="collapsible <?=$query['ntn']?>">
-        <div class="formHeader"> 
-        Command Cards
-        </div>
-    </div>
-
+<div class='break-inside-avoid'> 
+<button type="button" class="collapsible">  
+    <h3 class="<?=$query['ntn']?>">Command Cards</h3>
+</button>
 <div class="Formation">
-    <?php
+<?php  
     foreach ($CardsInList as $key1 => $row1) {
-        if ( !empty($row1["card"])) {   
-            foreach ($cards as $row2) { 
-                if (( $row1["card"] != "")&&(($row1["card"] == $row2["card"] )||( $row1["card"] == strtok($row2["card"], ":") ))) {
-
-                    if (isset($SummaryOfCards[$row1["card"]])) {
-
-                        foreach ($SummaryOfCards[$row1["card"]] as $rowNr => $cardRow){
-
-                            if ($cardRow != 0) {
-                                $row2["points{$rowNr}"] = "
-                                <div class='Points'>
-                                    <div>
-                                        {$cardRow} points
-                                    </div>
-                                </div>";
+        if ( !empty($row1["card"])) {    
+        foreach ($cards as $row2) {
+            if (( $row1["card"] != "")&&(($row1["card"] == $row2["card"] )||( $row1["card"] == strtok($row2["card"], ":") ))) {
+                    $cardStats = [];
+                    $cardStats["title"]= $row1["card"];
+                    $useStatRowInput = !empty($row2["statsModifier"])?$row2["statsModifier"]:(!empty($row2["unitModifier"])?$row2["unitModifier"]:"");
+                    $replace = [
+                        [": ",  "MOTIVATION",   "SKILL",    "IS HIT ON",    "SAVE", "ARMOUR",   "TACTICAL", "CROSS|\n", "\n|",  "|:EOS:",   "COUNTRY",  "Weapon|",   "WEAPON|"],
+                        [":",   ":MOTIVATION",  ":SKILL",   ":IS HIT ON",   ":SAVE",":ARMOUR",  ":TACTICAL","CROSS:",   "\n",   ":EOS:",    "C.",       "\n:Weapon|","\n:WEAPON|"]
+                    ];
+                    $useStatRow = str_replace($replace[0],$replace[1],(empty($useStatRowInput)?"":$useStatRowInput. ":EOS:"));
+                    $statsExplode = !empty($useStatRow)?explode(":",$useStatRow. ":EOS:"):[];
+                    foreach ($statsExplode as $key => $value) {
+                        if (str_replace(["MOTIVATION"],"",$value)!=$value) {
+                            $cardStats["motivation"] = $cardStats["motivation"]??"" . motivationBox(trim(str_replace("|","",$statsExplode[$key+1])??"","\n\r\t"));
+                        }
+                        if (str_replace(["SKILL"],"",$value)!=$value) {
+                            $explodedSkill = explode("/", $statsExplode[$key+1]);
+                            foreach ($explodedSkill as $rowNr =>  $explodedValue) {
+                                $cardStats["skill{$rowNr}"] = motivationBox(trim(str_replace("|","",$explodedValue)??"","\n\r\t"));
                             }
                         }
-                    }
-                    cardNoteParse($row2);
-                    break;
+                        if (str_replace("IS HIT ON","",$value)!=$value) {
+                            $cardStats["isHitOn"] ??=  motivationBox(trim(str_replace("|","",$statsExplode[$key+1])??"","\n\r\t"));
+                        }
+                        if (str_replace(["SAVE"],"",$value)!=$value) {
+                            $cardStats["save"] ??= saveBox(trim(str_replace("|","",$statsExplode[$key+1])??"","\n\r\t"));
                 }
+                        if (str_replace(["TACTICAL"],"",$value)!=$value) {
+                            $cardStats["TACTICAL"] ??=  generateHtmlGrid("{$value}\n{$statsExplode[$key+1]}"??"");
+                        }
+                        if (str_replace(["Weapon|"],"",$value)!=$value) {
+                            $cardStats["Weapon"] ??=  generateHtmlGrid("{$value}\n{$statsExplode[$key+1]}"??"");
+                    }
+                    }
+                    $notesExploded  =explode("\n",str_replace(["\t","||","|\n","|MOTIVATION","|SKILL","|IS HIT ON","for:","follows:","below:","teams:"],
+                                                                                ["|","|","\n","\nMOTIVATION","\nSKILL","\nIS HIT ON","for:\n\n","follows:\n","below:\n","teams:\n"  ],str_replace($useStatRowInput,"",$row2["notes"])));
+                    $notesTable = "";
+                    foreach ($notesExploded as $key => &$value) {
+                        if (str_replace(["|"],"",$value)!=$value) {
+                            $notesTable .= "{$value}\n";
+                            $value ="";
+                        }
+                    }
+                    foreach ($notesExploded as $key => &$value) {
+                        if ($value ==""&&!empty($notesTable)) {
+                            $value = generateHtmlGrid($notesTable);
+                            $notesTable ="";
+                        } elseif ($value =="") {
+                            unset($value);
+                        } else {
+                            $value = $value . "<br>";
+                        }
+                    }
+                    $cardStats["notes"]= implode("\n",$notesExploded) ."\n" . ($cardStats["TACTICAL"]??"")."\n" . ($cardStats["Weapon"]??"");
+                    unset($cardStats["TACTICAL"]);
+                    unset($cardStats["Weapon"]);
+
+                if (isset($SummaryOfCards[$row1["card"]])) {
+                        foreach ($SummaryOfCards[$row1["card"]] as $rowNr => $cardRow){
+                        if ($cardRow != 0) {
+                                $cardStats["points{$rowNr}"] = "
+                                <div class='Points'>
+                                <div>
+                                    {$cardRow} points
+                                </div>
+                                </div>";
+                        }
+                    }
+                }
+                    generateDynamicGrid($cardStats);
+                break;
             }
         }
+    }
     }
     ?>
 </div></div>
@@ -1282,12 +1292,12 @@ $platoonSoftStatsInput = [];
         }
     }
     if (!empty($sqlTempStatement)) {
-        $platoonSoftStats= $conn->query(
-            "SELECT  * 
-                    FROM    platoonsStats
-                    WHERE {$sqlTempStatement}");
+    $platoonSoftStats= $conn->query(
+    "SELECT  * 
+            FROM    platoonsStats
+            WHERE {$sqlTempStatement}");
     }
-    
+
     foreach ($platoonSoftStats as $key => $value) {
         if (!in_array($value, $platoonSoftStatsTotal)) {
             $platoonSoftStatsTotal[] = $value;
@@ -1295,12 +1305,9 @@ $platoonSoftStatsInput = [];
     }
     ?>
     <div class='break-inside-avoid'>
-    <div class="collapsible <?=$query['ntn']?>">
-        <div class="formHeader"> 
-        Arsenal
-        </div>
-    </div>
-
+    <button type="button" class="collapsible">  
+        <h3 class="<?=$query['ntn']?>">Arsenal</h3>
+    </button>
     <?php
 
     foreach ($attachmentsInForce as $key => $attachmentRow) {// ------- soft stats ----------
@@ -1310,12 +1317,12 @@ $platoonSoftStatsInput = [];
         } else {
             $attachmetCodes[0] = $attachmentRow["code"];
         }
-
+        
         foreach ($platoonSoftStatsTotal as $row3) {
             if ($attachmentRow["code"]==$row3["code"]) {
                 $attachmentsInForce[$key]["title"] = $row3["title"];
-                if (!empty($platoonCardMod[$attachmentRow['platoonIndex']]["title"])){
-                    $attachmentsInForce[$key]["title"] = $platoonCardMod[$attachmentRow['platoonIndex']]["title"] . ": " . $attachmentsInForce[$key]["title"];
+                        if (!empty($platoonCardMod[$attachmentRow['platoonIndex']]["title"])){
+                            $attachmentsInForce[$key]["title"] = $platoonCardMod[$attachmentRow['platoonIndex']]["title"] . ": " . $attachmentsInForce[$key]["title"];
                 } 
             }
         }
@@ -1327,7 +1334,7 @@ $platoonSoftStatsInput = [];
                     if (is_numeric(strrpos(strtoupper($optionsOfPlatoon), strtoupper($ruleRow["name"]),-1))) {
                         $rulesInForce[] =  $ruleRow["name"];
                     }
-                }
+                        } 
             }
         }
     }
@@ -1346,7 +1353,6 @@ if (isset($platoonSoftStatsTotal)&&count($platoonSoftStatsTotal) > 0) {// ------
         </THEAD>
         <TBODY>";            
 foreach ($platoonsInForce as $key => $platoonRow) {
-
     if (isset($platoonRow['originalPlatoonCode'])||isset($platoonRow["replaceImgWith"])) {
         $needles = ["x3","x4","x5"];
         foreach ($needles as $needle) {
@@ -1370,12 +1376,11 @@ foreach ($platoonsInForce as $key => $platoonRow) {
     }
 
 
-    if ($images instanceof mysqli_result) {
-        mysqli_data_seek($images ,0);
-    }
+if ($images instanceof mysqli_result) {
+    mysqli_data_seek($images ,0);
+}
     foreach ($platoonSoftStatsTotal as $platoonSoftStatRow) { 
         if (( $platoonRow['code'] === $platoonSoftStatRow["code"])&&($platoonSoftStatRow["TACTICAL"]!="")) {
-
             if (!empty($platoonRow["addToKeyword"])) {
                 $platoonSoftStatRow["Keywords"] .= ", {$platoonRow["addToKeyword"]}";
             }
@@ -1395,12 +1400,12 @@ foreach ($platoonsInForce as $key => $platoonRow) {
                             }
                         }
                     }
-
+                    
                     if (is_numeric(strrpos(strtoupper($platoonKeyword["Keywords"]), strtoupper($ruleRow["name"]),-1))) {
-                        
+
                         foreach (explode(",",$platoonKeyword["Keywords"]) as $eachKeyword) {
                             if (trim($ruleRow["name"]) == trim($eachKeyword)) {
-                                $rulesInForce[] =  $ruleRow["name"];
+                        $rulesInForce[] =  $ruleRow["name"];
                             }
                         }
                     }
@@ -1426,7 +1431,7 @@ foreach ($platoonsInForce as $key => $platoonRow) {
             ((!is_numeric(strpos($platoonSoftStatRow["code"],"CP")))?$platoonSoftStatRow["code"]: $platoonRow["originalPlatoonCode"]??"") . "\n";
 
             echo "</td><td class='statsrow' colspan='5' style='text-align: left;'>
-            <b><span class='left nation'>" . generateTitleImanges($insignia, $cardTitle . (($platoonRow["title"]=="")? $platoonSoftStatRow["title"] : $platoonRow["title"] ) . ($platoonRow["FormationCardTitle"]??""), (isset($platoonRow["Nation"]))?$platoonRow["Nation"]:(isset($platoonRow["platoonNation"])?$platoonRow["platoonNation"]:$query['ntn'])) ."</span><span>".$cardTitle .(($platoonRow["title"]=="")? $platoonSoftStatRow["title"] : $platoonRow["title"] )." </span></b><br>
+            <b><span class='left'>" . generateTitleImanges($insignia, $cardTitle . (($platoonRow["title"]=="")? $platoonSoftStatRow["title"] : $platoonRow["title"] ), (isset($platoonRow["Nation"]))?$platoonRow["Nation"]:(isset($platoonRow["platoonNation"])?$platoonRow["platoonNation"]:$query['ntn'])) ."</span><span>".$cardTitle .(($platoonRow["title"]=="")? $platoonSoftStatRow["title"] : $platoonRow["title"] )." </span></b><br>
                 ".  $platoonKeyword["Keywords"].$platoonKeyword["keywordCardChange"]."</td>
             <td class='statsrow' rowspan='2'>";
 //------------------ Motivation ------------------------
@@ -1519,19 +1524,17 @@ foreach ($platoonsInForce as $key => $platoonRow) {
     </TBODY>
 </table>
 <?php }?>
-
-</div>
+ 
+ </div>
 <div></div>
-<div class='break-inside-avoid'>
-    <div class="collapsible <?=$query['ntn']?>">
-        <div class="formHeader"> 
-        Weapons
-        </div>
-    </div>        
+<div class='break-inside-avoid'> 
+<button type="button" class="collapsible">  
+    <h3 class="<?=$query['ntn']?>">Weapons</h3>
+</button>
     <div><?php //------- weapons ----------?>
-   <?php         
+<?php            
 $weaponsTeamsInForce = array_unique($weaponsTeamsInForce);
-
+            
 if (isset($weapons)&&$weapons->num_rows > 0) {
             echo  "
                     <table class='break-inside-avoid'>
@@ -1560,9 +1563,9 @@ foreach ($weaponsTeamsInForce as $row1) if (($row1 != "")&&(strtolower($row1)  !
 
     </tr>
             <tr style=class='break-inside-avoid'>
-            <td class='teamHeader' colspan='8'>{$teamTeam}
+            <td class='teamHeader' style='text-align: left; background-color: #eeeeee;' colspan='8'>{$teamTeam}
             </td>
-        </tr>";
+    </tr>";
     }
     if (isset($weaponsRow)) {
 
@@ -1573,7 +1576,7 @@ foreach ($weaponsTeamsInForce as $row1) if (($row1 != "")&&(strtolower($row1)  !
                         if (isset($row2["notes"])&&$row2["notes"] != ""&&isset($row3["name"])&&is_numeric(strrpos(strtoupper($row2["notes"]), strtoupper($row3["name"]),-1))) {
                             foreach (explode(",",$row2["notes"]) as $eachKeyword) {
                                 if (trim($row3["name"]) == trim($eachKeyword)) {
-                                    $rulesInForce[] =  $row3["name"];
+                            $rulesInForce[] =  $row3["name"];
                                 }
                             }
                             
@@ -1627,14 +1630,12 @@ echo "
 ";
 ?>
 
-<div class="collapsible <?=$query['ntn']?>">
-    <div class="formHeader"> 
-    Rules
-    </div>
-</div>    
 
+<button type="button" class="collapsible">  
+    <h3 class="<?=$query['ntn']?>">Rules</h3>
+</button>
 
-<?php
+<?php  
    
 $rulesInForce = array_unique($rulesInForce);        
 
@@ -1677,24 +1678,4 @@ if (isset($rules)&&$rules->num_rows > 0) {
 </div>
 <div class="searchstring"><?=$linkQuery?></div>
 </body>
-<script>
-    let lastScrollTop = 0;
-    const header = document.getElementById('main-header');
-    window.addEventListener('scroll', () => {
-        const currentScroll = window.scrollY || document.documentElement.scrollTop;
-        if (currentScroll > lastScrollTop) {
-            // Scrolling down
-            header.classList.add('hiddenM');
-
-        } else {
-            // Scrolling up
-            header.classList.remove('hiddenM');
-
-        }
-        lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // For mobile or negative scrolling
-    });
-
-
-
-</script>
 </html>

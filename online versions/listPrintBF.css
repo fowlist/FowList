@@ -5,14 +5,9 @@ td:first-child, th:first-child {
 }
 
 .list tbody tr:nth-child(2n+1) td {
-	background-color: var(--box-background-color);
+	background-color: #eeeeee;
  
   }
-
-.teamHeader {
-	text-align: left; 
-	background-color: var(--box-background-color);
-}
 
 .list tbody tr:nth-child(2n+2) td {
 	background-color: unset;

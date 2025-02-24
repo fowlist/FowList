@@ -1,3 +1,5 @@
+@import url("menu1.css?v=1.4");
+
 .left {
     float: left;
 }
@@ -7,10 +9,6 @@
     float: right;
 }
 
-a {
-	color: var(--text-color);
-	text-decoration: none;
-}
 
 td button[type=submit] {
     background-color: #007BFF;
@@ -22,30 +20,50 @@ td button[type=submit] {
     cursor: pointer;
   }
 
+body
+{
+	margin: 0;
+    padding: 0;
+	background-color: black;
+	/*background: #000;*/
+	font-size: 15px;
+	font-family: arial, verdana, tahoma;
+	scroll-margin-top: 10em;
+}
+
 
 .page-container {
     display: grid;
     grid-auto-rows: 1fr;
     grid-template-columns: 1fr 1fr 1fr;
-	background-color: var(--background-color-alt);
+	background-color: #D6C9AF;
   }
 
 .middleColumn {
-
+    max-width: 1100px;
     margin: 0 auto;
-    background-color: var(--background-color);
+    background-color: #D6C9AF;
     padding: 20px;
-	color: var(--text-color);
+	color: #000;
 }
 
 .leftside {
 
-	background-color: var(--background-color);
+	background: linear-gradient(90deg, black 65%, gray 90%, black 100%);
+	background-color: black;
+	background-size: 200px;
+	background-position: right;
+	background-repeat: repeat-y;
 
 }
 .rightside {
-	background-color: var(--background-color);
+	background: linear-gradient(90deg, black 00%, gray 10%, black 35%);
+	background-color: black;
+	background-size: 200px;
+	background-position: left;
+	background-repeat: repeat-y;
 }
+
 
 .left {
     float: left;
@@ -56,17 +74,17 @@ td button[type=submit] {
 }
 
 .page-container a:visited{
-    color: var(--text-color);
-	text-decoration: none;
+    color: black;
+text-decoration: none;
 }
 
 
 .page-container a:link {
-  	text-decoration: none;
+  text-decoration: none;
 }
 
 .page-container a:-webkit-any-link {
-    color: var(--text-color);
+    color: black;
     cursor: pointer;
     text-decoration: none;
 }
@@ -89,10 +107,9 @@ td button[type=submit] {
 	gap: 5px;
 	flex-wrap: wrap;
     position: sticky;
-    top: var(--header-row-height); 
+    top: 0; 
     z-index: 4; 
-    background-color: var(--accent-color);
-	color: var(--text-color-alt);	
+    background-color: #bfb6a5;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
 	padding: .5rem;
 	width: calc(100% - 1rem);
@@ -106,7 +123,7 @@ td button[type=submit] {
 }
 
 .menuButton {
-    background-color: var(--primary-color);
+    background-color: #007BFF;
     color: white;
     padding: 8px;
     margin: 8px 0;
@@ -198,7 +215,7 @@ td button[type=submit] {
 .page-container h2{
 	padding: 2px 2px;
 	text-decoration: none;
-	background: var(--accent-color);
+	background: #3D4849;
 	color: white;
 	display: inline-block;
     width: 500px;
@@ -302,12 +319,11 @@ td button[type=submit] {
 
 .delete-confirm, .save-btn {
 	background-color: #007BFF;
-	background-color: var(--primary-color);
     color: white;
-    padding: 4px;
+    padding: 8px;
     margin: 8px 0;
     border: none;
-    border-radius: 4px;	
+    border-radius: 4px;
     cursor: pointer;
 }
 
@@ -315,28 +331,25 @@ td button[type=submit] {
 	cursor: n-resize;
 }
 
-.buttonImage {
-	filter: invert(var(--image-style-alt));	
-}
 
 table {
 	border-collapse:separate;
 	border-spacing: 0;
-	background-color: var(--background-color-alt);
+	background-color: #eee5d3;
 }
 
 td, th {
     padding-left: 6px;
-    border-left:solid var(--optionBox-background-color) 1px;
-    border-top:solid  var(--optionBox-background-color) 1px;
+    border-left:solid white 1px;
+    border-top:solid white 1px;
     border-top: none;
     border-bottom: none;
 	vertical-align: top;
 }
 th {
 
-	background-color: var(--accent-color);
-    color: var(--text-color-alt);
+	background-color: #9d9380;
+    color: black;
     border-top: none;
 	position: sticky;
     top: calc(var(--edit-row-height, 0) + 0px); /* Adjust dynamically */
@@ -355,7 +368,7 @@ img.insignia {
 	margin-right: 5px;
 }
 tr:nth-child(2n) {
-	background-color: var(--background-color);
+	background-color: rgba(255, 255, 255, 0.4);
 }
 
 .selected-row {
@@ -366,12 +379,17 @@ tr:nth-child(2n) {
     background-color: rgb(214, 230, 235);
 }
 
-
+#openMenuButtonSpan {
+	display: none;
+}
 .row-header {
 	display: none;
 }
 
-
+.row-updated {
+    background-color: #a4f285; /* Light green */
+    transition: background-color 2s ease;
+}
 @media screen and (max-width: 1100px) {
 
 	#platoonStats {
@@ -611,8 +629,4 @@ tr:nth-child(2n) {
 
 	}
 
-}
-.row-updated {
-    background-color: #a4f285; /* Light green */
-    transition: background-color 2s ease;
 }

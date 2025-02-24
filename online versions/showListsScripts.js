@@ -46,7 +46,7 @@ function displayItem(item) {
 
     imageArray.forEach(image => {
         const imgElement = document.createElement('img');
-        imgElement.src = `img/${image}.svg`;
+        imgElement.src = `img/${image}.svg`; // Adjust the path as needed
         imgDiv.appendChild(imgElement);
     });
     return {
@@ -80,7 +80,76 @@ document.addEventListener("DOMContentLoaded", function () {
     const duplicateSelectedButton = document.getElementById("duplicateSelectedButton");
 
     const tableBody = document.querySelector("#listTable tbody");
+    // Set up the MutationObserver
+    const observer = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+            if (mutation.type === "childList" || mutation.type === "subtree") {
+                initializeFilters();
+                initializeSorters();
+                initializeGlobalFilterInput();
+                initiateRowSaveButtons();
+                initializeContentEditableListeners();
+                initiateEditButtons();
+                break; // Only need to reinitialize once per batch
+            }
+            if (mutation.type === "characterData" ||  mutation.type === "attributes") {
+                initializeFilters();
+                initializeSorters();
+                initializeGlobalFilterInput();
+            }
+        }
+    });
+    // Observer configuration
+    const observerConfig = {
+        childList: true,
+        attributes: true,
+        characterData: true,
+        subtree: true
+    };
+    // Start observing the table body for child node changes
+    observer.observe(tableBody, observerConfig);
+    const editRowHeight = document.querySelector(".editRow").offsetHeight;
+    document.documentElement.style.setProperty("--edit-row-height", `${editRowHeight}px`);
+    // Update on page load and resize
 
+    // Utility to temporarily disable the observer
+    function withObserverDisabled(callback) {
+        observer.disconnect(); // Stop observing
+        callback(); // Perform the desired operation
+        observer.observe(tableBody, observerConfig); // Resume observing
+    }
+    function handleFocus() {
+        console.log("Disabling observer for contenteditable.");
+        observer.disconnect(); // Temporarily disable the observer
+    }
+    
+    function handleBlur() {
+        console.log("Re-enabling observer after contenteditable.");
+        observer.observe(document.querySelector("#listTable tbody"), observerConfig); // Re-enable the observer
+    }
+
+    const updateStickyPosition = () => {
+        const editRow = document.querySelector(".editRow");
+        const header = document.querySelector(".header");
+        const root = document.documentElement;
+        const isMobile = window.innerWidth <= 1100;
+       
+       
+        if (isMobile) {
+            let headerVisibleHeight = header.getBoundingClientRect().bottom;
+            if (headerVisibleHeight >0 ) {
+                document.getElementById("chenckboxHeaderCell").style.position="unset";
+            } else {
+                document.getElementById("chenckboxHeaderCell").style="";
+            }
+            let editRowHeight = editRow.offsetHeight + ((headerVisibleHeight >0)? headerVisibleHeight : 0);
+    
+            root.style.setProperty("--edit-row-height", `${editRowHeight}px`);
+        }
+    };
+    updateStickyPosition();
+    window.addEventListener("resize", updateStickyPosition);
+    window.addEventListener("scroll", updateStickyPosition); 
 
     function initializeSorters() {
         const listTable = document.getElementById("listTable");
@@ -207,13 +276,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const rows = document.querySelectorAll("tbody tr");
         const updatedRows = new Set();
         const saveAllBtn = document.getElementById("saveAllBtn");
-        
-        
         rows.forEach(row => {
             const cells = row.querySelectorAll("[contenteditable]");
-            const saveButton = row.querySelectorAll(".save-btn");
-           
-            
+            const saveButton = row.querySelector(".save-btn");
+    
             // Store initial cell values
             const originalValues = Array.from(cells).map(cell => cell.textContent.trim());
     
@@ -226,11 +292,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     const isEdited = currentValues.some((value, i) => value !== originalValues[i]);
                     updatedRows.add(row); // Track the updated row
                     // Show or hide the save button based on changes
-                    saveButton.forEach(button => {
-                        button.style.display = isEdited ? "inline-block" : "none";
-                    });
+                    saveButton.style.display = isEdited ? "inline-block" : "none";
                     saveAllBtn.style.display = updatedRows.size > 0 ? "inline-block" : "none";
-                    
                 });
             });
     
@@ -242,12 +305,11 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     
             // Save button functionality
-            saveButton.forEach(button => {
-                button.addEventListener("click", () => {
+            saveButton.addEventListener("click", () => {
                 updatedRows.delete(row); // Remove from the updated list
                 saveAllBtn.style.display = updatedRows.size > 0 ? "inline-block" : "none";
                 
-                const rowId = button.getAttribute("data-id");
+                const rowId = saveButton.getAttribute("data-id");
                 const updatedData = {
                     id: rowId,
                     name: row.querySelector(`#name-${rowId} .nameField`).textContent,
@@ -268,12 +330,11 @@ document.addEventListener("DOMContentLoaded", function () {
                                     row.classList.remove("row-updated");
                                 }, 5000); // Highlight for 2 seconds
                             }
-                            button.style.display = "none"; // Hide the save button after saving
+                            saveButton.style.display = "none"; // Hide the save button after saving
                         } else {
                             alert("Failed to save row.");
                         }
                     });
-                });
             });
         });
     }
@@ -313,6 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const boxes = JSON.parse(row.dataset.boxes);
                 const formations  = JSON.parse(row.dataset.formations);
                 const platoonStats = document.getElementById('platoonStats');
+    
                 
                 platoonStats.innerHTML  = "";
                 fetch('fetch_data.php', {
@@ -415,79 +477,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-
-
-    // Set up the MutationObserver
-    const observer = new MutationObserver((mutationsList) => {
-        for (const mutation of mutationsList) {
-            if (mutation.type === "childList" || mutation.type === "subtree") {
-                initializeFilters();
-                initializeSorters();
-                initializeGlobalFilterInput();
-                initiateRowSaveButtons();
-                initializeContentEditableListeners();
-                initiateEditButtons();
-                break; // Only need to reinitialize once per batch
-            }
-            if (mutation.type === "characterData" ||  mutation.type === "attributes") {
-                initializeFilters();
-                initializeSorters();
-                initializeGlobalFilterInput();
-            }
-        }
-    });
-    // Observer configuration
-    const observerConfig = {
-        childList: true,
-        attributes: true,
-        characterData: true,
-        subtree: true
-    };
-    // Start observing the table body for child node changes
-    observer.observe(tableBody, observerConfig);
-
-    const mainHeader = document.getElementById("main-header").offsetHeight;
-    const editRowHeight = document.querySelector(".editRow").offsetHeight + mainHeader;
-    document.documentElement.style.setProperty("--edit-row-height", `${editRowHeight}px`);
-    document.documentElement.style.setProperty("--header-row-height", `${mainHeader}px`);
-    // Update on page load and resize
-
-    // Utility to temporarily disable the observer
-    function withObserverDisabled(callback) {
-        observer.disconnect(); // Stop observing
-        callback(); // Perform the desired operation
-        observer.observe(tableBody, observerConfig); // Resume observing
-    }
-    function handleFocus() {
-        console.log("Disabling observer for contenteditable.");
-        observer.disconnect(); // Temporarily disable the observer
-    }
-    
-    function handleBlur() {
-        console.log("Re-enabling observer after contenteditable.");
-        observer.observe(document.querySelector("#listTable tbody"), observerConfig); // Re-enable the observer
-    }
-
-    const updateStickyPosition = () => {
-        const editRow = document.querySelector(".editRow");
-        const mainHeader = document.getElementById("main-header");
-        
-        const root = document.documentElement;
-        const isMobile = window.innerWidth <= 1100;
-       
-       
-        if (isMobile) {
-            let mainHeaderVisibleHeight = mainHeader.getBoundingClientRect().bottom;
-
-            let editRowHeight = editRow.offsetHeight + ((mainHeaderVisibleHeight >0)? mainHeaderVisibleHeight : 0);
-    
-            root.style.setProperty("--edit-row-height", `${editRowHeight}px`);
-        }
-    };
-    updateStickyPosition();
-    window.addEventListener("resize", updateStickyPosition);
-    window.addEventListener("scroll", updateStickyPosition); 
-
     initializeFilters();
     initializeSorters();
     initializeGlobalFilterInput();
@@ -504,7 +493,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const listId = link.getAttribute("data-id");
             const url = link.getAttribute("href");
             
-            
+
             fetch("set_list_number.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -518,13 +507,13 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(data => {
                 if (data.success) {
-                    // Redirect after updating session
-                    window.location.href = url;
+                // Redirect after updating session
+                window.location.href = url;
                 } else {
                     console.error("Server returned error:", data.message);
                 }
             })
-
+                
             .catch(error => console.error("Error:", error));
         });
     });
