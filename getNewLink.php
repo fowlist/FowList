@@ -13,6 +13,8 @@ $loadedListName = isset($query["loadedListName"]) ? $query["loadedListName"] : "
 
 // Build the new URL with the necessary query parameters
 $newUrl = "listPrintGet.php?$linkQuery&loadedListName=$loadedListName$costArrayStrig";
+$updateUrl = "index.php?$linkQuery&loadedListName=$loadedListName";
+$redirectUrl = "listPrintGet.php?$linkQuery&loadedListName=$loadedListName$costArrayStrig";
 
 // Return the new URL as a plain text response
 
@@ -21,7 +23,9 @@ $newUrl = "listPrintGet.php?$linkQuery&loadedListName=$loadedListName$costArrayS
 
         'success' => true,
         'query' => $linkQuery,
-        'url' => $newUrl
+        'url' => $newUrl,
+        'updateUrl' => $updateUrl,
+        'redirectUrl' => $redirectUrl
     ]);
     
 exit();

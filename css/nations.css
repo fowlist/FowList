@@ -42,4 +42,5 @@
 /* Override for non-default themes */
 .theme-overridden {
     background-color: var(--accent-color) !important;
+    color:  var(--text-color-alt) !important;;
 }   

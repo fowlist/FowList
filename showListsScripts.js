@@ -411,6 +411,85 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 });
                 editModal.style.display = "block";
+                    // Close modal when clicking the "X" button
+    closeModal.addEventListener("click", () => {
+        editModal.style.display = "none";
+    });
+
+    // Close modal when clicking the "X" button
+    closeSelectedModal.addEventListener("click", () => {
+        editSelectedModal.style.display = "none";
+    });
+
+    // Close modal when clicking outside the modal content
+    window.addEventListener("click", (event) => {
+        if (event.target === editModal) {
+            editModal.style.display = "none";
+        }
+        if (event.target === editSelectedModal) {
+            editSelectedModal.style.display = "none";
+        }
+    });
+    //edit single modal rename button
+    document.getElementById("renameButton").addEventListener("click", () => {
+        saveModalData();
+    });
+    //edit single modal event button
+    document.getElementById("updateEventButton").addEventListener("click", () => {
+        saveModalData();
+    });
+
+    // Handle delete action in single edit modal
+    deleteButton.addEventListener("click", () => {
+        if (confirm("Are you sure you want to delete this list?")) {
+            const selectedIds = [entryIdInput.value];
+            if (!selectedIds) {
+                alert("Invalid ID.");
+                return;
+            }
+                
+            fetch("delete_selected.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ selectedIds }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                // Remove the rows from the table
+                selectedIds.forEach(id => {
+                    const row = document.getElementById(id);
+                    if (row) row.remove();
+                });
+
+                    alert("Deleted list succesfully.");
+                } else {
+                    alert("Error deleting list.");
+                }
+                closeModalFktn(); // Function to close the modal
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                alert("Error deleting entries. Please try again.");
+            });
+            
+        }
+    });
+
+    // Handle duplicate in edit modal action
+    duplicateButton.addEventListener("click", () => {
+        const entryId = entryIdInput.value; // Get the ID of the entry to duplicate
+        if (!entryId) {
+            alert("Invalid ID.");
+            return;
+        }
+        // Set the form action to the duplicate handler PHP file
+        editForm.action = "duplicate_url.php"; 
+        editForm.submit();
+
+    });
             });
         });
     }
@@ -541,7 +620,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const editName = document.getElementById("editName").value.trim();
         const editEvent = document.getElementById("editEvent").value.trim();
 
-        if (!entryId || !editName || !editEvent) {
+        if (!entryId || !editName) {
             alert("All fields are required.");
             return;
         }
@@ -549,7 +628,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const requestData = {
             id: entryId,
             name: editName,
-            event: editEvent
+            event: editEvent ?? ""
         };
 
         fetch("save_row.php", {
@@ -591,85 +670,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     
-    // Close modal when clicking the "X" button
-    closeModal.addEventListener("click", () => {
-        editModal.style.display = "none";
-    });
 
-    // Close modal when clicking the "X" button
-    closeSelectedModal.addEventListener("click", () => {
-        editSelectedModal.style.display = "none";
-    });
-
-    // Close modal when clicking outside the modal content
-    window.addEventListener("click", (event) => {
-        if (event.target === editModal) {
-            editModal.style.display = "none";
-        }
-        if (event.target === editSelectedModal) {
-            editSelectedModal.style.display = "none";
-        }
-    });
-    //edit single modal rename button
-    document.getElementById("renameButton").addEventListener("click", () => {
-        saveModalData();
-    });
-    //edit single modal event button
-    document.getElementById("updateEventButton").addEventListener("click", () => {
-        saveModalData();
-    });
-
-    // Handle delete action in single edit modal
-    deleteButton.addEventListener("click", () => {
-        if (confirm("Are you sure you want to delete this list?")) {
-            const selectedIds = [entryIdInput.value];
-            if (!selectedIds) {
-                alert("Invalid ID.");
-                return;
-            }
-                
-            fetch("delete_selected.php", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ selectedIds }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                // Remove the rows from the table
-                selectedIds.forEach(id => {
-                    const row = document.getElementById(id);
-                    if (row) row.remove();
-                });
-
-                    alert("Deleted list succesfully.");
-                } else {
-                    alert("Error deleting list.");
-                }
-                closeModalFktn(); // Function to close the modal
-            })
-            .catch(err => {
-                console.error("Error:", err);
-                alert("Error deleting entries. Please try again.");
-            });
-            
-        }
-    });
-
-    // Handle duplicate in edit modal action
-    duplicateButton.addEventListener("click", () => {
-        const entryId = entryIdInput.value; // Get the ID of the entry to duplicate
-        if (!entryId) {
-            alert("Invalid ID.");
-            return;
-        }
-        // Set the form action to the duplicate handler PHP file
-        editForm.action = "duplicate_url.php"; 
-        editForm.submit();
-
-    });
 
 
     // "Select All" functionality based on filtering

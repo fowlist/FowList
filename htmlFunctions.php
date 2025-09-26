@@ -27,8 +27,10 @@ function platoonTitle($platoonInBox,$formation) {
             <b>
                 <?=isset($formation["formationCard"])&&!empty($formation["formationCard"]["title"])?trim($formation["formationCard"]["title"]).": ":""?><?=str_replace(" Force","",$platoonInBox["title"]??"")?>
             </b>
+
             </span>
             <span class="cardCode"><?=$platoonInBox["platoon"]??""?></span>
+
             <span><?=msi($platoonInBox)?></span>
         </div>
     <?php
@@ -53,13 +55,38 @@ function platoonConfigHTML($platoonInBox,$boxPositionID) {
     return $html;
 }
 
+function cardConfigHTML($cardItem,$cardItemNumbers) {
+
+    ob_start();
+
+    ?>
+        <?php if (!$cardItem["limited"]): ?>
+            <select name='<?=$cardItem["code"]?>' id='fCd-<?=$cardItem["code"]?>ddown1' class="configBox">
+            <?php for ($i=0; $i < ($cardItemNumbers>12?12:$cardItemNumbers)+5; $i++): ?>
+                <option <?=($cardItemNumbers==$i??false)?"selected":""?>  value="<?=$i?>" cost="<?=$i*($cardItem["price"]??$cardItem["cost"])?>"><?=$i?> cards (<?=$i*($cardItem["price"]??$cardItem["cost"])?> points)</option>
+            <?php endfor ?>
+            </select>
+
+        <?php endif ?>
+        <span class='left'><?=$cardItem["notes"]?></span>
+        <div class='Points'>
+            <div>
+            <?=$cardItem["totalPrice"]??$cardItem["price"]??$cardItem["cost"]?> point<?=($cardItem["totalPrice"]??$cardItem["price"]??$cardItem["cost"])>1?"s":""?>
+            </div>
+        </div>
+    <?php
+    $html = ob_get_clean();
+    return $html;
+}
+
+
 function boxOptionPrintHTML($platoonInBox,$boxPositionID) {
     ob_start();
     if (!empty($platoonInBox["Options"])): ?>
         <div class="optionBox">
         <?php foreach ($platoonInBox["Options"] as $optionNr => $options):
             if (count($options["dDAlternatives"])>1) { ?>
-                <?=$options["description"]?>
+                <?=$options["description"]?> <?=$options["dDAlternatives"][0]["dynamicPoints"]?"(dynamic: {$options["dDAlternatives"][0]["dynamicPoints"]}p each)":""?>
                 <br>
                 <select 
                     id="<?=$boxPositionID?>box-Op<?=$optionNr?>" 
@@ -127,7 +154,7 @@ function boxPlatoonCardPrintHTML($platoonInBox,$boxPositionID) {
         <?php foreach ($platoonInBox["platoonCards"] as $cardNr => $card):
             if (isset($card["options"])): ?>
             <span class="<?=($card["disabled"]&&$card["formcard"]??false)?"hidden":""?>">
-            <?=$card["card"]?>
+                <?=$card["card"]?>
                 <select 
                     name="<?=$boxPositionID?>Card<?=$cardNr?>" 
                     id="<?=$boxPositionID?>box-Card<?=$cardNr?>" 
@@ -151,11 +178,11 @@ function boxPlatoonCardPrintHTML($platoonInBox,$boxPositionID) {
            <?php elseif (isset($card["card"])): ?>
             <label class="<?=(($card["disabled"]&&$card["formcard"])??false)?"hidden":""?>">
                 <input 
-                    type="checkbox"
+                    type="checkbox" 
                     <?=($card["formcard"]??false)?"formcard":""?>
                     <?=($card["selected"]??false)?"checked":""?> 
                     name="<?=$boxPositionID?>Card<?=$cardNr?>" 
-                    id="<?=$boxPositionID?>box-Card<?=$cardNr?>"
+                    id="<?=$boxPositionID?>box-Card<?=$cardNr?>" 
                     currentCost="<?=$card["currentCost"]??"0"?>"
                     cost="<?=$card["cost"]?>"
                     pricePerTeam="<?=$card["pricePerTeam"]?>"
@@ -186,8 +213,10 @@ function boxUnitCardPrintHTML($platoonInBox,$boxPositionID) {
                     <?=($card["selected"]??false)?"checked":""?> 
                     name="<?=$boxPositionID?>uCd<?=$cardNr?>" 
                     id="<?=$boxPositionID?>box-CarduCd<?=$cardNr?>" 
+                    currentCost="<?=$card["currentCost"]??"0"?>"
                     cost="<?=$card["cost"]?>"
-                    value="<?=$card["code"]?>"><?=$card["cost"]?> points: <?=$card["card"]?>
+                    pricePerTeam="<?=$card["pricePerTeam"]?>"
+                    value="<?=$card["code"]?>"><span><span name="cost"><?=$card["thisCost"]?></span> points: <?=$card["card"]?></span> 
             </label>
             <?php endif  ?>
         <?php endforeach?>

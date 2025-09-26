@@ -1,7 +1,6 @@
 <?php
 // Connect to the database
-$beta = ((is_numeric(strpos($_SERVER['PHP_SELF'],"Beta")))? "Beta": "");
-include "sqlServerinfo{$beta}.php";
+include "sqlServerinfo.php";
 
 // Check if the token is provided in the URL
 if (!isset($_GET['token'])) {

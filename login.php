@@ -38,7 +38,7 @@ if (isset($_POST['login_user'])) {
                         $updateStmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
                         $updateStmt->execute([$newHash, $user['id']]);
                     }
-
+                    
                     // Set session variables
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['username'] = $user['username'];
@@ -54,16 +54,17 @@ if (isset($_POST['login_user'])) {
 
                     // Set the token as a secure cookie
                     setcookie('remember_token', $token, [
-                        'expires' => strtotime($expiresAt),
+                        'expires' => strtotime('+30 days'),
                         'path' => '/',
-                        'secure' => isset($_SERVER['HTTPS']), // Secure only if HTTPS
+                        'domain' => '.fowlist.com', // Allows sharing across all subdomains
+                        'secure' => true,
                         'httponly' => true,
                         'samesite' => 'Strict',
                     ]);
 
                     // Redirect to the homepage
-                    header('location: index.php');
-                    exit;
+                    // header('location: index.php');
+                    // exit;
                 } else {
                     $errors[] = "Invalid username or password.";
                 }
@@ -99,7 +100,6 @@ if (isset($_POST['logout_user'])) {
         setcookie('remember_token', '', [
             'expires' => time() - 3600, // Expiry time, adjust as needed
             'path' => '/', // Path for which the cookie is available
-            'secure' => isset($_SERVER['HTTPS']), // Secure only if HTTPS
             'httponly' => true,
             'samesite' => 'Strict', 
         ]);
@@ -119,23 +119,7 @@ if (isset($_SESSION['user_id'])) {
                            WHERE rt.token = ? AND rt.expires_at > NOW()");
     $stmt->execute([$token]);
     $result = $stmt->fetch();
-//--- temporary
-    if (!$result && $token) {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE remember_token = ?");
-        $stmt->execute([$token]);
-        $user = $stmt->fetch();
-    
-        if ($user) {
-            // Migrate the old token
-            $stmt = $pdo->prepare("INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, ?)");
-            $stmt->execute([$user['id'], $token, date('Y-m-d H:i:s', strtotime('+30 days'))]);
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $userID = $_SESSION['user_id'];
-            $username = $_SESSION['username'];
-        }
-    }
-// --to here
+
 
     if ($result) {
         // Valid token, log the user in
@@ -143,11 +127,7 @@ if (isset($_SESSION['user_id'])) {
         $_SESSION['username'] = $result['username'];
         $userID = $_SESSION['user_id'];
         $username = $_SESSION['username'];
-    } elseif (empty($_SESSION['user_id'])) {
-        // Invalid or expired token
-        setcookie('remember_token', '', time() - 3600, '/'); // Clear the cookie
-
-    }
+    } 
 }
 
 $userID = $_SESSION['user_id']?? "";
@@ -156,85 +136,98 @@ $saved_url = $_POST['updated_url'] ?? "";
 $listName =  $_POST['listName']??"";
 
 if (isset($userID)) {
+ 
 
     if (isset($_POST['save_url'])) {
-        $saved_url = $_POST['updated_url'];
-        unset($_POST['save_url']);
-          $associatedEvent = "";
-          if (!empty($usersEventList)) {
-            foreach ($usersEventList as $eachEvent) {
-              if ($eachEvent["value"]==$_POST["listEventList"]) {
-                $associatedEvent  = $eachEvent["description"];
-              }
-            }
-          }
+        echo "saving";
+        $saved_url = "index.php?{$linkQuery}&loadedListName=" . ($listName??"") .$costArrayStrig;
 
-          $saved_url_to_list = "listPrintGet.php?{$linkQuery}&loadedListName=" . ($query["loadedListName"]??"") .$costArrayStrig;
-          $saveCost = array_sum($formationCost)+$listCardCost;
-
-          $query1 = $pdo->prepare("INSERT INTO saved_lists (user_id, url, urlToList, name, cost, saveDate, tournament) VALUES (?, ?, ?, ?, ?, ?, ?)");
-          $query1->execute([$userID, $saved_url, $saved_url_to_list, $listName, $saveCost, date("Y-m-d",time()),$associatedEvent]);
-          //$query1 = "INSERT INTO saved_lists (user_id, url, name, cost) VALUES ('$userID', '$saved_url', '$listName', '$saveCost')";
-          //mysqli_query($conn, $query1);
-          $newId = $pdo->lastInsertId();
-          echo "URL saved.";
-          $query['loadedListName'] = $listName;
-          $_POST["loadedListName"] = $listName;
-          $_SESSION['loadedListNumber'] =$newId;
-      }
-      if (isset($_POST['updateSelected'])&&isset($_POST["listNameList"])) {
-        $saved_url = $_POST['updated_url'];
-        $saved_url_to_list = "listPrintGet.php?{$linkQuery}&loadedListName=" . ($query["loadedListName"]??"") .$costArrayStrig;
-        $saveCost = array_sum($formationCost)+$listCardCost;
-        $query1 = $pdo->prepare("UPDATE saved_lists SET url = ?, saveDate = ?, urlToList =?, cost=? WHERE id =?");
-        $query1->execute([$saved_url, date("Y-m-d",time()),$saved_url_to_list, $saveCost, $_POST["listNameList"]]);
-        //$query1 = "UPDATE saved_lists SET url = '{$saved_url}' WHERE id ='{$_POST["listNameList"]}' ";
-        //mysqli_query($conn, $query1);
-        echo "<!--URL Updated.-->";
-
-      } 
-        // -- all general tables 
-    if (empty($_SESSION["usersListsList"])||isset($_POST['refreshSelected'])||isset($_POST['updateSelected'])||isset($_POST['loadSelected'])) {
-        unset($_POST['refreshSelected']);
-        include_once "sqlServerinfo.php";
-        $usersListsQuery = $pdo->prepare("SELECT * FROM saved_lists WHERE user_id=? ORDER BY name");
-        $usersListsQuery->execute([$userID]);
-        $usersEventList=[];
-        $usersListsList=[];
-        foreach ($usersListsQuery as $key => $value) {
-
-            $usersListsList[$key]["value"] = $value["id"];
-            $usersListsList[$key]["description"] = $value["name"] .  ($value["tournament"]=="0"||$value["tournament"]=="none"?"":": " .$value["tournament"]);
-            if (isset($_SESSION['loadedListNumber'])&&$_SESSION['loadedListNumber'] == $value["id"]) {
-                $usersListsList[$key]["selected"] =1;
-            } else {
-                $usersListsList[$key]["selected"] ="";
-            }
-            $usersListsList[$key]["url"] = $value["url"];
-            $eventValue = htmlspecialchars(trim(strtolower( $value["tournament"])));
-
-            if (!in_array($eventValue,array_column($usersEventList,"value"))) {
-                $usersEventList[$key]["value"] = htmlspecialchars(strtolower( $value["tournament"]));
-                $usersEventList[$key]["description"] = trim($value["tournament"]);
-                if (isset($_SESSION['listEventList'])&&$_SESSION['listEventList'] == $eventValue) {
-                    $usersEventList[$key]["selected"] =1;
-                } else {
-                    $usersEventList[$key]["selected"] ="";
-                }
-                
-            }
+        $selectedEvent = $_POST['listEventList'] ?? null;
+        $customEvent   = trim($_POST['customEvent'] ?? "");
+        if ($customEvent !== "") {
+            $associatedEvent = $customEvent;   // free text overrides
+        } else {
+            $associatedEvent = $selectedEvent; // fallback to chosen
         }
 
-        $usersListsQuery = null;
-        $_SESSION["usersListsList"] = $usersListsList;
-        $_SESSION["usersEEventList"] = $usersEventList;
+        $saved_url_to_list = "listPrintGet.php?{$linkQuery}&loadedListName=" . ($listName??"") .$costArrayStrig;
+        $saveCost = array_sum($formationCost)+$listCardCost;
+
+        $query1 = $pdo->prepare("INSERT INTO saved_lists (user_id, url, urlToList, name, cost, saveDate, tournament) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $query1->execute([$userID, $saved_url, $saved_url_to_list, $listName, $saveCost, date("Y-m-d",time()),$associatedEvent]);
+        //$query1 = "INSERT INTO saved_lists (user_id, url, name, cost) VALUES ('$userID', '$saved_url', '$listName', '$saveCost')";
+        //mysqli_query($conn, $query1);
+        $newId = $pdo->lastInsertId();
+        echo "URL saved.";
+        $query['loadedListName'] = $listName;
+        $_POST["loadedListName"] = $listName;
+        $_SESSION['loadedListNumber'] =$newId;
+      }
+
+      if (isset($_POST['updateSelected'])&&isset($_POST["listNameList"])) {
+        $saved_url = "index.php?{$linkQuery}&loadedListName=" . ($_POST["listNameList"]??"") .$costArrayStrig;
+        $saved_url_to_list = "listPrintGet.php?{$linkQuery}&loadedListName=" . ($_POST["listNameList"]??"") .$costArrayStrig;
+        $associatedEvent = "";
+        $usersEventList = $usersEventList??$_SESSION["usersEEventList"];
+        if (!empty($usersEventList)) {
+          foreach ($usersEventList as $eachEvent) {
+            if ($eachEvent["value"]==$_POST["listEventList"]) {
+              $associatedEvent  = $eachEvent["description"];
+            }
+          }
+        }
+        $saveCost = array_sum($formationCost)+$listCardCost;
+        $query1 = $pdo->prepare("UPDATE saved_lists SET url = ?, saveDate = ?, urlToList =?, cost=?, tournament=? WHERE id =?");
+        $query1->execute([$saved_url, date("Y-m-d",time()),$saved_url_to_list, $saveCost, $associatedEvent, $_POST["listNameList"]]);
+        //$query1 = "UPDATE saved_lists SET url = '{$saved_url}' WHERE id ='{$_POST["listNameList"]}' ";
+        //mysqli_query($conn, $query1);
+        $query['loadedListName'] = $_POST["listNameList"];
+        $_POST["loadedListName"] = $_POST["listNameList"];
+
+      }
+        // -- all general tables 
+
+            include_once "sqlServerinfo.php";
+            $usersListsQuery = $pdo->prepare("SELECT * FROM saved_lists WHERE user_id=? AND url NOT LIKE '%pd=TY%' ORDER BY name");
+            $usersListsQuery->execute([$userID]);
+            $usersEventList=[];
+            $usersListsList=[];
+            foreach ($usersListsQuery as $key => $value) {
+    
+                $usersListsList[$key]["value"] = $value["id"];
+                $usersListsList[$key]["description"] = $value["name"];
+                $usersListsList[$key]["event"] = ($value["tournament"]=="0"||$value["tournament"]==""||$value["tournament"]=="none"?"":$value["tournament"]);
+                $parts = parse_url($value["url"]);       // splits into path + query
+                parse_str($parts['query'], $queryArray); // makes assoc array
+
+                $usersListsList[$key]["period"] = $queryArray['pd'] ?? "";
+                $usersListsList[$key]["nation"] = $queryArray['ntn'] ?? "";
+                $usersListsList[$key]["FormationCode"] = $queryArray['F1'] ?? "";
+
+                if (isset($_SESSION['loadedListNumber'])&&$_SESSION['loadedListNumber'] == $value["id"]) {
+                    $usersListsList[$key]["selected"] =1;
+                } else {
+                    $usersListsList[$key]["selected"] ="";
+                }
+                $usersListsList[$key]["url"] = $value["url"];
+                $eventValue = htmlspecialchars(trim(strtolower( $value["tournament"]??"")));
+    
+                if (!in_array($eventValue,array_column($usersEventList,"value"))) {
+                    $usersEventList[$key]["value"] = htmlspecialchars(strtolower( $value["tournament"]));
+                    $usersEventList[$key]["description"] = trim($value["tournament"]);
+                    if (isset($_SESSION['listEventList'])&&$_SESSION['listEventList'] == $eventValue) {
+                        $usersEventList[$key]["selected"] =1;
+                    } else {
+                        $usersEventList[$key]["selected"] ="";
+                    }
+                    
+                }
+            }
+    
+            $usersListsQuery = null;
+
+            
         
-    } else {
-        $usersListsList = $_SESSION["usersListsList"];
-        $usersEventList = $_SESSION["usersEEventList"];
-
-    }
-
     foreach ($usersListsList as $key => $value) {
         if (isset($_SESSION['loadedListNumber'])&&$_SESSION['loadedListNumber'] == $value["value"]) {
             $usersListsList[$key]["selected"] =1;
@@ -270,7 +263,7 @@ if (isset($userID)) {
         $usersListsList[$key]["url"] = $value["url"];
     }
     */
-    if (isset($_POST['loadSelected'])&&isset($_POST["listNameList"])) {
+    if (isset($_POST['loadSelected'])) {
         
         foreach ($usersListsList as $key => $value) {
             if ($_POST["listNameList"]==$value["value"]) {

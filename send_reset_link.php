@@ -1,7 +1,6 @@
 <?php
 // Include database connection
-$beta = ((is_numeric(strpos($_SERVER['PHP_SELF'],"Beta")))? "Beta": "");
-include "sqlServerinfo{$beta}.php";
+include "sqlServerinfo.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get the email submitted via the form
@@ -14,6 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user) {
+        $username = $user["username"];
         // Generate a random token for password reset
         $token = bin2hex(random_bytes(32));
 
@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Send an email with the password reset link to the user
         $to = $email;
         $subject = "Password Reset Link";
-        $message = "Click the link below to reset your password:\n$reset_link";
+        $message = "Your Username is {$username}. Click the link below to reset your password:\n$reset_link";
         $headers = "From: feedback@fowlist.com";
         mail($to, $subject, $message, $headers);
 

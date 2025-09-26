@@ -4,12 +4,75 @@ $pageISShowLists = ((is_numeric(strpos($_SERVER['PHP_SELF'],"showLists")))? "sho
 $pageIsDisplayList = ((is_numeric(strpos($_SERVER['PHP_SELF'],"listPrintGet")))? "listPrintGet": false);
 $currentUrl = $_SERVER['REQUEST_URI'];
 ?>
+<header id="main-header">
 
+        <div class="logo">
+          <span id="openMenuButtonSpan" class="hamburger" onclick="openNav()">☰</span>
+          <a href="index.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?>"> <img src="img/Card.svg" alt=""> <span id="fowListLogo">FOWList</span></a>
+        </div>
+        <nav>
+        <?php if (!$pageISShowLists) : ?>
+          <a href="showLists.php">View all lists</a>
+        <?php endif ?>
+        <?php if (!$pageIsIndex) :
+          if ($pageISShowLists) : ?>
+            <a href="index.php?<?=$linkQuery?>">Edit latest List</a>
+          <?php else : ?>
+            <a href="index.php?<?=$linkQuery?>">Edit List</a>
+            <?php if ($pageIsDisplayList) :?>
+
+              <a listPrint href="listPrintGet.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?><?=$costArrayStrig?>"><img class='buttonImage' src='img/viewList.svg' alt='View List' title='View List'> View List</a>
+              <a listPrintBf href="listPrintGetBFStyle.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?><?=$costArrayStrig?>"><img class='buttonImage' src='img/viewListBF.svg' alt='View List Bf style' title='View List Bf style'> View List BF style</a>
+            <?php endif ?>
+          <?php endif ?>
+        <?php else :?>
+          <button type="button" class="menuButton" id="viewListTopButton">
+              <img class='buttonImage' src='img/viewList.svg' alt='View List' title='View List'> View List
+          </button>
+          <button type="button" class="menuButton" id="viewListBFTopButton">
+            <img class='buttonImage' src='img/viewListBF.svg' alt='View List Bf style' title='View List Bf style'> View List BF style
+          </button>
+
+        <?php endif ?>
+        <a id="teamlLink" href="list_all_teams.php">Find Team</a>
+          <a id="manualLink" href="https://github.com/fowlist/FowList/wiki/User-Manual">User manual</a>
+          <a id="tyLink" href="https://ty.fowlist.com/index.php?lsID=&pd=TY">WWIII team yankee</a>
+          <?php if ($pageIsDisplayList) : ?>
+            <span class="printButton" value="" onClick="window.print();">Print the page</span>
+
+        <?php endif ?>
+        
+        </nav>
+          <?php  if (!$pageISShowLists&&!$pageIsIndex) : ?>
+            <div class="rearrangeSwitch">
+            <!--<button id="generatePdfButton">save pdf</button>-->
+            <label for="dragToggleSwitch" class="switch">
+              Rearrange:
+            </label>
+            <input id="dragToggleSwitch" type="checkbox">
+          </div>
+          <?php else : ?>
+            <div class="pointsSpacer"> </div>
+          <?php endif ?>
+
+    </header>
 <nav class="sidebar" id="sidebar">
   <span id="navClosebtn" class="closebtn" onclick="closeNav()">&times;</span>
+  <?php if (($userID??"na")!="" && $pageIsIndex): ?>
+  <!-- Trigger -->
+  <button type="submit"  onclick="openSaveLoad()" class="btn" >Save / Load</button>
 
-  <form id="saveListForm" method="post" action="<?=$currentUrl?>">
-  
+<?php endif ?>
+
+  <form id="loginForm" method="post" action="<?=$currentUrl?>">
+  <?php if ( $pageIsIndex): ?>
+        <div class="input-group">
+
+      </div>
+
+<?php endif ?>
+
+
     <?php if (!$pageIsIndex) :
         if ($pageISShowLists) : ?>
         <div class="input-group">
@@ -62,47 +125,7 @@ $currentUrl = $_SERVER['REQUEST_URI'];
       }
       
     } else {
-
-      if ($pageIsIndex) { ?>
-      <div class="input-group">
-        <a listPrint href="listPrintGet.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?><?=$costArrayStrig?>">View List</a>
-      </div>
-      <div class="input-group">
-        <a listPrintBf href="listPrintGetBFStyle.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?><?=$costArrayStrig?>">View List BF style</a>
-      </div>
-      <div class="input-group">
-        <input alt="custom name" placeholder="Name displayed at list print" name="loadedListName" id="loadedListName" value="<?php echo $query['loadedListName']??""; ?>">
-        <button value="" onClick="setDropdownAndSubmit();">
-            <img src="img/update.svg" alt="update">
-        </button>
-        <button value="" onClick="resetDropdownAndSubmit();">
-            <img src="img/clear.svg" alt="clear">
-        </button>
-      </div>
-
-      Event:
-      <div class="input-group">
-        <?php if (isset($usersEventList)) echo generateDroppdownHTML("listEventList", "listEventList", $usersEventList,false,"Associate list with event" ); ?>
-      </div>
-      Update or load list:
-      <div class="input-group">
-      <?php if (isset($usersListsList)) echo generateDroppdownHTML("listNameList", "listNameList", $usersListsList,false, "Update or load list"); ?><button name="refreshSelected"  alt="refresh dropdown" title="refresh dropdown"><img src="img/update.svg" alt="update"></button>
-      </div>
-      
-        <div class="input-group">
-        <input type="hidden" id="updated_url" name="updated_url" value="<?=$currentUrl?>">
-        <button type="submit" name="updateSelected">Update above list with current list</button>
-        <button type="submit" name="loadSelected">Load above list</button>
-          
-        </div>
-
-        <div class="input-group">
-          <input type="text" name="listName" value="<?=$query["loadedListName"]??""?>" placeholder="New List name"> 
-          
-        </div>
-        <button type="submit" name="save_url">Save as new list</button>
-
-      <?php } ?>
+ ?>
       <a href="mailto:fowlistfeedback@gmail.com">Feedback</a>
       <div class="input-group">
       <a class="bmc-btn" target="_blank" href="https://buymeacoffee.com/Fowlist">
@@ -129,70 +152,82 @@ $currentUrl = $_SERVER['REQUEST_URI'];
 
         </div></a>
         <div class="disclaimer">Disclamer:<br>
-        This is a free unofficial alternative tool to generate lists for flames of war. It is a complement to the books and cards, bought either physical or from here: <a href="https://forces.flamesofwar.com">the official tool</a>. For validating lists for tournament play use official tool.</div>
+        This is a free unofficial alternative tool/ app to generate lists/ build your army for flames of war. It is a complement to the books and cards, bought either physical or from here: <a href="https://forces.flamesofwar.com">the official tool</a>. For validating lists for tournament play use official tool.</div>
           <div class="theme-selector">
-            <label for="theme">Theme: </label>
-            <select id="theme" onchange="changeTheme(this.value)">
-              <option value="default">Default</option>
-              <option value="modern">Modern</option>
-              <option value="earthy">Earthy</option>
-              <option value="dark">Dark</option>
-              <option value="german">German</option>
-              <option value="american">American</option>
-              <option value="british">British</option>
-              <option value="soviet">Soviet</option>
-              <option value="finnish">Finnish</option>
-              <option value="hungarian">Hungarian</option>
-              <option value="romanian">Romanian</option>
-              <option value="italian">Italian</option>
-            </select>
-          </div>
+<label for="theme">Theme: </label>
+<select id="theme" onchange="changeTheme(this.value)">
+  <option value="default">Default</option>
+  <option value="modern">Modern</option>
+  <option value="printer-friendly">Printer Friendly</option>
+  <option value="dark">Dark</option>
+  <option value="german">German</option>
+  <option value="american">American</option>
+  <option value="british">British</option>
+  <option value="soviet">Soviet</option>
+  <option value="finnish">Finnish</option>
+  <option value="hungarian">Hungarian</option>
+  <option value="romanian">Romanian</option>
+  <option value="italian">Italian</option>
+</select>
+</div>
         </nav>
-<header id="main-header">
+      
+<form id="saveListForm" method="post" action="<?=$currentUrl?>">
+<!-- Overlay -->
+<div id="saveLoadOverlay" class="overlay hidden">
+  <div class="overlay-content">
 
-        <div class="logo">
-          <span id="openMenuButtonSpan" class="hamburger" onclick="openNav()">☰</span>
-          <a href="index.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?>"> <img src="img/Card.svg" alt=""> <span id="fowListLogo">FOWList</span></a>
-        </div>
-        <nav>
-        <?php if (!$pageISShowLists) : ?>
-          <a href="showLists.php">View all lists</a>
-        <?php endif ?>
-        <?php if (!$pageIsIndex) :
-          if ($pageISShowLists) : ?>
-            <a href="index.php?<?=$linkQuery?>">Edit latest List</a>
-          <?php else : ?>
-            <a href="index.php?<?=$linkQuery?>">Edit List</a>
-            <?php if ($pageIsDisplayList) :?>
-              <a listPrint href="listPrintGet.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?><?=$costArrayStrig?>"><img class='buttonImage' src='img/viewList.svg' alt='View List' title='View List'> View List</a>
-              <a listPrintBf href="listPrintGetBFStyle.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?><?=$costArrayStrig?>"><img class='buttonImage' src='img/viewListBF.svg' alt='View List Bf style' title='View List Bf style'> View List BF style</a>
-            <?php endif ?>
-          <?php endif ?>
-        <?php else :?>
-          <a listPrint href="listPrintGet.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?><?=$costArrayStrig?>"><img class='buttonImage' src='img/viewList.svg' alt='View List' title='View List'> View List</a>
-          <a listPrintBf href="listPrintGetBFStyle.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?><?=$costArrayStrig?>"><img class='buttonImage' src='img/viewListBF.svg' alt='View List Bf style' title='View List Bf style'> View List BF style</a>
-        <?php endif ?>
-          <a id="manualLink" href="https://github.com/fowlist/FowList/wiki/User-Manual">User manual</a>
-          <a id="tyLink" href="https://ty.fowlist.com/index.php?lsID=&pd=TY">WWIII team yankee</a>
-          <?php if ($pageIsDisplayList) : ?>
-            <span class="printButton" value="" onClick="window.print();">Print the page</span>
+    <div class="overlay-header">
+      
+      <h2>Manage Lists<span class="close-btn" onclick="closeSaveLoad()">&times;</span></h2>
+    </div>
+    <div class="overlay-body">
 
-        <?php endif ?>
-        
-        </nav>
-          <?php  if (!$pageISShowLists&&!$pageIsIndex) : ?>
-            <div class="rearrangeSwitch">
-            <!--<button id="generatePdfButton">save pdf</button>-->
-            <label for="dragToggleSwitch" class="switch">
-              Rearrange:
-            </label>
-            <input id="dragToggleSwitch" type="checkbox">
-          </div>
-          <?php else : ?>
-            <div class="pointsSpacer"> </div>
-          <?php endif ?>
+    <!-- Load / Update -->
+    <div class="section">
+      <h3>Existing Lists</h3>
+      <p>Choose one to update or load.</p>
+<div class="list-filter">
+  <input type="text" id="listFilterInput" placeholder="Filter lists...">
+</div>
+        <?php if (isset($usersListsList)) echo generateListFrameHTML("listNameList", $usersListsList, "list"); ?>
+<input type="hidden" id="updated_url" name="updated_url" value="<?=$currentUrl?>">
+      <div class="actions">
+                
+        <button type="submit" name="updateSelected">Update selected</button>
+        <button type="submit" name="loadSelected">Load selected</button>
+      </div>
+    </div>
 
-    </header>
+    <!-- Save New -->
+    <div class="section">
+      <h3>Save as New</h3>
+      <input type="text" name="listName" placeholder="Enter new list name">
+      <button type="submit" name="save_url">Save new list</button>
+    </div>
+              <!-- Event association -->
+    <div class="section">
+      <h3>Event</h3>
+      <p>Select an event to associate this list with.</p>
+  <!-- Existing events -->
+
+    <?php if (isset($usersEventList)) echo generateListFrameHTML("listEventList", $usersEventList, "event"); ?>
+
+
+  <!-- Free field -->
+  <div class="input-group">
+    <label for="customEvent">Or create new event:</label>
+    <input type="text" name="customEvent" id="customEvent" placeholder="Enter event name">
+  </div>
+    </div>
+    </div>
+
+
+
+  </div>
+</div>
+        </form>
+
     <?php if ($pageIsIndex) : ?>
           <div id="pointsOnTop" costArray="<?=htmlspecialchars(json_encode($dataToTransfer))?>">
             <div class='Points'>
@@ -203,14 +238,14 @@ $currentUrl = $_SERVER['REQUEST_URI'];
           </div>
     <?php endif ?>
 <script>
-  function openNav() {
+function openNav() {
     document.getElementById("sidebar").classList.add("open");
     document.getElementById("navClosebtn").classList.add("open");
-  }
-  function closeNav() {
+}
+function closeNav() {
     document.getElementById("sidebar").classList.remove("open");
     document.getElementById("navClosebtn").classList.remove("open");
-  }
+}
 
   // Set a cookie
   function setCookie(name, value, days) {
@@ -221,8 +256,6 @@ $currentUrl = $_SERVER['REQUEST_URI'];
   // Get a cookie
   function getCookie(name) {
       const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-      console.log(match);
-
       return match ? match[2] : null;
   }
 
@@ -254,4 +287,31 @@ $currentUrl = $_SERVER['REQUEST_URI'];
       updateNationSpecificTheme();
       
   });
+
+  function openSaveLoad() {
+  document.getElementById("saveLoadOverlay").classList.remove("hidden");
+};
+
+function closeSaveLoad() {
+  document.getElementById("saveLoadOverlay").classList.add("hidden");
+};
+const filterInput = document.getElementById('listFilterInput');
+const listItems = document.querySelectorAll('.list-item');
+
+filterInput.addEventListener('input', () => {
+  const filter = filterInput.value.toLowerCase();
+
+  listItems.forEach(item => {
+    const text = item.querySelector('.list-text').textContent.toLowerCase();
+    const nation = item.dataset.nation.toLowerCase();
+    const period = item.dataset.period.toLowerCase();
+    const event = item.dataset.event.toLowerCase();
+
+    if (text.includes(filter) || nation.includes(filter) || period.includes(filter) || event.includes(filter)) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+});
 </script>

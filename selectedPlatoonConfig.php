@@ -33,11 +33,13 @@ $currentFormation = "F" . $formationNr;
 $currentBoxInFormation = $boxPositionID = $platoonInfo['boxPositionID']??"";
 $query[$currentBoxInFormation] = $platoon;
 $query[$currentFormation] = $formation;
-$query["dPs"] = $platoonInfo['dynamic']??"";
+$query['dpVer'] = $platoonInfo['dynamic']??"";
+$query["dPs"] = isset($platoonInfo['dynamic'])&&($platoonInfo['dynamic'] !="Book")?"True":"";
 $query[$formationNr . "-Card"] = $platoonInfo['formCard']??"";
+$query["pd"] = $platoonInfo["pd"]??"";
 $cardNr = $platoonInfo['cardNr']??null;
 
-$type = $platoonInfo["currentFormation"];
+$type = $platoonInfo["currentFormation"];   
 
 $BoxInSection[$platoon] = [
     "platoon" => $platoon,
@@ -72,6 +74,63 @@ if (!empty($platoon)) {
 try {
     $platoonConfig = queryToItems($platoonConfigQuery, $conn, $placeholders);
     
+
+    $dpVersions =  $conn->query( "SELECT DISTINCT year FROM dpDatabase");
+    $latestdp = 0;
+    $setDpVersion ="";
+    foreach ($dpVersions as $key => $value) {
+        if ($value["year"] > $latestdp) {
+            $latestdp = $value["year"];
+        }
+        if (($query['dpVer']??"") === $value["year"]) {
+    
+            $setDpVersion = $value["year"];
+            $query['dPs'] = "true";
+    
+        }
+    }
+    
+    $setDpVersion = $setDpVersion==""?$latestdp:$setDpVersion;
+    
+    $platoonOptiondpArray =  [];
+    $platoonConfigdpArray = [];
+    if (isset($query['dpVer'])||isset($query['dPs'])) {
+
+    $platoonOptiondp = $conn->query(
+    "SELECT  * 
+        FROM    dpDatabase
+        WHERE   type = 'option'
+        AND     year = {$setDpVersion}");  
+    $platoonConfigdp = $conn->query(
+    "SELECT  * 
+        FROM    dpDatabase
+        WHERE   type = 'config'
+        AND     year = {$setDpVersion}");  
+
+    $platoonCardgdp = $conn->query(
+    "SELECT  * 
+        FROM    dpDatabase
+        WHERE   type = 'card'
+        AND     year = {$setDpVersion}");  
+
+    
+        foreach ($platoonOptiondp as $key => $value) {
+            $platoonOptiondpArray[$value["configCode"]] = $value;
+        }
+    
+        foreach ($platoonConfigdp as $key => $value) {
+            $platoonConfigdpArray[$value["configCode"]] = $value;
+        }
+    
+        foreach ($platoonCardgdp as $key => $value) {
+            $platoonCarddpArray[$value["code"]] = $value;
+        }
+    }
+    
+    foreach ($platoonConfig as $key => &$row) {
+        $platoonConfig[$key]["dynamicPoints"] = $platoonConfigdpArray[$row["shortID"]]["cost"]??$platoonConfig[$key]["dynamicPoints"];
+    }
+
     $boxesPlatoonsData[$formationNr] =[];
 
     $boxesPlatoonsData[$formationNr]["formCost"] = 0;
@@ -125,9 +184,11 @@ try {
             AND     cardNr = '{$cardNr}'
             AND     platoon IN ({$placeholders})");
 
-    
+
         foreach ($cardPlatoon??[] as $key => $value) {
+
             $BoxInSection[$value["platoon"]] = array_merge($BoxInSection[$value["platoon"]],$value);
+
         }
     }
     $boxesPlatoonsData[$formationNr]["thisNation"] = $forceNation??null;
@@ -135,12 +196,16 @@ try {
     $platoonCards =[];
     $unitCards =[];
     if ($nation == $forceNation) {
-        $platoonCards= $conn->query(
+        $platoonCardsQuery= $conn->query(
             "SELECT  *
             FROM    cmdCardPlatoonModDB
             WHERE   Book IN ({$bookPlaceholders})
             AND     platoon IN ({$placeholders})");
-
+        $platoonCards =[];
+        foreach ($platoonCardsQuery as $key => $value) {
+            $platoonCards[$key] = $value;
+            $platoonCards[$key]["dynamicPoints"] = $platoonCarddpArray[$value["code"]]["cost"]??"";
+        }
         $unitCards= $conn->query(
             "SELECT  *
             FROM    cmdCardUnitModDB
@@ -148,21 +213,22 @@ try {
             AND     Book = '{$book}'");
     }
 
-    $platoonOptionOptions= $conn->query(
+    $platoonOptionOptionsQuery= $conn->query(
         "SELECT  * 
         FROM    platoonOptions
         WHERE   code IN ({$placeholders})");
                 ob_start();
-    $platoonOptionHeaders = [];
-    foreach ($platoonOptionOptions as $value) {
-        $code = $value["code"];
-        $description = $value["description"];
-        
-        if (!in_array(["code" => $code,"description" => $description, "oldNr" => $value["optCode"]], $platoonOptionHeaders[$code]??[])) {
-            $platoonOptionHeaders[$code][]  = ["code" => $code,"description" => $description, "oldNr" => $value["optCode"]];
+        $platoonOptionHeaders = [];
+        $platoonOptionOptions = [];
+        foreach ($platoonOptionOptionsQuery as $key => $value) {
+            $platoonOptionOptions[$key] = $value;
+            $code = $value["code"];
+            $description = $value["description"];
+            $needle = ["code" => $code,"description" => $description, "oldNr" => $value["optCode"], "dynamicPoints" => ($platoonOptiondpArray[$value["code"] . "|" . $value["opionID"]]["cost"]??"")];
+            if (!in_array($needle, $platoonOptionHeaders[$code]??[])) {
+                $platoonOptionHeaders[$code][]  = $needle;
+            }
         }
-    }
-    mysqli_data_seek($platoonOptionOptions, 0);
 
         $boxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr]["thisBoxType"] = "";
 
@@ -181,7 +247,11 @@ try {
 
 // ----- checked and set status from session variablse for the selected platoon in the box
             $platoonConfigChanged = configChangedGenerate($platoonInBox, $platoonConfig);
+            foreach ($platoonConfigChanged as $key => &$value) {
+                $value["dynamicPoints"] = $platoonConfigdpArray[$value["shortID"]]["cost"]??$value["cost"];
+            }
 
+            
             $cardIndex =0;
             if ((!empty($currentPlatoon))&&($currentPlatoon == $thisBoxSelectedPlatoon)&&(isset($platoonInBox["cardNr"]))) {
                 foreach ($platoonCards as $key => $thisplatoonCard) {

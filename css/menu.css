@@ -25,13 +25,17 @@
   --optionBox-background-color: #f1f1f1;
 }
 
-[data-theme="earthy"] {
-  --background-color: #f4f1ea;
-  --background-color-alt: #ede4d9;  
-  --primary-color: #8b5e34;
-  --secondary-color: #d9c4a1;
-  --accent-color: #5a4632;
-  --text-color: #5a4632;
+[data-theme="printer-friendly"] {
+  --background-color: #f5f7fa;
+  --background-color-alt: #e9eef4;
+  --primary-color: #3498db;
+  --secondary-color: #2980b9;
+  --accent-color: #ffffff;
+  --text-color: #333;
+    --text-color-alt: #111111;
+  --box-background-color: #D3D3D3;
+  --box-color: rgba(0, 0, 0, 0.4);
+  --optionBox-background-color: #f1f1f1;
 
 }
 
@@ -421,6 +425,88 @@ button[type=submit]  {
   }
 }
   
-  .pointsSpacer {
-    width: 180px;
-  }
+.pointsSpacer {
+  width: 180px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+.overlay.hidden { display: none; }
+
+.overlay-content {
+    position: relative;
+  background: #fff;
+  padding: 2rem;
+  width: 500px;
+  max-height: 80%;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: #fff;   /* keep background so text doesn’t scroll under it */
+  z-index: 5;
+  padding-bottom: .5rem;
+}
+
+.list-frame {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: .5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.list-frame label {
+  display: block;
+  padding: .5rem;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.list-frame label:last-child {
+  border-bottom: none;
+}
+
+.list-frame input[type=radio] {
+  margin-right: .5rem;
+}
+
+.list-text {
+  font-weight: bold;
+}
+
+.event-text {
+  text-align: right;
+  float: right;
+}
+
+.close-btn {
+  position: absolute;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #000;
+}
+
+img.insignia {
+    height: 20px;
+	margin-right: 5px;
+}

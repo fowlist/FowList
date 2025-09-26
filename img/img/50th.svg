@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="7.9961739mm"
+   height="8mm"
+   viewBox="0 0 7.996174 7.9999999"
+   version="1.1"
+   id="svg47190"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="50th.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview47192"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="16"
+     inkscape:cx="31.59375"
+     inkscape:cy="10.15625"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g31631"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-page="true" />
+  <defs
+     id="defs47187">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath63680-8">
+      <path
+         d="M 0,0 H 595.276 V 841.89 H 0 Z"
+         id="path63678-4" />
+    </clipPath>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-95.587164,-80.934645)">
+    <g
+       inkscape:label="Capa 1"
+       id="layer1-5"
+       transform="matrix(0.01238547,0,0,0.01238547,86.37603,76.630162)">
+      <g
+         id="g4299"
+         transform="translate(1.9492421e-6)">
+        <g
+           id="g31631"
+           transform="matrix(5.4254363,0,0,5.4254363,1570.8141,1953.9589)">
+          <path
+             d="m -84.634921,-215.37983 v -33.90768 h -7.037442 -7.03744 v -5.11813 -5.11814 h 32.628139 32.628133 v 5.11814 5.11813 h -20.472556 -20.472556 v 33.90768 33.90767 h -5.118139 -5.118139 z m -26.017299,15.14111 -0.85294,-0.85306 v -39.45228 -39.45228 h -20.47255 -20.47257 v -4.47837 -4.47838 h 46.06327 46.06325 v 4.47838 4.47837 h -20.472557 -20.472563 v 40.30534 40.30535 h -4.26507 -4.26521 z m -16.20735,-54.16692 v -5.11814 h 6.39768 6.39766 v 5.11814 5.11813 h -6.39766 -6.39768 z"
+             style="fill:#df0a15;stroke-width:0.338543"
+             id="path33053" />
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

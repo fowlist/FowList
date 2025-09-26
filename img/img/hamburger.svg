@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="12.340591mm"
+   height="12.366419mm"
+   viewBox="0 0 12.340591 12.366419"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="hamburger.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="5.1241863"
+     inkscape:cx="27.223835"
+     inkscape:cy="30.151129"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-69.189842,-122.37308)">
+    <rect
+       style="fill:#000000;stroke-width:0.639066;stroke-linejoin:round;paint-order:markers fill stroke;stop-color:#000000"
+       id="rect1778"
+       width="12.340591"
+       height="12.366419"
+       x="69.189842"
+       y="122.37308" />
+    <rect
+       style="fill:#ffffff;stroke-width:0.4;stroke-linejoin:round;paint-order:markers fill stroke;stop-color:#000000"
+       id="rect1612"
+       width="7.745132"
+       height="1.0585014"
+       x="71.487572"
+       y="124.67081" />
+    <rect
+       style="fill:#ffffff;stroke-width:0.4;stroke-linejoin:round;paint-order:markers fill stroke;stop-color:#000000"
+       id="rect1612-9"
+       width="7.745132"
+       height="1.0585014"
+       x="71.487572"
+       y="128.02704" />
+    <rect
+       style="fill:#ffffff;stroke-width:0.4;stroke-linejoin:round;paint-order:markers fill stroke;stop-color:#000000"
+       id="rect1612-9-2"
+       width="7.745132"
+       height="1.0585014"
+       x="71.487572"
+       y="131.38327" />
+  </g>
+</svg>

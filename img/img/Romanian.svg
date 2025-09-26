@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="7.9999986mm"
+   height="8mm"
+   viewBox="0 0 7.9999986 7.9999999"
+   version="1.1"
+   id="svg47190"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="Romanian.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview47192"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="8"
+     inkscape:cx="37.8125"
+     inkscape:cy="20.8125"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="text33941"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-page="true" />
+  <defs
+     id="defs47187">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath63680-8">
+      <path
+         d="M 0,0 H 595.276 V 841.89 H 0 Z"
+         id="path63678-4" />
+    </clipPath>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-96.011968,-80.440872)">
+    <g
+       inkscape:label="Capa 1"
+       id="layer1-5"
+       transform="matrix(0.01238547,0,0,0.01238547,86.37603,76.630162)">
+      <g
+         id="g4299"
+         transform="translate(1.9492421e-6)">
+        <g
+           id="g31631"
+           transform="matrix(5.4254363,0,0,5.4254363,1570.8141,1953.9589)">
+          <g
+             aria-label="W"
+             id="text33941"
+             style="font-size:157.498px;line-height:1.25;stroke-width:3.93745">
+            <g
+               transform="matrix(0.14881712,0,0,0.14881712,-144.7274,-304.83889)"
+               id="g14">
+              <path
+                 d="m 2580.0646,1677.5641 v 257.0189 h -257.018 v 42.5486 l 79.4772,81.2436 -79.4772,81.2437 v 43.3763 h 257.018 v 257.0188 h 43.3764 l 81.2436,-79.4772 81.2437,79.4772 h 42.5485 v -257.0188 h 257.0196 v -43.3763 l -79.4772,-81.2437 79.4772,-81.2436 v -42.5486 h -257.0196 v -257.0189 h -42.5485 l -81.2437,79.4772 -81.2436,-79.4772 z"
+                 fill="#0038a1"
+                 transform="matrix(1.025641,0,0,1.025641,-2383.0265,-1702.1644)"
+                 stroke="#ffffff"
+                 stroke-width="17.55"
+                 paint-order="markers fill stroke"
+                 id="path2" />
+              <path
+                 d="M 69.133937,492.4844 H 307.51421 v 238.38028 l 83.28269,-81.47189 83.28268,81.47189 V 492.4844 h 238.38027 l -81.47189,-83.28268 81.47189,-83.28268 H 474.07958 V 87.538565 L 390.7969,169.01045 307.51421,87.538565 V 325.91904 H 69.133937 l 81.471893,83.28268 z"
+                 color="#000000"
+                 fill="#f8c300"
+                 paint-order="stroke fill markers"
+                 id="path4" />
+              <g
+                 transform="matrix(1.0005068,0,0,1.0005068,-9.4778579,8.865841)"
+                 id="g12">
+                <circle
+                   cx="400.07199"
+                   cy="400.133"
+                   r="117.235"
+                   fill="#da251d"
+                   id="circle6" />
+                <circle
+                   cx="400.07199"
+                   cy="400.133"
+                   r="78.154999"
+                   fill="#f8c300"
+                   id="circle8" />
+                <circle
+                   cx="400.07199"
+                   cy="400.133"
+                   r="39.077999"
+                   fill="#0038a1"
+                   id="circle10" />
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

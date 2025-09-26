@@ -2,10 +2,11 @@
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
+include "functions.php";
 include 'sqlServerinfo.php';
 $userID = $_SESSION['user_id']??"";
 $username = $_SESSION['username']??"";
-include "functions.php";
+
 include "login.php";
 include "showListsFunctions.php";
 include "cssVersion.php";

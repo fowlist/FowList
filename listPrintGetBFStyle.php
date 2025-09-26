@@ -2,8 +2,9 @@
 // Start the session
 session_start();
 
-include "sqlServerinfo.php";
+
 include "functions.php";
+include "sqlServerinfo.php";
 include "login.php";
 include "cssVersion.php";
 
@@ -110,6 +111,63 @@ if ($_GET['cost'] != "") {
 $bookSelected = FALSE;
 
 
+$dpVersions = fetchData($conn, $query, "dpVersions", "SELECT DISTINCT year FROM dpDatabase");
+$latestdp = 0;
+$setDpVersion ="";
+foreach ($dpVersions as $key => $value) {
+    if ($value["year"] > $latestdp) {
+        $latestdp = $value["year"];
+    }
+    if (($query['dpVer']??"") === $value["year"]) {
+
+        $setDpVersion = $value["year"];
+        $query['dPs'] = "true";
+
+    }
+}
+
+$setDpVersion = $setDpVersion==""?$latestdp:$setDpVersion;
+
+$platoonOptiondpArray =  [];
+$platoonConfigdpArray = [];
+$platoonCarddpArray = [];
+if (isset($query['dpVer'])||isset($query['dPs'])) {
+    if ($_SESSION["platoonConfigdp"][0]["year"]??"" != $setDpVersion) {
+        unset($_SESSION["platoonConfigdp"]);
+        unset($_SESSION["platoonOptiondp"]);
+        unset($_SESSION["platoonCarddp"]);
+    }
+    $platoonOptiondp = fetchData($conn, $query, "platoonOptiondp", 
+        "SELECT  * 
+        FROM    dpDatabase
+        WHERE   type = 'option'
+        AND     year = {$setDpVersion}");
+
+    $platoonConfigdp= fetchData($conn, $query, "platoonConfigdp",
+        "SELECT  * 
+        FROM    dpDatabase
+        WHERE   type = 'config'
+        AND     year = {$setDpVersion}");
+
+    $platoonCardgdp= fetchData($conn, $query, "platoonCarddp",
+        "SELECT  * 
+        FROM    dpDatabase
+        WHERE   type = 'card'
+        AND     year = {$setDpVersion}");
+
+
+    foreach ($platoonOptiondp as $key => $value) {
+        $platoonOptiondpArray[$value["configCode"]] = $value;
+    }
+
+    foreach ($platoonConfigdp as $key => $value) {
+        $platoonConfigdpArray[$value["configCode"]] = $value;
+    }
+
+    foreach ($platoonCardgdp as $key => $value) {
+        $platoonCarddpArray[$value["code"]] = $value;
+    }
+}
 
     foreach ($Books as $row) if (($row["code"] == $query['Book']??"na")||($row["Book"]??"" == $query['Book']??"na")){
         $bookCode = $row["code"]; 
@@ -162,12 +220,18 @@ $maxSupportBoxNr = 0;
     }
     mysqli_data_seek($Support_DB ,0);
 
-
-    $platoonCards= $conn->query(
+    $platoonCardsQuery= $conn->query(
         "SELECT  *
         FROM    cmdCardPlatoonModForPrintDB
         WHERE   Book = '{$bookTitle}'");
 
+    $platoonCards =[];
+    foreach ($platoonCardsQuery as $key => $value) {
+        $platoonCards[$key] = $value;
+        if (isset($platoonCarddpArray[$value["code"]])) {
+            $platoonCards[$key]["dynamicPoints"] = $platoonCarddpArray[$value["code"]]["cost"];
+        }
+    }
     $unitCards= $conn->query(
         "SELECT  *
         FROM    cmdCardUnitModForPrintDB
@@ -181,6 +245,7 @@ $maxSupportBoxNr = 0;
             cmdCardsText.code AS code,
             cmdCardsText.notes AS notes,
             cmdCardsText.title AS title,
+            cmdCardsText.limited AS limited,
             cmdCardCost.price AS cost
         FROM    cmdCardsForceMod_link
             LEFT JOIN cmdCardCost
@@ -209,7 +274,7 @@ $maxSupportBoxNr = 0;
 if ($bookSelected && $query['Book'] <> "")  {
 
     $platoonOptionOptions= $conn->query(
-        "SELECT DISTINCT  * 
+"SELECT  * 
                 FROM    platoonOptions");
     $platoonOptionHeaders = [];
 $counts = [];
@@ -243,6 +308,7 @@ foreach ($platoonOptionOptions as $value) {
             "code" => $code,
             "description" => $description,
             "oldNr" => $oldNr,
+            "dynamicPoints" => ($platoonOptiondpArray[$value["code"] . "|" . $value["opionID"]]["cost"]??""),
             "nrOfOptions" => $counts[$uniqueKey] // Use the precomputed count for this unique key
         ];
 
@@ -315,7 +381,7 @@ $SummaryOfCards = [];
 </div>
 <div class="Formation">
     <?php if (!empty($query['dPs'])) :?>
-        Using Dynamic Points
+        Using <?=$setDpVersion?> Dynamic Points
     <?php else :?>
         Using Book Points
     <?php endif ?>
@@ -369,6 +435,7 @@ if ($bookSelected) { //   Formation
         if ($platoonConfigQuery->num_rows > 0) {
             while ($row = $platoonConfigQuery->fetch_assoc()) {
                 if ($row['formation'] == $query[$currentFormation]) {
+                    $row["dynamicPoints"] = $platoonConfigdpArray[$row["shortID"]]["cost"]??"";
                     $platoonConfig[] = $row;
                 }
             }
@@ -486,7 +553,7 @@ if (isset($query[$currentFormation])) {
                     
                 foreach ($cardPlatoonConfig as $key1 => $value1) {
                     if (($value['platoon'] == $value1['platoon'])&&(($formationLookup1=="")||($formationLookup1==$value1["formation"]))) {
-
+                        $value1["dynamicPoints"] = $platoonConfigdpArray[$value1["shortID"]]["cost"]??"";
                         $platoonConfig[] = $value1;
                         $formationLookup1 = $value1["formation"];
                     }
@@ -559,6 +626,7 @@ if (!isset($formationCardTitle[$formationNr])) {
                 foreach ($platoonConfigChanged as $row3) {
                     
                         if (($row["platoon"]==$row3["platoon"])&&isset($query[$currentBoxInFormation . "c"])&&($row3["shortID"] === $query[$currentBoxInFormation . "c"])) {
+                        $row["dynamicPoints"]=$row3["dynamicPoints"] = $platoonConfigdpArray[$row3["shortID"]]["cost"]??"";
                         $cardsHTML = "";
                         actualSectionsEval($row3,$row);
                         printPlatoonCardHTML($platoonCards, $row, $query, $currentBoxInFormation, $platoonIndex, $platoonCardChange, $platoonCardMod, $CardsInList, $platoonsInForce, $formationCardTitle, $attachmentsInForce);
@@ -759,6 +827,7 @@ $formationCards = [];
 
                 foreach ($platoonConfigChanged as $row3) {
                     if (($row["platoon"]==$row3["platoon"])&&isset($query[$currentBoxInFormation . "c"])&&($row3["shortID"] === $query[$currentBoxInFormation . "c"])) {
+                        $row["dynamicPoints"]=$row3["dynamicPoints"] = $platoonConfigdpArray[$row3["shortID"]]["cost"]??"";
                         $cardsHTML = "";
                         $row["nrOfTeams"] = $row3["nrOfTeams"];
                         $row["teams"] = $row3["teams"];
@@ -940,6 +1009,7 @@ $platoonConfig = $conn->query(
             $platoonsInForce[$platoonIndex]["Nation"] = $row["Nation"];
             foreach ($platoonConfig as $row3) {
                 if (($row["platoon"]==$row3["platoon"])&&isset($query[$currentBoxInFormation . "c"])&&($row3["shortID"] === $query[$currentBoxInFormation . "c"])) {
+                    $row["dynamicPoints"]=$row3["dynamicPoints"] = $platoonConfigdpArray[$row3["shortID"]]["cost"]??"";
                     $cardsHTML = "";
                     $row["nrOfTeams"] = $row3["nrOfTeams"];
                     $row["box_nr"] = $currentBoxNr;
@@ -1058,6 +1128,8 @@ $cardPlatoonIndex = 0;
 
             foreach ($platoonConfigChanged as $row3) {
                 if (($row["platoon"]==$row3["platoon"])&&($row3["shortID"] === $row["shortID"])) {
+                    $row["dynamicPoints"]=$row3["dynamicPoints"] = $platoonConfigdpArray[$row3["shortID"]]["cost"]??"";
+
                     $cardsHTML = "";
                     
                     $row["nrOfTeams"] = $row3["nrOfTeams"]??0;
@@ -1588,9 +1660,30 @@ if (isset($rules)&&$rules->num_rows > 0) {
             $pdo = null;
             $conn->close();
 ?>
+        <div class="collapsible <?=$query['ntn']?>">
+        <div class="formHeader"> 
+        Link QR Code
+        </div>
+    </div>        
+    <div class="formation">
+<div id="qrcode" data-url="http://www.fowlist.com/listPrintGet.php?<?=$linkQuery?>"></div>
+    </div>
     
 </div>
-<div class="searchstring"><?=$linkQuery?></div>
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  const qrDiv = document.getElementById("qrcode");
+  const url = qrDiv.dataset.url;  // read data-url
+  new QRCode(qrDiv, {
+    text: url,
+    width: 256,
+    height: 256
+  });
+</script>
+</div>
+
 
     <script>
         function printPage() {

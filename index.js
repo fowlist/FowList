@@ -125,7 +125,7 @@ function updatePrerequisites(selectedPlatoon) {
         const prerequisite = configItem.getAttribute("prerequisite");
 
         if (prerequisite && prerequisite !== "0") {
-            const requiredCodes = prerequisite.split('|'); // Split prerequisite into an array
+            const requiredCodes = prerequisite.split(/[,|]/).map(code => code.trim()).filter(Boolean);
 
             // 🔹 Handle "AddOn" Logic
             if (prerequisite.includes("AddOn")) {
@@ -137,7 +137,7 @@ function updatePrerequisites(selectedPlatoon) {
 
                 const wasDisabled = configItem.disabled;
                 configItem.disabled = !prerequisitesMet;
-
+    
                 // 🔹 Handle points update if the state changes
                 if (wasDisabled !== configItem.disabled) {
                     prerequisitesChanged = true; // Mark that something changed
@@ -151,12 +151,12 @@ function updatePrerequisites(selectedPlatoon) {
                     }
                 }
             }
-
+            
             // 🔹 Handle "Warrior" Logic
             else if (prerequisite.includes("Warrior")) {
                 if (configItem.checked) {
                     warriorChecked = true; // Mark that a warrior checkbox is selected
-                }
+                } 
             }
         }
     });
@@ -176,7 +176,7 @@ function updatePrerequisites(selectedPlatoon) {
         });
     }
 
-    // 🔹 If prerequisites changed, recalculate the box points
+    // If prerequisites changed, recalculate the box points
     if (prerequisitesChanged) {
         const box = selectedPlatoon.closest(".box");
         if (box) {
@@ -184,7 +184,56 @@ function updatePrerequisites(selectedPlatoon) {
         }
     }
 }
-
+function updatePlatoonCheckboxPrerequisites() {
+    const allPlatoonCheckboxes = document.querySelectorAll('input[platoonCheckbox]');
+    const allCardSelects = document.querySelectorAll('select[fcardselect], input[fCardCheckbox]');
+    allPlatoonCheckboxes.forEach(checkbox => {
+        const info = checkbox.getAttribute('data-platooninfo');
+        if (!info) return;
+        let platoonData;
+        try {
+            platoonData = JSON.parse(info);
+        } catch (e) {
+            return;
+        }
+        const prerequisite = platoonData.prerequisite;
+        if (prerequisite && prerequisite.trim() !== "") {
+                        // Limited logic
+            if (prerequisite === "Limited") {
+                // Disable if another checkbox with the same value is checked
+                const othersChecked = Array.from(allPlatoonCheckboxes).some(other =>
+                    other !== checkbox && other.value === checkbox.value && other.checked
+                );
+                checkbox.disabled = othersChecked;
+                if (othersChecked && checkbox.checked) {
+                    checkbox.checked = false;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+                return; // Skip further checks for Limited
+            }
+            // Split by comma or pipe
+            const requiredCodes = prerequisite.split(/[,|]/).map(code => code.trim()).filter(Boolean);
+            // Check if any required code is checked elsewhere
+            const anyMet = requiredCodes.some(code =>
+                Array.from(allPlatoonCheckboxes).some(other =>
+                    other !== checkbox && other.value === code && other.checked
+                ) ||
+                Array.from(allCardSelects).some(card =>
+                    (card.tagName === 'SELECT' && card.value === code) ||
+                    (card.type === 'checkbox' && card.value === code && card.checked)
+                )
+            );
+            checkbox.disabled = !anyMet;
+            if (!anyMet && checkbox.checked) {
+                checkbox.checked = false;
+                // Optionally, trigger change event to update UI/config
+                checkbox.dispatchEvent(new Event('change'));
+            }
+        } else {
+            checkbox.disabled = false;
+        }
+    });
+}
 
 function initiatePrerequisites(selectedPlatoon) {
     const allWarriorCheckboxes = document.querySelectorAll("input[type='checkbox'][prerequisite*='Warrior']");
@@ -213,104 +262,90 @@ function updatePoints(selectElement, selectedPlatoon) {
         const isConfigBox = selectElement.parentElement.classList.contains('configBox');
         const isOptionBox = selectElement.parentElement.classList.contains('optionBox');
         const formation = selectedPlatoon.closest('.Formation');
-        const header = formation?.previousElementSibling;
-        const points = selectElement.closest('.box')?.querySelector(".Points div");
-        const formationPoints = header?.querySelector(".Points div");
-        const forcePoints = document.getElementById("pointsOnTop")?.querySelector(".Points div");
+        const header = formation.previousElementSibling;
+        const points = selectElement.closest('.box').querySelector(".Points").querySelector("div");
+        const formationPoints = header.querySelector(".Points").querySelector("div");
+        const forcePoints = document.getElementById("pointsOnTop").querySelector(".Points").querySelector("div");
+        const oldForcePoints = parseInt(forcePoints.innerText);
+        const oldFormationPoints = parseInt(formationPoints.innerText);
+        const oldPoints = parseInt(points.innerText);
+        const newFormationPoints = oldFormationPoints - oldPoints;
+        const newForcePoints = oldForcePoints - oldPoints;
+        const currentCost = parseInt(selectElement.getAttribute('currentCost') ?? selectElement.getAttribute('cost') ?? '0');
 
-        // Ensure all required elements exist
-        if (!points || !formationPoints || !forcePoints) {
-            console.error("updatePoints: Missing elements in the DOM.");
-            resolve();
-            return;
-        }
-
-        // Get previous values before updating
-        const oldForcePoints = parseInt(forcePoints.innerText) || 0;
-        const oldFormationPoints = parseInt(formationPoints.innerText) || 0;
-        const oldPoints = parseInt(points.innerText) || 0;
-
-        // Remove old value from the totals
-        let newFormationPoints = oldFormationPoints - oldPoints;
-        let newForcePoints = oldForcePoints - oldPoints;
-
-        let currentCost = parseInt(selectElement.getAttribute('currentCost') ?? selectElement.getAttribute('cost') ?? '0');
         let newCost = oldPoints;
-
-        // Fix calculation order for team multiplicator
-        if (isConfigBox) {
-            selectedPlatoon.setAttribute('currentNrOfTeams', selectElement.options[selectElement.selectedIndex]?.getAttribute('nrOfTeams') || "1");
-        } else if (isOptionBox) {
-            selectedPlatoon.setAttribute('currentNrOfAddedTeams', selectElement.options[selectElement.selectedIndex]?.getAttribute('value') || "0");
-        }
-
-        // Fix race condition with `perTeamMultiplicator`
         let perTeamMultiplicator = parseFloat(selectElement.getAttribute('pricePerTeam') ?? '0') 
-                                    * (parseInt(selectedPlatoon.getAttribute('currentNrOfTeams') ?? '1'));
+                                * (parseInt(selectedPlatoon.getAttribute('currentNrOfTeams') ?? '1')
+                                ); //+ parseInt(selectedPlatoon.getAttribute('currentNrOfAddedTeams') ?? '0')
 
-        perTeamMultiplicator = (perTeamMultiplicator === 0 || !perTeamMultiplicator) ? 1 : perTeamMultiplicator;
+        perTeamMultiplicator = (perTeamMultiplicator==0)||(!perTeamMultiplicator)? 1:perTeamMultiplicator;
 
-        // Handle different element types
         if (selectElement.type === 'checkbox') {
-            const checkBoxCost = Math.round((parseInt(selectElement.getAttribute('cost') ?? "0")) * perTeamMultiplicator);
-
+            const checkBoxCost = Math.round(parseInt(selectElement.getAttribute('cost')??"0") * perTeamMultiplicator);
             if (selectElement.checked) {
-                newCost += (urlParams.has(selectElement.getAttribute("name")) ? checkBoxCost - currentCost : checkBoxCost);
-                urlParams.set(selectElement.getAttribute("name"), selectElement.value);
+
+                if (urlParams.has(selectElement.getAttribute("name"))) {
+
+                    newCost +=  checkBoxCost - currentCost;
+                    selectElement.setAttribute('currentCost',checkBoxCost);
+                    if (selectElement.nextElementSibling) {
+                        selectElement.nextElementSibling.querySelector("span").innerHTML = checkBoxCost;
+                    }
+                    
+                } else {
+                    newCost += checkBoxCost;
+                    urlParams.set(selectElement.getAttribute("name"), selectElement.value);
+                }
+                
             } else {
                 newCost -= checkBoxCost;
                 urlParams.delete(selectElement.getAttribute("name"));
             }
-
-            selectElement.setAttribute('currentCost', checkBoxCost);
-            if (selectElement.nextElementSibling) {
-                const spanElement = selectElement.nextElementSibling.querySelector("span");
-                if (spanElement) spanElement.innerHTML = checkBoxCost;
-            }
-        } 
-        
-        else if (selectElement.tagName.toLowerCase() === 'select') {
+        } else if ((selectElement.type??"").toLowerCase() === 'select-one') {
+            // Handle <select> elements
             const selectedDropDown = selectElement.options[selectElement.selectedIndex];
+            
             if (isConfigBox) {
                 selectedPlatoon.setAttribute('currentNrOfTeams', selectedDropDown.getAttribute('nrOfTeams'));
 
+            } else if (isOptionBox) {
+                const currentNrOfAddedTeams = parseInt(selectedDropDown.getAttribute('value')) ? parseInt(selectedDropDown.getAttribute('value')) : "0";
+                
+                selectedPlatoon.setAttribute('currentNrOfAddedTeams',currentNrOfAddedTeams);
             }
-            const dropDownCost = parseInt(selectedDropDown.getAttribute('cost') ?? '0');
-
+            const dropDownCost = parseInt(selectedDropDown.getAttribute('cost') ?? '0');       
+            selectElement.setAttribute('currentCost',dropDownCost);
             newCost = newCost - currentCost + dropDownCost;
-            selectElement.setAttribute('currentCost', dropDownCost);
+            
             urlParams.set(selectElement.getAttribute("name"), selectedDropDown.value);
-        } 
-        
-        else if (selectElement.nodeName === 'CARD') {
-            const cardCost = Math.round(parseFloat(selectElement.getAttribute('priceFactor') ?? '0') 
-                            * (parseInt(selectedPlatoon.getAttribute('currentNrOfTeams') ?? '1')));
+            
+        } else if (selectElement.nodeName === 'CARD') {
+            cardCost =  Math.round(parseFloat(selectElement.getAttribute('priceFactor') ?? '0') 
+            * (parseInt(selectedPlatoon.getAttribute('currentNrOfTeams') ?? '1')
+            )); //+ parseInt(selectedPlatoon.getAttribute('currentNrOfAddedTeams') ?? '0')
+            
+            newCost = newCost - currentCost +cardCost;
+            selectElement.setAttribute('currentCost',cardCost);
 
-            newCost = newCost - currentCost + cardCost;
-            selectElement.setAttribute('currentCost', cardCost);
-        } 
-        
-        else {
-            if (selectElement.value.trim() !== "") {
+        }
+        else  {
+            if (selectElement.getAttribute("value").trim() !== "") {
                 urlParams.set(selectElement.getAttribute("name"), selectElement.value);
             } else {
                 urlParams.delete(selectElement.getAttribute("name"));
             }
         }
 
-        // Update UI
         points.innerText = `${newCost} Points`;
         selectedPlatoon.setAttribute("lastPrice", newCost);
         formationPoints.innerText = `${newFormationPoints + newCost} Points`;
         forcePoints.innerText = `${newForcePoints + newCost} Points`;
 
-        // Ensure URL update happens last
-        setTimeout(() => {
-            const newUrl = `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`;
-            updateURL(newUrl);
-            resolve();
-            //
-        }, 50);  // Small delay to ensure attributes are fully updated
+        // ✅ Update the URL in the browser without reloading
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`;
+        window.history.pushState({}, '', newUrl);
+        resolve();
+        //
     });
 }
 //
@@ -452,13 +487,25 @@ function flashElement(element) {
 
 function handleElementChange(selectElement) {
     const selectedPlatoon = selectElement.closest('.selectedPlatoon');
-    const box = selectElement.closest('.selectedPlatoon');
-    const platoonSelectElements = selectedPlatoon.querySelectorAll("select, input, card");
+    if (!selectedPlatoon) {
+        const selectedCard = selectElement.closest('.selectedCard');
+        if (!selectedCard) return;
+        console.log("Element changed");
+        // ✅ Update prerequisites
+        updatePrerequisites(selectedCard);
+        // ✅ Update points and URL
+        recalculateBoxPoints(selectedCard);
+        return;
+    }
+
+    //const platoonSelectElements = selectedPlatoon.querySelectorAll("select, input, card");
+    console.log("Element changed");
     
     // ✅ Update prerequisites
     updatePrerequisites(selectedPlatoon);
     // ✅ Update points and URL
-    recalculateBoxPoints(box);
+    recalculateBoxPoints(selectedPlatoon);
+    updatePricePerTeam(selectedPlatoon)
     /*updatePoints(selectElement, selectedPlatoon)
     .then(() => {
         platoonSelectElements.forEach(element => {
@@ -470,6 +517,27 @@ function handleElementChange(selectElement) {
         });
     });
 */
+}
+
+function updatePricePerTeam(selectedPlatoon) {
+    const currentNrOfTeams = parseInt(selectedPlatoon.getAttribute('currentNrOfTeams') ?? '1');
+
+    // Hitta alla inputs med priceperteam="1" inne i selectedPlatoon
+    const pricePerTeamInputs = selectedPlatoon.querySelectorAll('input[type="checkbox"][priceperteam="1"]');
+
+    pricePerTeamInputs.forEach(input => {
+        const baseCost = parseInt(input.getAttribute('cost') ?? '0');
+        const newCost = baseCost * currentNrOfTeams;
+
+        // Uppdatera currentcost attributet så att allt stämmer i vidare beräkningar
+        input.setAttribute('currentcost', newCost);
+
+        // Uppdatera den visuella cost-spanen om den finns
+        const costSpan = input.parentElement.querySelector('span[name="cost"]');
+        if (costSpan) {
+            costSpan.innerText = newCost;
+        }
+    });
 }
 
 function decreaseNOF(id) {
@@ -504,13 +572,69 @@ function incrementNOF(id) {
     }
 }
 
+function syncDOMWithURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Synka alla platoon-checkboxar
+    document.querySelectorAll('input[type="checkbox"][platoonCheckbox]').forEach(checkbox => {
+        const name = checkbox.getAttribute('name');
+        const value = checkbox.value;
+
+        if (urlParams.has(name) && urlParams.get(name) === value) {
+            checkbox.checked = true;
+        } else {
+            checkbox.checked = false;
+        }
+
+        // Hitta box och konfig
+        const platoon = checkbox.closest('.platoon, .blackbox');
+        const box = platoon?.closest('.box');
+        const selectedPlatoonConfig = platoon?.querySelector('.selectedPlatoon');
+        const isBlackBox = platoon?.classList.contains('blackbox');
+
+        if (checkbox.checked && box && selectedPlatoonConfig) {
+            // Kör om selection-logiken
+            handlePlatoonSelection(box, checkbox, selectedPlatoonConfig, isBlackBox);
+        }
+    });
+
+    // Synka alla <select>-element
+    document.querySelectorAll('select').forEach(select => {
+        const name = select.getAttribute('name');
+        const value = urlParams.get(name);
+
+        if (value) {
+            select.value = value;
+
+            const selectedPlatoon = select.closest('.selectedPlatoon');
+            if (selectedPlatoon) {
+                updatePoints(select, selectedPlatoon);
+            }
+        }
+    });
+}
+
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        syncDOMWithURL(); // reset DOM vid bfcache
+        console.log("DOM synced with URL on pageshow event.");
+        
+    }
+});
+
 document.addEventListener("DOMContentLoaded", function () {
+    updatePlatoonCheckboxPrerequisites();
     const boxesCheckboxes = document.querySelectorAll("input[platoonCheckbox]");
     const fCardsCheckboxes = document.querySelectorAll("input[fCardCheckbox]");
     
     const collapsableHeader = document.querySelectorAll(".collapsible");
     const grids = document.querySelectorAll(".grid");
+    const viewListButtons = [
+        document.getElementById('process-link'),
+        document.getElementById("viewListTopButton")
+      ];
 
+    
     const overlay = document.getElementById("infoOverlay");
     const closeOverlay = document.getElementById("closeOverlay");
     const platoonDetails = document.getElementById("platoonDetails");
@@ -522,7 +646,36 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
     // Special Button Handling
-    document.getElementById('process-link').addEventListener('click', function () {
+    viewListButtons.forEach(button => { 
+        button.addEventListener('click', function () {
+            const form = document.getElementById('form');
+            cleanEmptyFieldsBeforeSubmission(form);
+            const formData = new FormData(form);
+    
+            // Convert FormData to URL query string
+            const queryString = new URLSearchParams(formData).toString();
+    
+            console.log('Form Data as Query String:', queryString);
+    
+            fetch(`getNewLink.php?${queryString}`, {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update address bar for legal evaluation
+                    window.history.replaceState({}, '', data.updateUrl);
+                    // Redirect to the printable list
+                    window.location.href = data.redirectUrl;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+     
+    document.getElementById("viewListBFTopButton").addEventListener('click', function () {
         const form = document.getElementById('form');
         cleanEmptyFieldsBeforeSubmission(form);
         const formData = new FormData(form);
@@ -540,7 +693,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.success) {
                 console.log('Redirecting to:', data.url);
                 // Redirect to the returned URL
-                window.location.href = data.url;
+                window.location.href = data.url.replace("listPrintGet.php","listPrintGetBFStyle.php");
             } 
         })
         .catch(error => {
@@ -552,46 +705,160 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener('click',  function (event) {
             if (button.name != "loadSelected") {
                 event.preventDefault(); // Prevent the default form submission
-                const form1 = document.getElementById('form');
-                cleanEmptyFieldsBeforeSubmission(form1);
-                const formData = new FormData(form1);
-        
-                // Convert FormData to URL query string
+                const form = document.getElementById('form');
+                const saveListForm = document.getElementById('saveListForm');
+                cleanEmptyFieldsBeforeSubmission(form);
+                const formData = new FormData(form);
+                const saveListFormData = new FormData(saveListForm);
+
                 const queryString = new URLSearchParams(formData).toString();
-        
-                console.log('Form Data as Query String:', queryString);
-        
-                fetch(`getNewLink.php?${queryString}`, {
-                    method: 'GET'
+
+                saveListFormData.append(button.name, button.value);
+                if (button.name == "save_url"||button.name == "updateSelected") {
+                    saveListFormData.append("refreshSelected", true);
+                    console.log('Form Data as Query String for save:', queryString, saveListFormData);
+                }
+                // Convert FormData to URL query string
+                const path = window.location.pathname;
+                const page = path.substring(path.lastIndexOf('/') + 1);
+                fetch(`saveNewLink.php?${queryString}`, {
+                    method: 'post',
+                    body: saveListFormData
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-        
-                        const form = this.closest("form");
-                        
-                        // Create a hidden input to simulate the button click
-                        const hiddenInput = document.createElement('input');
-                        hiddenInput.type = 'hidden';
-                        hiddenInput.name = button.name;
-                        hiddenInput.value = button.innerText;
-                        // Append the hidden input to the form
-                        
-                        if (form) {
-                            form.action = `index.php?${data.query}`;
-                            form.appendChild(hiddenInput);
-                            form.submit();
+
+                        switch (button.name) {
+                            case "save_url":
+                            case "updateSelected": {
+
+                                console.log('Redirecting to:', data.query);
+
+                                const listFrame = document.querySelector("#listNameListFrame"); 
+                                listFrame.innerHTML = ''; // Clear old radios
+
+                                data.listList.forEach(list => {
+                                    const id = "listNameList_" + list.value;
+
+                                    // Create label
+                                    const label = document.createElement("label");
+                                    label.setAttribute("for", id);
+                                    label.className = "list-item";
+                                    label.dataset.nation = list.nation;
+                                    label.dataset.period = list.period;
+                                    label.dataset.event = list.event;
+
+                                    // Radio input
+                                    const radio = document.createElement("input");
+                                    radio.type = "radio";
+                                    radio.name = "listNameList";
+                                    radio.id = id;
+                                    radio.value = list.value;
+                                    if (list.selected) radio.checked = true;
+
+                                    // Images
+                                    const imgPeriod = document.createElement("img");
+                                    imgPeriod.className = "period insignia";
+                                    imgPeriod.src = "img/" + list.period + ".svg";
+                                    imgPeriod.alt = "";
+
+                                    const imgNation = document.createElement("img");
+                                    imgNation.className = "insignia";
+                                    imgNation.src = "img/" + list.nation + ".svg";
+                                    imgNation.alt = "";
+
+                                    // Text spans
+                                    const textSpan = document.createElement("span");
+                                    textSpan.className = "list-text";
+                                    textSpan.textContent = list.description;
+
+                                    const eventSpan = document.createElement("span");
+                                    eventSpan.className = "event-text";
+                                    eventSpan.textContent = list.event;
+
+                                    // Build label
+                                    label.appendChild(radio);
+                                    label.appendChild(imgPeriod);
+                                    label.appendChild(imgNation);
+                                    label.appendChild(textSpan);
+                                    label.appendChild(eventSpan);
+
+                                    listFrame.appendChild(label);
+                                });
+
+                                showToast(
+                                    (button.name === "save_url") 
+                                        ? "List saved successfully!" 
+                                        : "List updated!", 
+                                    "success"
+                                );
+                                break;
+                                /*
+
+                                console.log('Redirecting to:', data.query);
+
+
+                               
+                                const listDropdown = document.querySelector("#listNameList");
+                                const defaultOption = listDropdown.querySelector('option[value=""]');
+                                listDropdown.innerHTML = '';
+                                if (defaultOption) {
+                                    listDropdown.appendChild(defaultOption);
+                                }
+                                data.listList.forEach(list => {
+                                    const option = document.createElement('option');
+                                    option.value = list.value;
+                                    option.textContent = list.description;
+                                    option.selected = list.selected;
+                                    listDropdown.appendChild(option);
+                                });
+                                showToast((button.name === "save_url")?"List saved successfully!":"List updated!", "success");
+                                break;
+                                */
+                            
+                            }
+                            default: {
+                                window.location.href = `${page}?${data.query}`;
+                                break;
+                            }
                         }
                     } 
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    showToast("An error occurred while saving.", error);
                 });
             }
         });
     });
     
-
+    function showToast(message, type = "success") {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+    
+        toastMessage.textContent = message;
+    
+        // Anpassa färger beroende på typ (success, error, info)
+        if (type === "success") {
+            toast.style.backgroundColor = "#4CAF50"; // Grön
+        } else if (type === "error") {
+            toast.style.backgroundColor = "#f44336"; // Röd
+        } else {
+            toast.style.backgroundColor = "#333"; // Standard mörk
+        }
+    
+        // Visa toast
+        toast.style.opacity = "1";
+        toast.style.transform = "translateX(-50%) translateY(0)";
+        toast.classList.add("flash-effect");
+        
+        // Dölj efter 3 sekunder
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateX(-50%) translateY(20px)";
+        }, 3000);
+    }
 
     function updateSelectElements() {
         return new Promise(resolve => {
@@ -653,7 +920,7 @@ document.addEventListener("DOMContentLoaded", function () {
               });
         }
             // Add click event listener for buttons
-            else if (element.tagName === 'BUTTON') {
+            else if (element.tagName === 'BUTTON' && element.id && element.id.includes("box")) {
                 element.addEventListener('click', function () {
 
                     const form = this.closest("form");
@@ -668,6 +935,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         cleanEmptyFieldsBeforeSubmission(form);
                         form.submit();
                     }
+                });
+            }
+            // Add click event listener for buttons
+            else if (element.tagName === 'BUTTON') {
+                element.addEventListener('click', function () {
                 });
             }
         });
@@ -693,8 +965,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateSelectElements();
     // Show overlay when info button is clicked
-
-    
 
 
     // Close overlay
@@ -929,14 +1199,26 @@ document.addEventListener("DOMContentLoaded", function () {
         return new Promise((resolve, reject) => {
             try {
                 if (currentCheckbox.hasAttribute("ally")) {
+                    const listHeaders = document.querySelectorAll(".collapsible");
+                    var numberOfAlliesAllowed = 1;
+                    console.log(listHeaders);
+                    listHeaders.forEach(thisHeader => {
+                        if (thisHeader.classList.contains("Italian")) {
+                            numberOfAlliesAllowed = 2;                      
+                        }
+                    } );
                     const alliesCheckboxes = document.querySelectorAll("input[ally]");
                     alliesCheckboxes.forEach(alliedCheckbox => {
                         if (alliedCheckbox != currentCheckbox) {
                             if (alliedCheckbox.checked ) {
-                                alliedCheckbox.checked = false;
-                                const otherPlatoonConfig = alliedCheckbox.parentElement.querySelector(".selectedPlatoon");
-                                updateCostCalculation(otherPlatoonConfig);
-                                removeChildElements(otherPlatoonConfig);
+                                if (numberOfAlliesAllowed > 1) {
+                                    numberOfAlliesAllowed--;
+                                } else {
+                                    alliedCheckbox.checked = false;
+                                    const otherPlatoonConfig = alliedCheckbox.parentElement.querySelector(".selectedPlatoon");
+                                    updateCostCalculation(otherPlatoonConfig);
+                                    removeChildElements(otherPlatoonConfig);
+                                }
                             }
                         }
                     });
@@ -1058,7 +1340,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return new Promise((resolve, reject) => {
             try {
                     fetchCardConfig(checkbox.dataset.cardinfo, platoonConfig)
-
+                    .then(() => {
+                        // Step 4: Update dependent select elements
+                        return updateSelectElements();
+                    })
                     .then(() => {
                         // Step 5: Adjust the grid layout
                         return redistributeGrid(box);
@@ -1124,7 +1409,7 @@ document.addEventListener("DOMContentLoaded", function () {
     boxesCheckboxes.forEach(checkbox => {
         initiatePrerequisites(checkbox.parentElement)
         checkbox.addEventListener("change", function () {
-
+            updatePlatoonCheckboxPrerequisites();
             const queryAttribute = this.getAttribute("name");
             const platoon = this.parentElement;
             const platoonCode = this.value; // Checkbox value (platoon code)

@@ -20,6 +20,7 @@ $codes = $data['code']??false;
 
 if ($codes) {
     include_once "sqlServerinfo.php";
+    include "htmlFunctions.php";
     $placeholders = "'" . implode("','", $codes) . "'";
 
     // Query for the platoonconfig table
@@ -33,18 +34,8 @@ if ($codes) {
 try {
 
     $cardItems = queryToItems($cardQuery, $conn);
-    ob_start();
 
-    ?>
-
-        <span class='left'><?=$cardItems[0]["notes"]?></span>
-        <div class='Points'>
-            <div>
-            <?=$cardItems[0]["price"]?> point<?=$cardItems[0]["price"]>1?"s":""?>
-            </div>
-        </div>
-    <?php
-    $html = ob_get_clean();
+    $html = cardConfigHTML($cardItems[0],$data['numbers']??1);
 
     // Return the result as JSON
     echo json_encode([
