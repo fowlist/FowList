@@ -1,11 +1,13 @@
 <?php
 
-function generateListArray($results, $conn) {
-    $Books = $conn->query("
-    SELECT  * 
-    FROM    nationBooks");
-    $sqlTempStatement = "";
-    $first = true;
+function generateListArray($results, $conn,$Periods=[["period"=>"LW"]]) {
+    foreach ($Periods as $key => $value) {
+            $Books[$value["period"]] = $conn[$value["period"]]->query("
+                SELECT  * 
+                FROM    nationBooks");
+    }
+    $sqlTempStatement = [];
+    $first = [];
     $listArray =[];
     foreach ($results as $listKey => $row) {
         $parts = parse_url($row['url']);
@@ -15,7 +17,7 @@ function generateListArray($results, $conn) {
         $listArray[$listKey]['query'] = $query;
         $platoons =[];
         $boxes =[];
-        foreach ($Books as $bookKey => $value) {
+        foreach ($Books[$query["pd"]] as $bookKey => $value) {
             if ($value['code']==$query["Book"]) {
                 $listArray[$listKey]["BookName"] = $value["Book"];
                 $listArray[$listKey]["pd"] = $value["periodLong"];
@@ -23,14 +25,14 @@ function generateListArray($results, $conn) {
                 $listArray[$listKey]["ShortBookName"] = strpos($temp,"Force")?substr($temp,0,strpos($temp,"Force")):$temp;  
             }
         }
-        $listArray[$listKey]["urlNew"] = $row['url']."&loadedListName=" . trim($row['name']) . ($row["tournament"]=="0"||$row["tournament"]=="none"?"":":" . trim($row["tournament"]));
-        $listArray[$listKey]["urlToListNew"] = $row['urlToList']."&loadedListName=" . trim($row['name']) . ($row["tournament"]=="0"||$row["tournament"]=="none"?"":":" . trim($row["tournament"]));
+        $listArray[$listKey]["urlNew"] = $row['url']."&loadedListName=" . trim($row['name']??"") . ($row["tournament"]=="0"||$row["tournament"]=="none"?"":":" . trim($row["tournament"]??""));
+        $listArray[$listKey]["urlToListNew"] = $row['urlToList']."&loadedListName=" . trim($row['name']??"") . ($row["tournament"]=="0"||$row["tournament"]=="none"?"":":" . trim($row["tournament"]??""));
         $listArray[$listKey]["urlToListNewBF"] = str_replace("listPrintGet.php","listPrintGetBFStyle.php",$listArray[$listKey]["urlToListNew"] );
         for ($formations=0; $formations < 6; $formations++) { 
             if (!empty($query["F{$formations}"])) {
-                $sqlTempStatement .= (!$first?" OR ":"") . "code LIKE '". $query["F{$formations}"] . "'";
+                $sqlTempStatement[$query["pd"]] = ($sqlTempStatement[$query["pd"]]??"") . (!($first[$query["pd"]]??true)?" OR ":"") . "code LIKE '". $query["F{$formations}"] . "'";
                 $listArray[$listKey]["FormationCode"][] = $query["F{$formations}"];
-                $first = False;
+                $first[$query["pd"]] = False;
             }
         }
         foreach ($query as $key => $value) {
@@ -47,18 +49,21 @@ function generateListArray($results, $conn) {
         $listArray[$listKey]['boxes'] = $boxes;
 
     }
-    if (!empty($sqlTempStatement)) {
-        $Formations = $conn->query(
+    foreach ($Periods as $key => $value) {
+        if (empty($sqlTempStatement[$value["period"]])) {
+            continue;
+        }
+        $Formations[$value["period"]] = $conn[$value["period"]]->query(
             "SELECT  * 
              FROM    formations 
              WHERE   formations.title NOT LIKE '%Support%'
-             AND {$sqlTempStatement}");
+             AND {$sqlTempStatement[$value["period"]]}");
     }
 
          
     foreach ($listArray as $key => $row) {
         foreach ($row["FormationCode"]??[] as $formationCodes) {
-            foreach ($Formations as $value) {
+            foreach ($Formations[$row['query']["pd"]] as $value) {
                 if ($formationCodes == $value["code"]) {
                     $listArray[$key]["Formation"][] = $value;
                 }
@@ -112,7 +117,7 @@ function generateShowListRows($listArray) {
                 <?= ($row["Formation"]??false)?$row["Formation"][0]["motivSkillHitOn"]:"" ?>
             </div>
         </div>
-        <a href="<?= $row['urlNew'] ?>" data-points="<?= $row['cost'] ?>"><?= ($row["Formation"]??false)?$row["Formation"][0]["title"]:"" ?></a>
+        <a href="<?= $row['urlToListNew'] ?>" data-points="<?= $row['cost'] ?>"><?= ($row["Formation"]??false)?$row["Formation"][0]["title"]:"" ?></a>
     </td>
     <td data-label="List Name" id="name-<?=$row['id']?>">
         <span class="rowControlls">

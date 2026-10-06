@@ -108,12 +108,13 @@ document.addEventListener("DOMContentLoaded", function () {
         platoonDetails.innerHTML = ""; // Clear previous details
     });
 
-    // Fetch platoon details via AJAX
-    function fetchPlatoonDetails(codes) {        
+    // Fetch platoon details via AJAX (send full platoonInfo like selectedPlatoonConfig)
+    function fetchPlatoonDetails(data) {
+        const platoonData = typeof data === 'string' ? JSON.parse(data) : data;
         fetch("fetchPlatoonDetails.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({codes: codes})
+            body: JSON.stringify({platoonInfo: platoonData})
 
         })
             .then(response => response.json())
@@ -135,12 +136,13 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    // Fetch platoon details via AJAX
-    function fetchPlatoonConfig(codes,platoon) {        
+    // Fetch platoon config via AJAX (send full platoonInfo)
+    function fetchPlatoonConfig(data, platoon) {
+        const platoonData = typeof data === 'string' ? JSON.parse(data) : data;
         fetch("selectedPlatoonConfig.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({codes: codes})
+            body: JSON.stringify({platoonInfo: platoonData})
 
         })
             .then(response => response.json())

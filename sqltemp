@@ -1,0 +1,227 @@
+    TRUNCATE TABLE alliedFormations;
+
+INSERT INTO alliedFormations
+SELECT
+	DISTINCT 
+    nationBooks.Book AS currentBook,
+    formations.*
+FROM
+    nationBooks
+LEFT JOIN
+    nationBooks AS nb 
+    ON 
+    nb.period = nationBooks.period
+    AND 
+    (nb.Nation = nationBooks.Nation
+    OR
+    nb.Allies LIKE CONCAT('%', nationBooks.Nation, '%'))
+LEFT JOIN 
+  	formations
+    ON 
+    nb.Book = formations.Book
+WHERE
+	formations.code NOT LIKE '%Support%'
+ORDER BY
+currentBook,
+formations.Book;
+
+TRUNCATE TABLE cmdCardFormationModDB;
+
+INSERT INTO cmdCardFormationModDB
+SELECT  DISTINCT 
+        cmdCardFormationMod.Book AS Book, 
+        cmdCardFormationMod.formation AS formation, 
+        cmdCardFormationMod.card AS card, 
+        cmdCardCost.platoonTypes AS platoonTypes, 
+        cmdCardCost.pricePerTeam AS pricePerTeam,     
+        cmdCardCost.price AS cost,
+        cmdCardsText.code AS code,
+        cmdCardsText.title AS title,
+        cmdCardsText.notes AS notes
+FROM    cmdCardFormationMod
+    LEFT JOIN cmdCardCost
+        LEFT JOIN cmdCardsText
+        ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
+    ON cmdCardCost.Book = cmdCardFormationMod.Book AND cmdCardCost.card = cmdCardFormationMod.card ;
+
+TRUNCATE TABLE cmdCardUnitModDB;
+
+INSERT INTO cmdCardUnitModDB
+    SELECT  DISTINCT 
+    cmdCardUnitMod.Book AS Book, 
+    cmdCardUnitMod.unit AS unit, 
+    cmdCardUnitMod.card AS card, 
+    cmdCardsText.code AS code,
+    cmdCardCost.pricePerTeam AS pricePerTeam,            
+    cmdCardCost.price AS cost
+FROM    cmdCardUnitMod
+    LEFT JOIN cmdCardCost
+        LEFT JOIN cmdCardsText
+        ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
+    ON cmdCardCost.Book = cmdCardUnitMod.Book AND cmdCardCost.card = cmdCardUnitMod.card ;
+
+
+TRUNCATE TABLE cmdCardUnitModForPrintDB;
+
+INSERT INTO cmdCardUnitModForPrintDB
+    SELECT  DISTINCT 
+    cmdCardUnitMod.Book AS Book, 
+    cmdCardUnitMod.unit AS unit, 
+    cmdCardUnitMod.card AS card, 
+    cmdCardCost.pricePerTeam AS pricePerTeam,            
+    cmdCardCost.price AS cost,
+    cmdCardsText.notes AS notes,
+    cmdCardUnitMod.image AS image,
+    cmdCardsText.title AS title,
+    cmdCardUnitMod.motivation AS motivation, 
+    cmdCardUnitMod.skill AS skill,  
+    cmdCardsText.code AS code,
+    cmdCardUnitMod.isHitOn AS isHitOn,
+    cmdCardUnitMod.addUnit AS addUnit,
+    cmdCardUnitMod.addWeapon AS addWeapon,
+    cmdCardUnitMod.replaceUnitStats AS replaceUnitStats
+
+FROM    cmdCardUnitMod
+    LEFT JOIN cmdCardCost
+        LEFT JOIN cmdCardsText
+        ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
+    ON cmdCardCost.Book = cmdCardUnitMod.Book AND cmdCardCost.card = cmdCardUnitMod.card;
+
+TRUNCATE TABLE cmdCardPlatoonModDB;
+
+INSERT INTO cmdCardPlatoonModDB
+SELECT  DISTINCT 
+    cmdCardPlatoonMod.Book AS Book, 
+    cmdCardPlatoonMod.platoon AS platoon, 
+    cmdCardPlatoonMod.card AS card,
+    cmdCardPlatoonMod.replacedText AS replacedText,
+    cmdCardPlatoonMod.replaceWith AS replaceWith,
+    cmdCardCost.price AS cost,
+    cmdCardCost.platoonTypes AS platoonTypes,
+    cmdCardsText.title AS title,
+    cmdCardsText.code AS code,
+    cmdCardPlatoonMod.onlyAddCard AS onlyAddCard,
+    cmdCardCost.pricePerTeam AS pricePerTeam,
+    cmdCardPlatoonMod.multiSelect AS multiSelect,
+    cmdCardsText.limited AS limited,
+    cmdCardPlatoonMod.prerequisite AS prerequisite,
+    cmdCardCost.dynamicPoints AS dynamicPoints
+FROM    cmdCardPlatoonMod
+    LEFT JOIN cmdCardCost
+        LEFT JOIN cmdCardsText
+        ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card             
+    ON cmdCardCost.Book = cmdCardPlatoonMod.Book AND cmdCardCost.card = cmdCardPlatoonMod.card     ;
+    
+
+
+TRUNCATE TABLE cmdCardPlatoonModForPrintDB;
+
+INSERT INTO cmdCardPlatoonModForPrintDB
+    SELECT  DISTINCT 
+    cmdCardPlatoonMod.Book AS Book, 
+    cmdCardPlatoonMod.platoon AS platoon, 
+    cmdCardPlatoonMod.card AS card, 
+    cmdCardPlatoonMod.motivation AS motivation, 
+    cmdCardPlatoonMod.skill AS skill, 
+    cmdCardPlatoonMod.isHitOn AS isHitOn, 
+    cmdCardCost.price AS cost, 
+    cmdCardCost.platoonTypes AS platoonTypes,
+    cmdCardsText.code AS code,
+    cmdCardPlatoonMod.replacedText AS replacedText,
+    cmdCardPlatoonMod.replaceWith AS replaceWith,
+    cmdCardPlatoonMod.addWeapon AS addWeapon,
+    cmdCardCost.pricePerTeam AS pricePerTeam,
+    cmdCardPlatoonMod.replaceUnitStats AS replaceUnitStats,
+    cmdCardsText.notes AS notes,
+    cmdCardsText.title AS title,
+    cmdCardPlatoonMod.prerequisite AS prerequisite
+FROM    cmdCardPlatoonMod
+    LEFT JOIN cmdCardCost
+        LEFT JOIN cmdCardsText
+        ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
+    ON cmdCardCost.Book = cmdCardPlatoonMod.Book AND cmdCardCost.card = cmdCardPlatoonMod.card ;
+
+TRUNCATE TABLE support_DB;
+
+INSERT INTO support_DB
+
+    SELECT  
+            support_Structure.formation AS formation, 
+            support_Structure.box_nr AS box_nr,  
+            support_Structure.box_type AS box_type, 
+            support_Structure.platoon AS platoon, 
+            support_Structure.title AS title, 
+            support_Structure.unitType AS unitType, 
+            formations.code AS code, 
+            formations.Book AS Book, 
+            support_Structure.box_nr AS ogBoxNr,
+            support_Structure.motivSkillHitOn AS motivSkillHitOn,
+            support_Structure.prerequisite AS prerequisite
+    FROM    support_Structure 
+    LEFT    JOIN    formations 
+        ON      formations.code = support_Structure.formation
+    WHERE   formations.title LIKE '%Support%';
+
+    TRUNCATE TABLE formationSupport_DB;
+
+INSERT INTO formationSupport_DB
+SELECT
+	DISTINCT 
+    nationBooks.Book,
+    nb.Book AS alliedBook,
+    formation_DB.formation AS formation, formation_DB.platoon , formation_DB.title AS title, formation_DB.unitType, formation_DB.box_type AS box_type, nb.Nation AS Nation,
+	(FIND_IN_SET(nationBooks.Book, nb.Book) + FIND_IN_SET(nationBooks.Nation, nb.Nation)) AS relevance,  formation_DB.motivSkillHitOn AS motivSkillHitOn
+FROM
+    nationBooks
+LEFT JOIN
+    nationBooks AS nb 
+    ON 
+    nb.period = nationBooks.period
+    AND 
+    (nb.Nation = nationBooks.Nation
+    OR
+    nb.Allies LIKE CONCAT('%', nationBooks.Nation, '%'))
+LEFT JOIN 
+  	formations
+    ON 
+    nb.Book = formations.Book
+LEFT JOIN
+    formation_DB
+    ON
+    formations.code = formation_DB.formation
+WHERE
+	formations.code NOT LIKE '%Support%'
+    AND
+    formation_DB.BlackBox = 1
+    AND
+    formations.code NOT LIKE '%CC%'
+ORDER BY 
+relevance DESC,
+formation_DB.box_type ASC,
+nationBooks.Book;
+
+
+
+TRUNCATE TABLE platoonConfigDB;
+
+INSERT INTO platoonConfigDB
+        SELECT  platoonConfig.* , unitT.unitType AS unitType , unitT.formation AS formation
+    FROM    platoonConfig
+    left    JOIN    (   SELECT DISTINCT unitType, platoon, formation
+                        FROM formation_DB )
+                    AS
+                    unitT
+            ON unitT.platoon = platoonConfig.platoon;
+
+
+TRUNCATE TABLE platoonConfigSupportDB;
+
+INSERT INTO platoonConfigSupportDB
+
+    SELECT  platoonConfig.* , unitT.unitType AS unitType, unitT.formation AS formation, Book
+    FROM    platoonConfig
+    INNER    JOIN    (   
+        SELECT DISTINCT unitType, platoon, formation, Book
+        FROM support_DB )
+        AS unitT
+    ON unitT.platoon = platoonConfig.platoon;

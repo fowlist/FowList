@@ -20,7 +20,6 @@ $currentUrl = $_SERVER['REQUEST_URI'];
           <?php else : ?>
             <a href="index.php?<?=$linkQuery?>">Edit List</a>
             <?php if ($pageIsDisplayList) :?>
-
               <a listPrint href="listPrintGet.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?><?=$costArrayStrig?>"><img class='buttonImage' src='img/viewList.svg' alt='View List' title='View List'> View List</a>
               <a listPrintBf href="listPrintGetBFStyle.php?<?=$linkQuery?><?=($query["loadedListName"]??false)?"&loadedListName={$query["loadedListName"]}":""?><?=$costArrayStrig?>"><img class='buttonImage' src='img/viewListBF.svg' alt='View List Bf style' title='View List Bf style'> View List BF style</a>
             <?php endif ?>
@@ -36,7 +35,7 @@ $currentUrl = $_SERVER['REQUEST_URI'];
         <?php endif ?>
         <a id="teamlLink" href="list_all_teams.php">Find Team</a>
           <a id="manualLink" href="https://github.com/fowlist/FowList/wiki/User-Manual">User manual</a>
-          <a id="tyLink" href="https://ty.fowlist.com/index.php?lsID=&pd=TY">WWIII team yankee</a>
+          <a id="tyLink" href="ty">WWIII team yankee</a>
           <?php if ($pageIsDisplayList) : ?>
             <span class="printButton" value="" onClick="window.print();">Print the page</span>
 
@@ -58,9 +57,10 @@ $currentUrl = $_SERVER['REQUEST_URI'];
     </header>
 <nav class="sidebar" id="sidebar">
   <span id="navClosebtn" class="closebtn" onclick="closeNav()">&times;</span>
-  <?php if (($userID??"na")!="" && $pageIsIndex): ?>
+  <?php if (($userID ?? "") != "" && $pageIsIndex): ?>
   <!-- Trigger -->
   <button type="submit"  onclick="openSaveLoad()" class="btn" >Save / Load</button>
+  <button type="submit"  onclick="openSettings()" class="btn" >Settings</button>
 
 <?php endif ?>
 
@@ -172,7 +172,9 @@ $currentUrl = $_SERVER['REQUEST_URI'];
 </div>
         </nav>
       
+<?php if (($userID ?? "") != "") : ?>
 <form id="saveListForm" method="post" action="<?=$currentUrl?>">
+<input type="hidden" name="csrf" value="<?=htmlspecialchars($_SESSION['csrf'] ?? '', ENT_QUOTES, 'UTF-8')?>">
 <!-- Overlay -->
 <div id="saveLoadOverlay" class="overlay hidden">
   <div class="overlay-content">
@@ -193,7 +195,6 @@ $currentUrl = $_SERVER['REQUEST_URI'];
         <?php if (isset($usersListsList)) echo generateListFrameHTML("listNameList", $usersListsList, "list"); ?>
 <input type="hidden" id="updated_url" name="updated_url" value="<?=$currentUrl?>">
       <div class="actions">
-                
         <button type="submit" name="updateSelected">Update selected</button>
         <button type="submit" name="loadSelected">Load selected</button>
       </div>
@@ -205,6 +206,7 @@ $currentUrl = $_SERVER['REQUEST_URI'];
       <input type="text" name="listName" placeholder="Enter new list name">
       <button type="submit" name="save_url">Save new list</button>
     </div>
+
               <!-- Event association -->
     <div class="section">
       <h3>Event</h3>
@@ -227,7 +229,38 @@ $currentUrl = $_SERVER['REQUEST_URI'];
   </div>
 </div>
         </form>
+        
+<!-- Settings Modal -->
+<div id="settingsOverlay" class="overlay hidden">
+  <div class="overlay-content">
+    <div class="overlay-header">
+      <h2>Settings<span class="close-btn" onclick="closeSettings()">&times;</span></h2>
+    </div>
+    <div class="overlay-body">
+      <form id="settingsForm" method="post" action="<?=$currentUrl?>">
+        <input type="hidden" name="csrf" value="<?=htmlspecialchars($_SESSION['csrf'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+        <div class="section">
+          <h3>Display Preferences</h3>
+          
+          <div class="input-group">
+            <label for="dpPresetsSelect">Default Points Preset:</label>
+            <select id="dpPresetsSelect" name="dpPresets">
+              <option value="Book">Book</option>
+              <option value="Latest">Latest</option>
+            </select>
+            <small>Choose how formation points are calculated by default</small>
+          </div>
 
+          <div class="actions">
+            <button type="submit" name="save_settings" class="btn">Save Settings</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<?php endif ?>
+        
     <?php if ($pageIsIndex) : ?>
           <div id="pointsOnTop" costArray="<?=htmlspecialchars(json_encode($dataToTransfer))?>">
             <div class='Points'>
@@ -289,15 +322,20 @@ function closeNav() {
   });
 
   function openSaveLoad() {
-  document.getElementById("saveLoadOverlay").classList.remove("hidden");
+  const overlay = document.getElementById("saveLoadOverlay");
+  if (!overlay) return;
+  overlay.classList.remove("hidden");
 };
 
 function closeSaveLoad() {
-  document.getElementById("saveLoadOverlay").classList.add("hidden");
+  const overlay = document.getElementById("saveLoadOverlay");
+  if (!overlay) return;
+  overlay.classList.add("hidden");
 };
 const filterInput = document.getElementById('listFilterInput');
 const listItems = document.querySelectorAll('.list-item');
 
+if (filterInput) {
 filterInput.addEventListener('input', () => {
   const filter = filterInput.value.toLowerCase();
 
@@ -313,5 +351,61 @@ filterInput.addEventListener('input', () => {
       item.style.display = 'none';
     }
   });
+});
+}
+
+function openSettings() {
+  const overlay = document.getElementById("settingsOverlay");
+  const select = document.getElementById("dpPresetsSelect");
+  if (!overlay || !select) return;
+  overlay.classList.remove("hidden");
+  // Load current dpPresets value if available
+  const currentDpPresets = getCookie('dpPresets') || '<?=isset($user["dpPresets"]) ? $user["dpPresets"] : "Book"?>';
+  select.value = currentDpPresets;
+}
+
+function closeSettings() {
+  const overlay = document.getElementById("settingsOverlay");
+  if (!overlay) return;
+  overlay.classList.add("hidden");
+}
+
+// Handle settings form submission via JavaScript
+document.addEventListener('DOMContentLoaded', () => {
+  const settingsForm = document.getElementById('settingsForm');
+  if (settingsForm) {
+    settingsForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const dpPresets = document.getElementById('dpPresetsSelect').value;
+      const formData = new FormData();
+      formData.append('save_settings', '1');
+      formData.append('dpPresets', dpPresets);
+      
+      console.log('Submitting settings:', { dpPresets });
+      
+      fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Response from server:', data);
+        
+        if (data.success) {
+          // Save to cookie for immediate use
+          setCookie('dpPresets', dpPresets, 30);
+          closeSettings();
+          alert('Settings saved successfully!');
+        } else {
+          alert('Error: ' + (data.error || 'Unknown error'));
+        }
+      })
+      .catch(error => {
+        console.error('Error saving settings:', error);
+        alert('Failed to save settings: ' + error);
+      });
+    });
+  }
 });
 </script>

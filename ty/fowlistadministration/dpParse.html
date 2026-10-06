@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Dynamic Points Parser</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; color: #f0f4f8; background: #000000;}
+        .controls { background: #333; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; gap: 20px; align-items: center; }
+        label { font-weight: bold; }
+        input[type="number"] { width: 60px; padding: 5px; }
+        #status { font-weight: bold; margin: 10px 0; color: #666; }
+        
+        /* Tabell-styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ddd; padding: 10px 12px; text-align: left; }
+        th { background-color: #0056b3; color: white; }
+        tr:nth-child(even) { background-color: #333; }
+        tr:hover { background-color: #5e5e5e; }
+    </style>
+
+    <!-- Laddar filen lokalt från din egen projektmapp -->
+    <script src="pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/index.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/jspreadsheet.min.css" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/jsuites@5/dist/jsuites.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites@5/dist/jsuites.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://bossanova.uk/jspreadsheet/v5/jspreadsheet.themes.css" type="text/css" />
+</head>
+<body>
+
+    <h2>PDF Dynamic Points Parser</h2>
+    
+    <div class="controls">
+        <div>
+            <label for="pdf-file">choose PDF-fil:</label>
+            <input type="file" id="pdf-file" accept=".pdf" />
+        </div>
+        <div>
+            <label for="start-page">start process from page:</label>
+            <input type="number" id="start-page" value="1" min="1" />
+        </div>
+    </div>
+
+    <div id="status">choose PDF-fil to start...</div>
+<div id="text-body"></div>
+    <table id="result-table" style="display:none;">
+        <thead>
+            <tr>
+                <th>Nation</th>
+                <th>Platoon / HQ</th>
+                <th>Code</th>
+                <th>Configuration</th>
+                <th>Point</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <!-- Parsad data hamnar här -->
+        </tbody>
+    </table>
+
+    
+
+    <script>
+        // Sätter upp den lokala worker-filen
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+
+        document.getElementById('pdf-file').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const startPage = parseInt(document.getElementById('start-page').value) || 1;
+            const statusDiv = document.getElementById('status');
+            const table = document.getElementById('result-table');
+            const tbody = document.getElementById('table-body');
+            
+            
+            statusDiv.textContent = "Läser in och tolkar PDF... Vänligen vänta.";
+            tbody.innerHTML = ""; // Rensa gammal data
+            
+            table.style.display = "none";
+
+            const fileReader = new FileReader();
+            
+            fileReader.onload = function() {
+                const typedarray = new Uint8Array(this.result);
+
+                pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                    let countPromises = [];
+
+                    // Loopa ENBART från och med den valda startsidan till dokumentets slut
+                    for (let i = startPage; i <= pdf.numPages; i++) {
+                        countPromises.push(
+                            pdf.getPage(i).then(function(page) {
+                                return page.getTextContent().then(function(textContent) {
+                                    return textContent.items.map(item => item.str).join(" ");
+                                });
+                            })
+                        );
+                    }
+
+                    // När alla valda sidor är inlästa kör vi parsningen
+                    Promise.all(countPromises).then(function(pagesText) {
+                        const fullCombinedText = pagesText.join(" ");
+                        processTextToTable(fullCombinedText);
+                        
+                    }).catch(function(err) {
+                        statusDiv.textContent = "Fel vid textutvinning: " + err.message;
+                    });
+
+                }).catch(function(error) {
+                    statusDiv.textContent = "Ett fel uppstod vid laddning av PDF: " + error.message;
+                });
+            };
+
+            fileReader.readAsArrayBuffer(file);
+        });
+
+        function processTextToTable(text) {
+            const statusDiv = document.getElementById('status');
+            const tbody = document.getElementById('table-body');
+            const table = document.getElementById('result-table');
+            const textString = document.getElementById('text-body');
+
+            const nationMapping = {
+                'G' : 'West German',
+                'B' : 'British',
+                'AU': 'ANZAC',
+                'U' : 'American',
+                'S' : 'Soviet',
+                'SV': 'Swedish',
+                'IS': 'Israeli',
+                'IQ': 'Iraqi',
+                'IR': 'Iranian',
+                'NO': 'Norwegian',
+                'V' : 'East Germans',
+                'PL': 'Polish',
+                'CZ': 'Czechoslovaks',
+                'FI': 'Finnish',
+                'BE': 'Belgian',
+                'CU': 'Cuban',
+                'NL': 'Dutch',
+                'F' : 'French',
+                'CA': 'Canadian',
+                'SY': 'Syrian',
+                'DK': 'Danish'
+            };
+
+            // 1. Hämta alla nationer, gör om till versaler och sortera efter längd (längst först)
+            const nations = Object.values(nationMapping)
+                .map(name => name.toUpperCase())
+                .sort((a, b) => b.length - a.length);
+
+            
+
+            // 2. Skapa ett regex dynamiskt: ^(WEST GERMAN|CZECHOSLOVAK|AMERICAN...)\s*
+            const dynamicRegex = new RegExp(`(${nations.join('|')})\\s*`, 'i');
+
+            // 1. Tvätta texten: Ta bort alla radbrytningar och dubbla mellanslag helt
+            let cleanText = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
+            let codeRegex = 
+
+            cleanText = cleanText.replace(/\(\s*T\s*([A-Z]{1,2})\s*(\d{2,3})\s*([a-zA-Z]?)\s*\)/gi, '(T$1$2$3)');
+
+            // 2. Hitta ALLA äkta plutonsrubriker i hela texten först och spara deras positioner
+            // Vi tillåter ett valfritt mellanslag i koden på slutet (t.ex. "TU111 a") tack vare \s*
+            const unitRegex = /([\p{L}\d\s'’\-]+?)\s*\(\s*T\s*([A-Z]{1,2})\s*(\d{2,3})\s*([a-zA-Z]?)\s*\)/gu;
+
+            
+
+        //const unitRegex = /([\w\d\s\-\'’]+?)\s*\(T([A-Z]{1,2})\s*(\d+)\s*([a-z]?)\s*\)/g;
+            let units = [];
+            let match;
+
+            while ((match = unitRegex.exec(cleanText)) !== null) {
+
+                
+
+                const countryCode = match[2];
+                const numCode = match[3];
+                const letterCode = match[4].trim();
+                const fullCode = `T${countryCode}${numCode}${letterCode}`;
+                const nation = nationMapping[countryCode] || "Okänd (" + countryCode + ")";
+
+                
+
+                // --- NY STRATEGI FÖR ATT IGNORERA INTERNA KODER (som TU205) ---
+                // Vi kikar på de närmaste 20 tecknen efter parentesen. 
+                // Om ordet "points" eller "point" finns där, är detta en del av en konfiguration, INTE en ny pluton!
+                const textAfterMatch = cleanText.substring(unitRegex.lastIndex, unitRegex.lastIndex + 15).toLowerCase();
+                
+                if (textAfterMatch.includes("point")) {
+                    continue; // Hoppa över denna träff och gå direkt till nästa!
+                }
+                // -------------------------------------------------------------
+
+                // Tvätta enhetsnamnet från inledande sidnummer och nationsnamn (t.ex. "4 AMERICAN M1A1...")
+                let cleanUnitName = match[1].trim();
+                // Tar bort inledande siffror (sidnummer) och eventuella nationsord i början av namnet
+                cleanUnitName = cleanUnitName.replace(/^\d+\s*/, ''); // Tar bort "4 "
+                cleanUnitName = cleanUnitName.replace(dynamicRegex, '');// Tar bort nationen
+                // 1. Ta bort allt som läckt med från föregående alternativ (t.ex. "1x M1A1HC Abrams 11 points")
+                cleanUnitName = cleanUnitName.replace(/.*?\d+\s*points?\s*/gi, '');
+
+                // --- NY FIX: Ta bort lösa, inledande "points"-ord som blivit kvar i skarven ---
+                cleanUnitName = cleanUnitName.replace(/^points?\s+/i, '');
+
+
+                units.push({
+                    nation: nation,
+                    unitName: cleanUnitName,
+                    code: fullCode,
+                    startIndex: match.index,
+                    endIndex: unitRegex.lastIndex
+                });
+                
+            }
+
+
+            // 3. Hitta ALLA poängrader i texten
+            // Matchar t.ex: "4x AH-1 Cobra (TOW) 13 points" eller "2x A... 7 point"
+            const optionRegex = /(\d+x\s+.+?)(?:\s+(\d+)\s+points)/gi;
+            let options = [];
+            let optMatch;
+
+            while ((optMatch = optionRegex.exec(cleanText)) !== null) {
+                options.push({
+                    text: optMatch[1],
+                    points: optMatch[2],
+                    startIndex: optMatch.index,
+                    endIndex: optionRegex.lastIndex
+                    
+                });
+                //textString.innerHTML += optMatch[1] + "<br>";
+            }
+
+            if (options.length === 0) {
+                statusDiv.textContent = "Kunde inte hitta några poängrader (X points) i texten.";
+                return;
+            }
+
+            // 4. Koppla ihop varje poängrad med rätt pluton och bygg texten bakåt
+            for (let i = 0; i < options.length; i++) {
+                const currentOpt = options[i];
+                // Hitta vilken plutonsrubrik som ligger närmast INNAN denna poängrad
+                let associatedUnit = null;
+                for (let j = 0; j < units.length; j++) {
+                    if (units[j].endIndex <= currentOpt.startIndex) {
+                        associatedUnit = units[j];
+                    }
+                }
+
+                if (!associatedUnit) continue; // Om poängraden ligger före första rubriken, hoppa över
+
+                // Ta reda på var texten för detta alternativ faktiskt börjar.
+                // Det börjar antingen där den tillhörande plutonsrubriken slutar, 
+                // eller där den FÖREGÅENDE poängraden slutade.
+                let textStartPos = associatedUnit.endIndex;
+                if (i > 0 && options[i-1].endIndex > textStartPos && options[i-1].endIndex < currentOpt.startIndex) {
+                    textStartPos = options[i-1].endIndex;
+                }
+
+                // Extrahera hela textblocket för detta alternativ (inklusive ev. infanteritexter före)
+                let fullOptionText = options[i].text;
+
+
+                
+                fullOptionText = fullOptionText.replace(/(?!^)\s?\b(\d+x\b)/g, '\n$1');
+                // Lägg till raden i tabellen
+                appendRow(
+                    associatedUnit.nation,
+                    associatedUnit.unitName,
+                    associatedUnit.code,
+                    fullOptionText,
+                    currentOpt.points
+                );
+            }
+
+            function appendRow(nation, unit, code, option, points) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${nation}</td>
+                    <td>${unit}</td>
+                    <td>${code}</td>
+                    <td>${option}</td>
+                    <td>${points}</td>
+                `;
+                tbody.appendChild(row);
+            }
+
+            statusDiv.textContent = `Klart! Processade ${options.length} rader baserat på en linjär textsträng.`;
+            table.style.display = "table";
+                      table = jspreadsheet(document.getElementById("result-table"), {
+    
+    worksheets: [{
+      minDimensions: 6,
+      tableOverflow: true,
+
+      columnSorting: true,
+      sortOnClick: true,  
+      columnResize: true,
+      allowInsertColumn: false,
+      allowDeleteColumn: false,
+      allowRenameColumn: false,
+      search: true,
+      wordWrap: true,
+      filters: true
+
+    }]
+});
+        }
+
+
+    </script>
+
+</body>
+</html>

@@ -39,7 +39,7 @@ body {
 	right: -14px;
 	z-index: 10;
 }
-	
+
 /* Apply common styles to elements with images */
 .card, .platoon img, .blackbox img {
     filter: invert(var(--image-style));

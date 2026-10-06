@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="14.800623mm"
+   height="6.8285179mm"
+   viewBox="0 0 14.800623 6.8285179"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="inkporter-svg-pp9qbc87.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.71891835"
+     inkscape:cx="397.12437"
+     inkscape:cy="561.25984"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-97.666526,-89.958319)">
+    <g
+       id="FR-Panhard-AMD"
+       transform="matrix(0.32859895,0,0,0.32859895,35.49777,-29.06142)">
+      <circle
+         style="fill:#000000;fill-rule:evenodd;stroke-width:0.1;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill"
+         id="path8"
+         cx="196.81728"
+         cy="377.83942"
+         r="5.1449385" />
+      <circle
+         style="fill:#000000;fill-rule:evenodd;stroke-width:0.1;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill"
+         id="circle8"
+         cx="224.27254"
+         cy="377.83942"
+         r="5.1449385" />
+      <path
+         style="fill:#000000;fill-rule:evenodd;stroke-width:0.1;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill"
+         d="m 197.84626,378.76099 25.86501,0.42095 6.36101,0.23386 2.99342,-3.04019 0.28063,-0.56126 0.88868,-0.65482 v -1.59025 l -1.21608,-0.60804 -0.5145,-0.84188 1.6838,-0.60804 -16.65089,-1.30963 -1.63703,-3.78854 -2.66601,-4.2095 -1.35639,0.0935 -7.99804,0.93546 -1.44994,1.4967 -1.02899,0.0468 -0.18708,0.37417 -0.98222,0.14033 -0.18709,-0.32742 -0.51449,0.23387 -5.09817,0.18708 -0.42095,-0.1403 h -0.37417 l -0.32741,0.23386 -2.0112,-0.18709 0.14031,0.84188 1.82412,-0.18708 0.23386,0.0935 0.60804,-0.0935 h 5.51911 l 0.70159,0.28064 -0.79513,0.0935 0.56126,0.51451 1.40317,0.37417 -0.65481,0.60804 -1.77734,0.14031 -0.8419,1.63703 -2.10475,1.63703 -2.10475,0.56126 -1.59025,0.93543 -0.23386,-0.88865 -1.59026,0.0468 -0.14031,0.79512 -1.26285,0.65479 1.21608,0.60804 -0.14032,2.85311 1.07576,1.1693 -1.44994,0.60804 0.18709,0.42095 z"
+         id="path9" />
+    </g>
+  </g>
+</svg>

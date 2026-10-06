@@ -17,6 +17,7 @@ function queryToItems($query, $conn) {
 
 $data = json_decode(file_get_contents("php://input"), true)??[];
 $codes = $data['codes']??false;
+$query["pd"] = $data["pd"]??"";
 
 if ($codes) {
     include_once "sqlServerinfo.php";
@@ -34,16 +35,16 @@ try {
     $cardItems = queryToItems($cardQuery, $conn);
     ob_start();
     foreach ($cardItems as $key => $value) {
-        
-        ?>
-        <tr>
-            <td class='statsrow'>
+    
+    ?>
+    <tr>
+        <td class='statsrow'>
                 <span class='left'><b><?=$value["card"]?></b></span>
-                <br>
+            <br>
                 <span class='left'><?=cardNoteParse($value,false)?></span>
-            </td>
-        </tr>
-        <?php
+        </td>
+    </tr>
+    <?php
     }
 
     $html = ob_get_clean();

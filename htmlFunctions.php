@@ -27,10 +27,8 @@ function platoonTitle($platoonInBox,$formation) {
             <b>
                 <?=isset($formation["formationCard"])&&!empty($formation["formationCard"]["title"])?trim($formation["formationCard"]["title"]).": ":""?><?=str_replace(" Force","",$platoonInBox["title"]??"")?>
             </b>
-
             </span>
             <span class="cardCode"><?=$platoonInBox["platoon"]??""?></span>
-
             <span><?=msi($platoonInBox)?></span>
         </div>
     <?php
@@ -43,9 +41,19 @@ function platoonConfigHTML($platoonInBox,$boxPositionID) {
     ob_start();
     ?>
             <div class="configBox">
-                <select id="<?=$boxPositionID?>" name="<?=$boxPositionID?>c" class="select-element" currentCost="<?=$platoonInBox["configCost"]?>">
+                <select 
+                    id="<?=$boxPositionID?>"
+                    name="<?=$boxPositionID?>c"
+                    class="select-element"
+                    currentCost="<?=$platoonInBox["configCost"]?>">
                 <?php foreach ($platoonInBox["config"] as $shortID => $config) {?>
-                    <option <?=($config["selected"]??false)?"selected":""?> value="<?=$shortID?>" cost="<?=$config["cost"]?>" nrOfTeams="<?=$config["nrOfTeams"]?>"><?=$config["configuration"]?> <?=$config["cost"]?> points</option>
+                    <option 
+                    <?=($config["selected"]??false)?"selected":""?> 
+                    value="<?=$shortID?>" 
+                    cost="<?=$config["cost"]?>" 
+                    teamsNumbers="<?=htmlspecialchars(json_encode($config["teamsInSelectedConfig"]??[]))?>"
+                    nrOfTeams="<?=$config["nrOfTeams"]?>">
+                    <?=$config["configuration"]?> <?=$config["cost"]?> points</option>
                 <?php } ?>
                 </select>
             </div>
@@ -85,13 +93,22 @@ function boxOptionPrintHTML($platoonInBox,$boxPositionID) {
     if (!empty($platoonInBox["Options"])): ?>
         <div class="optionBox">
         <?php foreach ($platoonInBox["Options"] as $optionNr => $options):
-            if (count($options["dDAlternatives"])>1) { ?>
-                <?=$options["description"]?> <?=$options["dDAlternatives"][0]["dynamicPoints"]?"(dynamic: {$options["dDAlternatives"][0]["dynamicPoints"]}p each)":""?>
+
+            if (count($options["dDAlternatives"])>1||$options["dDAlternatives"][0]["numberaction"] == "up to half") { ?>
+                <?=$options["description"]?>
+                <?=$options["dDAlternatives"][0]["dynamicPoints"]?"(dynamic: {$options["dDAlternatives"][0]["dynamicPoints"]}p {$options["dDAlternatives"][0]["eachPrice"]})":""?>
                 <br>
                 <select 
+                <?=($options["dDAlternatives"][0]["disabled"])?"disabled":""?>
                     id="<?=$boxPositionID?>box-Op<?=$optionNr?>" 
                     name="<?=$boxPositionID?>Op<?=$optionNr?>" 
                     currentCost="<?=$options["thisCost"]??"0"?>"
+                    cost="<?=$options["dDAlternatives"][0]["price"]??"0"?>"
+                    removeTeam="<?=$options["dDAlternatives"][0]["removeTeam"]??""?>"
+                    addTeams="<?=$options["dDAlternatives"][0]["teams"]??""?>"
+                    action="<?=strtoupper($options["dDAlternatives"][0]["action"]??"")?>"
+                    numberaction="<?=$options["dDAlternatives"][0]["numberaction"]??""?>"
+                    eachPrice="<?=$options["dDAlternatives"][0]["eachPrice"]??""?>"
                     class="<?=$boxPositionID?>Option">
                     <option 
                         value="">
@@ -100,22 +117,30 @@ function boxOptionPrintHTML($platoonInBox,$boxPositionID) {
                 <?php foreach ($options["dDAlternatives"] as $optionRow):?>
                     <option 
                         <?=($optionRow["selected"]??false)?"selected":""?> 
+                        <?=($optionRow["disabled"]??false)?"disabled":""?>
                         value="<?=$optionRow["optionSelection"]?>" cost="<?=$optionRow["cost"]??"0"?>">
-                        <?=$optionRow["nrOfOptions"]?>x <?=$optionRow["teams"]?> (<?=$optionRow["cost"]?> points)
+                        <?=$optionRow["optionSelection"]?>x <?=$optionRow["teams"]?> (<?=$optionRow["cost"]?> points)
                     </option>
                 <?php endforeach ?>
                 </select>
             <?php } else { ?>
-                <label>
+                <label class="<?=($options["dDAlternatives"][0]["disabled"]??false)?"disabledLabel":""?>" >
                     <input 
                         <?=($options["dDAlternatives"][0]["selected"]??false)?"checked":""?> 
+                        <?=($options["dDAlternatives"][0]["disabled"]??false)?"disabled":""?>
                         type="checkbox" 
                         id="<?=$boxPositionID?>box-Op<?=$optionNr?>" 
                         name="<?=$boxPositionID?>Op<?=$optionNr?>" 
                         class="<?=$boxPositionID?>Option" 
                         value="<?=$options["dDAlternatives"][0]["optionSelection"]?>"
-                        cost="<?=$options["dDAlternatives"][0]["cost"]??"0"?>">
-                    <?=$options["description"]?>
+                        currentCost="<?=$options["dDAlternatives"][0]["currentCost"]??"0"?>"
+                        removeTeam="<?=strtoupper($options["dDAlternatives"][0]["removeTeam"]??"")?>"
+                        addTeams="<?=strtoupper($options["dDAlternatives"][0]["teams"]??"")?>"
+                        action="<?=strtoupper($options["dDAlternatives"][0]["action"]??"")?>"
+                        numberaction="<?=strtoupper($options["dDAlternatives"][0]["numberaction"]??"")?>"
+                        cost="<?=$options["dDAlternatives"][0]["cost"]??"0"?>"
+                        eachPrice="<?=$options["dDAlternatives"][0]["eachPrice"]??""?>">
+                    <?=$options["description"]?> (<?=$options["dDAlternatives"][0]["cost"]??"0"?> points)
                 </label>
             <?php } ?>
         <?php endforeach?>
@@ -257,9 +282,15 @@ function boxPrintHTML($platoonInBox,$boxPositionID) {
 function generateFormationButtonsHTML($Formations, $bookTitle, $thisNation, $currentFormation, $currentPlatoon, $currentUnit, $insignia) {
     ob_start();
 
-    $ntn = $thisNation['ntn']??$thisNation??"";
+    
     if (isset($Formations)&&query_exists($Formations)) {
         foreach ($Formations as $row) {
+            if (isset($row["otherNation"])&&$row["otherNation"]!="") {
+                $ntn = $row['otherNation'];
+            } else
+            {
+                $ntn = $thisNation['ntn']??$thisNation??"";
+            }
             if ($row["Book"] == $bookTitle) {
                 ?>
             <button type='submit' id="<?=$currentFormation?>box<?=$row["code"]?>" name='<?=$currentFormation?>' value='<?=$row["code"]?>' class='platoon <?=$ntn?>'>
@@ -284,7 +315,7 @@ function generateFormationButtonsHTML($Formations, $bookTitle, $thisNation, $cur
                 </span>
                 <div class='title'>
                     <span class='left nation'>
-                        <?= generateTitleImanges($insignia, $row["title"], $ntn)?>
+                        <?= generateTitleImanges($insignia, $row["title"], $ntn, $row["insignia"]??null)?>
                     <?php if (is_numeric(strpos($row["code"],"CC"))) {
                         ?>
                         <div class="floatingImg"><img src='img/Card.svg'></div>

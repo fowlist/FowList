@@ -1,14 +1,23 @@
+function getCsrfToken() {
+    const direct = document.getElementById('csrfToken');
+    const fromForm = document.querySelector('input[name="csrf"]');
+    const value = direct && typeof direct.value === 'string' ? direct.value : (fromForm && typeof fromForm.value === 'string' ? fromForm.value : '');
+    return String(value).trim();
+}
+
 function saveRow(row) { 
     const rowId = row.querySelector(".save-btn").getAttribute("data-id");
+    const csrfToken = getCsrfToken();
     const updatedData = {
         id: rowId,
         name: row.querySelector(`#name-${rowId} .nameField`).textContent,
-        event: row.querySelector(`#event-${rowId}`).textContent
+        event: row.querySelector(`#event-${rowId}`).textContent,
+        csrf: csrfToken
     };
 
     fetch("save_row.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
         body: JSON.stringify(updatedData)
     })
     .then(response => response.json())
@@ -60,7 +69,7 @@ function displayItem(item) {
 
 document.addEventListener("DOMContentLoaded", function () {
     
-
+    const csrfToken = getCsrfToken();
     
     const editSelectedModal = document.getElementById("editSelectedModal");
     const closeSelectedModal = editSelectedModal.querySelector(".close");
@@ -251,12 +260,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 const updatedData = {
                     id: rowId,
                     name: row.querySelector(`#name-${rowId} .nameField`).textContent,
-                    event: row.querySelector(`#event-${rowId}`).textContent
+                    event: row.querySelector(`#event-${rowId}`).textContent,
+                    csrf: csrfToken
                 };
     
                 fetch("save_row.php", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
                     body: JSON.stringify(updatedData)
                 })
                     .then(response => response.json())
@@ -453,7 +463,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ selectedIds }),
+                body: JSON.stringify({ selectedIds, csrf: csrfToken }),
             })
             .then(response => response.json())
             .then(data => {
@@ -486,6 +496,11 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
         // Set the form action to the duplicate handler PHP file
+        const formCsrf = document.createElement('input');
+        formCsrf.type = 'hidden';
+        formCsrf.name = 'csrf';
+        formCsrf.value = csrfToken;
+        editForm.appendChild(formCsrf);
         editForm.action = "duplicate_url.php"; 
         editForm.submit();
 
@@ -506,6 +521,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 initiateRowSaveButtons();
                 initializeContentEditableListeners();
                 initiateEditButtons();
+                updateStickyPosition();
                 break; // Only need to reinitialize once per batch
             }
             if (mutation.type === "characterData" ||  mutation.type === "attributes") {
@@ -525,10 +541,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // Start observing the table body for child node changes
     observer.observe(tableBody, observerConfig);
 
-    const mainHeader = document.getElementById("main-header").offsetHeight;
-    const editRowHeight = document.querySelector(".editRow").offsetHeight + mainHeader;
-    document.documentElement.style.setProperty("--edit-row-height", `${editRowHeight}px`);
-    document.documentElement.style.setProperty("--header-row-height", `${mainHeader}px`);
+    const mainHeader = document.getElementById("main-header");
+    const editRow = document.querySelector(".editRow");
+    
+    const calculateTotalHeight = () => {
+        const mainHeaderHeight = mainHeader.getBoundingClientRect().height;
+        const editRowHeight = editRow.getBoundingClientRect().height;
+        const totalHeight = mainHeaderHeight + editRowHeight;
+        
+        document.documentElement.style.setProperty("--edit-row-height", `${totalHeight}px`);
+        document.documentElement.style.setProperty("--header-row-height", `${mainHeaderHeight}px`);
+    };
+    
+    calculateTotalHeight();
     // Update on page load and resize
 
     // Utility to temporarily disable the observer
@@ -547,22 +572,17 @@ document.addEventListener("DOMContentLoaded", function () {
         observer.observe(document.querySelector("#listTable tbody"), observerConfig); // Re-enable the observer
     }
 
-    const updateStickyPosition = () => {
-        const editRow = document.querySelector(".editRow");
-        const mainHeader = document.getElementById("main-header");
-        
-        const root = document.documentElement;
-        const isMobile = window.innerWidth <= 1100;
-       
-       
-        if (isMobile) {
-            let mainHeaderVisibleHeight = mainHeader.getBoundingClientRect().bottom;
-
-            let editRowHeight = editRow.offsetHeight + ((mainHeaderVisibleHeight >0)? mainHeaderVisibleHeight : 0);
-    
-            root.style.setProperty("--edit-row-height", `${editRowHeight}px`);
-        }
+     const updateStickyPosition = () => {
+        calculateTotalHeight();
     };
+    
+    // Watch for changes to the editRow element height using ResizeObserver
+    const resizeObserver = new ResizeObserver(() => {
+        calculateTotalHeight();
+    });
+    
+    resizeObserver.observe(editRow);
+    resizeObserver.observe(mainHeader);
     updateStickyPosition();
     window.addEventListener("resize", updateStickyPosition);
     window.addEventListener("scroll", updateStickyPosition); 
@@ -628,7 +648,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const requestData = {
             id: entryId,
             name: editName,
-            event: editEvent ?? ""
+            event: editEvent ?? "",
+            csrf: csrfToken
         };
 
         fetch("save_row.php", {
@@ -749,7 +770,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ selectedIds }),
+                body: JSON.stringify({ selectedIds, csrf: csrfToken }),
             })
             .then(response => response.json())
             .then(data => {
@@ -807,7 +828,7 @@ document.addEventListener("DOMContentLoaded", function () {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ updates }),
+            body: JSON.stringify({ updates, csrf: csrfToken }),
         })
             .then(response => response.json())
             .then(data => {
@@ -855,7 +876,7 @@ document.addEventListener("DOMContentLoaded", function () {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ ids: selectedIds }),
+            body: JSON.stringify({ ids: selectedIds, csrf: csrfToken }),
         })
             .then(response => response.json())
             .then(data => {

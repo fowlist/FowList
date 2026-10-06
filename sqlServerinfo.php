@@ -18,6 +18,7 @@ $dbname = "ki12570048_Fowlist";
 $dbnameFS = "ki12570048_Fowlist_firestorm";
 $dbnameGW = "ki12570048_Fowlist_GW";
 $userDB  = "ki12570048_users";
+$dbnameEW = "dbs15153684";
 
 $parts1 = parse_url($_SERVER['REQUEST_URI']);
 $query1 = [];
@@ -30,6 +31,9 @@ if (($query1['pd']??"") == "GW"||($query['pd']??"") == "GW") {
 }
 if (($query1['pd']??"") == "CP"||($query['pd']??"") == "CP") {
     $dbname = $dbnameFS;
+}
+if (($query1['pd']??"") == "EW"||($query['pd']??"") == "EW") {
+    $dbname = $dbnameEW;
 }
 unset($query1);
 unset($parts1);

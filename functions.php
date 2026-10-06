@@ -294,21 +294,24 @@ function generateListFrameHTML($inputName, $optionsArray, $type = "list", $onCha
         foreach ($optionsArray as $option) {
             $id = $inputName . "_" . htmlspecialchars($option["value"]);
             $checked = (isset($option["selected"]) && $option["selected"] == 1) ? "checked" : "";
+            $nation = $option["nation"] ?? "";
+            $period = $option["period"] ?? "";
+            $event = $option["event"] ?? "";
             $images = "";
             if ("list" == $type) {
                 $images = "
-                    <img class='period insignia' src='img/{$option["period"]}.svg' alt=''>
-                <img class='insignia' src='img/{$option["nation"]}.svg' alt=''>
+                    <img class='period insignia' src='img/{$period}.svg' alt=''>
+                <img class='insignia' src='img/{$nation}.svg' alt=''>
                 ";
             }
 
             $output .= "
-            <label for='{$id}' class='{$type}-item' data-nation='{$option["nation"]}' data-period='{$option["period"]}' data-event='{$option["event"]}'>
+            <label for='{$id}' class='{$type}-item' data-nation='{$nation}' data-period='{$period}' data-event='{$event}'>
 
                 <input type='radio' name='{$inputName}' id='{$id}' value='{$option["value"]}' {$checked}>
                             {$images}
                 <span class='list-text'>{$option["description"]}</span>
-                <span class='event-text'>{$option["event"]}</span>
+                <span class='event-text'>{$event}</span>
             </label>\n";
         }
         $output .= "</div>\n";
@@ -583,7 +586,10 @@ function processFormationCards($formationNr, $formationCards, &$query, $currentF
             $useTitle = empty($row5["title"])?$row5['card']:$row5["title"];
             $row5["description"] =$useTitle;
             if ((!empty($query[$formationNr . "-Card"])&&($row5["code"] === $query[$formationNr . "-Card"]))|| 
-                (empty($query[$formationNr . "-Card"])&&!empty($query[$currentFormation])&&$query[$currentFormation] == $row5["formation"]&&is_numeric(strpos($query[$currentFormation],"C")))) {
+                (empty($query[$formationNr . "-Card"])&&!empty($query[$currentFormation])&&
+                $query[$currentFormation] == $row5["formation"]&&
+                is_numeric(strpos($query[$currentFormation],"C"))&&
+                $row5["card"] == $boxesPlatoonsData["formationTitle"])) {
                 $selected = "selected";
                 $row5["selected"]= true;
                 $cmdCardTitleOfEntireFormation = $row5['title']; // Set the card title
@@ -661,16 +667,30 @@ function addConfigToBoxPlatoon($platoonConfig, &$boxesPlatoonsData,&$query,$curr
         }
     }
 
-    if (!isset($query[$currentBoxInFormation . "c"])||(!is_numeric(strpos($query[$currentBoxInFormation . "c"],$boxesPlatoonsData["platoon"]))||!is_numeric(strpos($thisPlatoonConfigShortCodes, $query[$currentBoxInFormation . "c"])))) {
+    if (!isset($query[$currentBoxInFormation . "c"])||(!is_numeric(strpos($query[$currentBoxInFormation . "c"],$boxesPlatoonsData["platoon"]))&&!isset($boxesPlatoonsData["configChange"])||(!is_numeric(strpos($thisPlatoonConfigShortCodes, $query[$currentBoxInFormation . "c"]))))) {
         unset($query[$currentBoxInFormation . "c"]);
         $boxesPlatoonsData["config"]["autoset"]=true;
     } else {
         $boxesPlatoonsData["config"][$query[$currentBoxInFormation . "c"]]["selected"] = true;
     }
-
     if (isset($platoonConfig)&&query_exists($platoonConfig)) {
+        $teamsinSelectedConfig ="";
         foreach ($thisPlatoonConfig as $ConfigRowValue) {
-            if ($ConfigRowValue["platoon"] === $boxesPlatoonsData["platoon"]) {
+            if (strtoupper($ConfigRowValue["platoon"]) === strtoupper($boxesPlatoonsData["platoon"])) {
+                $teamsinSelectedConfig = explode("|",strtoupper($ConfigRowValue["teams"]));
+                $numberOfTeams = explode("|",$ConfigRowValue["actualSections"]);
+
+                foreach ($numberOfTeams as $teamNr => $teamValue) {
+                    $eachNumberOfTeams = explode("x",$teamValue);
+                    if (count($eachNumberOfTeams) > 1) {
+                        $numberOfTeams[$teamNr] = intval($eachNumberOfTeams[0])*intval($eachNumberOfTeams[1]);
+                    } else {
+                        $numberOfTeams[$teamNr] = intval($teamValue);
+                    }
+                }
+                foreach ($teamsinSelectedConfig as $key => $teamValue) {
+                    $boxesPlatoonsData["config"][$ConfigRowValue["shortID"]]["teamsInSelectedConfig"][$teamValue] = intval($boxesPlatoonsData["config"][$ConfigRowValue["shortID"]]["teamsInSelectedConfig"][$teamValue]??0) + $numberOfTeams[$key];
+                }
                 if (isset($query["dPs"])&&($query["dPs"]=="true")&&(!empty($ConfigRowValue["dynamicPoints"]))) {
                     $ConfigRowValue["cost"] = $ConfigRowValue["dynamicPoints"];
                 } 
@@ -680,11 +700,11 @@ function addConfigToBoxPlatoon($platoonConfig, &$boxesPlatoonsData,&$query,$curr
                     unset($boxesPlatoonsData["config"]["autoset"]);
                 }
                 if ($boxesPlatoonsData["config"][$ConfigRowValue["shortID"]]["selected"]??false) {
-
                     $boxesPlatoonsData["platoonCost"] = $boxesPlatoonsData["platoonCost"]??0 + $ConfigRowValue["cost"];
                     actualSectionsEval($ConfigRowValue, $boxesPlatoonsData["boxSections"]);
                     $query[$currentBoxInFormation . "c"] =$ConfigRowValue["shortID"];
                     $boxesPlatoonsData["configCost"] = $boxesPlatoonsData["configCost"]??0 + $ConfigRowValue["cost"];
+                    $boxesPlatoonsData["teamsInSelectedConfig"] = $boxesPlatoonsData["config"][$ConfigRowValue["shortID"]]["teamsInSelectedConfig"];
                 }
                 $boxesPlatoonsData["box_type"] .= (!empty($ConfigRowValue["attachment"])?"|Attachment":"");
 
@@ -694,11 +714,112 @@ function addConfigToBoxPlatoon($platoonConfig, &$boxesPlatoonsData,&$query,$curr
         }
     }
 }
+function newAddOptionsToBoxPlatoon($platoonOptionHeaders, &$boxesPlatoonsData,&$query, $currentBoxInFormation) {
+    $teamsConfigNumbers= $boxesPlatoonsData["teamsInSelectedConfig"];
+    foreach ($platoonOptionHeaders as $key => $optionHeaderRow) {
 
+        $optionHeaderRow["currentCost"] = $optionHeaderRow["price"]??0;
+        if (isset($query["dPs"])&&($query["dPs"]=="true")&&!empty($optionHeaderRow["dynamicPoints"])) {
+            $optionHeaderRow["price"] = $optionHeaderRow["dynamicPoints"];
+        }
+        if (!isset($optionHeaderRow["price"])) {
+            break;
+        }
+        $optionHeaderRow["cost"] = $optionHeaderRow["price"]??0;
+        $removeTeam = strtoupper($optionHeaderRow["removeTeam"]??"");
+        $addTeams = explode("|",strtoupper($optionHeaderRow["teams"]));
+        $optionHeaderRow["disabled"] = FALSE;
+
+        if ($optionHeaderRow["action"]=="Replace") {
+            switch ($optionHeaderRow["numberaction"]) {               
+                case "any or All": 
+                    $optionHeaderRow["nrOfteams"] = $teamsConfigNumbers[$removeTeam]??0;
+                    if ($optionHeaderRow["eachPrice"] != "") {
+                        $optionHeaderRow["currentCost"] = $optionHeaderRow["price"];
+                    } 
+                    break;
+                case "up to half": 
+                    $optionHeaderRow["nrOfteams"] = floor(($teamsConfigNumbers[$removeTeam]??0)/2);
+
+                    $optionHeaderRow["nrOfOptions"] = floor(($teamsConfigNumbers[$removeTeam]??0)/2);
+                    if ($optionHeaderRow["eachPrice"] != "") {
+                        $optionHeaderRow["currentCost"] = $optionHeaderRow["price"];
+                    } 
+                    break;
+                case "two": 
+                    $optionHeaderRow["nrOfteams"] = $teamsConfigNumbers[$removeTeam]??0;
+                    if ($optionHeaderRow["eachPrice"] == "") {
+                        $optionHeaderRow["currentCost"] = $optionHeaderRow["price"];
+                    } 
+                    break;
+                case "All":
+                    $optionHeaderRow["nrOfteams"] = $teamsConfigNumbers[$removeTeam]??$optionHeaderRow["nrOfteams"]??$boxesPlatoonsData["teamsInSelectedConfig"];
+                    $optionHeaderRow["nrOfOptions"] = 1;
+                    if ($optionHeaderRow["eachPrice"] != "") {
+                        $optionHeaderRow["currentCost"] = $optionHeaderRow["price"]*$teamsConfigNumbers[$removeTeam];
+                    } elseif ($optionHeaderRow["eachPrice"] == "each") {
+                        $optionHeaderRow["currentCost"] = $optionHeaderRow["price"];
+                    }
+                    break;  
+                default:
+                    $optionHeaderRow["nrOfteams"] = $teamsConfigNumbers[$removeTeam]??0;
+                    if ($optionHeaderRow["eachPrice"] != "") {
+                        $optionHeaderRow["currentCost"] = $optionHeaderRow["price"];
+                    } 
+                    break;
+            }
+        } else {
+            $optionHeaderRow["nrOfteams"] = ($optionHeaderRow["numberaction"] =="")?null:explode("|",strtoupper($optionHeaderRow["numberaction"]));
+        }
+        if (!isset($teamsConfigNumbers[$removeTeam])&&$optionHeaderRow["action"]=="Replace"&&$removeTeam!="") {
+            $optionHeaderRow["disabled"] = true;
+        }
+
+        for ($optionSelection=1; $optionSelection <= $optionHeaderRow["nrOfOptions"]; $optionSelection++) { 
+            $thisrow = $optionHeaderRow;
+            $thisrow["currentCost"] = $optionHeaderRow["currentCost"]* ($optionHeaderRow["eachPrice"] != ""?$optionSelection:1);
+            $thisrow["optionSelection"] = $optionSelection;
+            $thisrow["cost"] = $thisrow["cost"] * ($optionHeaderRow["eachPrice"] != ""?$optionSelection:1);
+            if (isset($optionHeaderRow["nrOfteams"]) && $optionHeaderRow["nrOfteams"] <= $optionSelection && $optionHeaderRow["action"] == "Replace"&& ($optionHeaderRow["numberaction"] == "any or All"||$optionHeaderRow["numberaction"] == "up to half")) {
+                 $thisrow["disabled"] = true;
+            }
+
+            if ($optionSelection == ($query[$currentBoxInFormation . "Op" . $optionHeaderRow["optionID"]]??"")) {
+                if (($removeTeam == ""&&$optionHeaderRow["numberaction"]!='All')||(!empty($teamsConfigNumbers[$removeTeam]))) {
+
+                    foreach ($addTeams as $teamIndex => $eachAddTeams) {
+
+                        $teamsConfigNumbers[$eachAddTeams] = 
+                        ($teamsConfigNumbers[$eachAddTeams]??0)+
+                        (!is_array($optionHeaderRow["nrOfteams"])||
+                        isset($optionHeaderRow["nrOfteams"][$teamIndex]) && 
+                        $optionHeaderRow["nrOfteams"][$teamIndex] == ""?
+                        $optionSelection:
+                        $optionHeaderRow["nrOfteams"][$teamIndex]);
+                    }
+                    if ($removeTeam != "") {
+                        $teamsConfigNumbers[$removeTeam] = ($teamsConfigNumbers[$removeTeam]??0)-(!is_array($optionHeaderRow["nrOfteams"])||$optionHeaderRow["nrOfteams"][$teamIndex] == ""?0:$optionHeaderRow["nrOfteams"][$teamIndex]);
+                    }
+                    $thisrow["selected"] = true;
+
+                    $boxesPlatoonsData["platoonCost"] = ($boxesPlatoonsData["platoonCost"]??0) + $thisrow["currentCost"] ;
+                    }
+                //$boxesPlatoonsData["Options"][$optionSelection]["thisCost"] = $thisrow["currentCost"];
+                      
+            }
+
+            $boxesPlatoonsData["Options"][$optionHeaderRow["optionID"]]["dDAlternatives"][]=$thisrow;
+        }
+
+        $boxesPlatoonsData["Options"][$optionHeaderRow["optionID"]]["description"] = $optionHeaderRow["description"];
+    }
+    $boxesPlatoonsData["teamsInSelectedConfig"] =$teamsConfigNumbers;
+
+}
 
 function addOptionsToBoxPlatoon($platoonOptionHeaders, $platoonOptionOptions,&$boxesPlatoonsData,&$query, $currentBoxInFormation) {
     foreach ($platoonOptionOptions as $optionRowValue) {
-        if ($optionRowValue["code"] === $boxesPlatoonsData["platoon"]){
+        if ($optionRowValue["code"] === $boxesPlatoonsData["platoon"]&&isset($platoonOptionHeaders[$boxesPlatoonsData["platoon"]])){
             foreach ($platoonOptionHeaders[$boxesPlatoonsData["platoon"]] as $optionID => $headerRowValue) {
                 if ($headerRowValue["code"] === $boxesPlatoonsData["platoon"]&&$optionRowValue["description"]===$headerRowValue["description"]) {
                     if (isset($query["dPs"])&&($query["dPs"]=="true")&&!empty($headerRowValue["dynamicPoints"])) {
@@ -714,7 +835,7 @@ function addOptionsToBoxPlatoon($platoonOptionHeaders, $platoonOptionOptions,&$b
                         $boxesPlatoonsData["Options"][$optionID]["thisCost"] = $optionRowValue["cost"];
                         
                     }
-                    $boxesPlatoonsData["Options"][$optionID]["dDAlternatives"][]=$optionRowValue;
+                    $boxesPlatoonsData["Options"][$optionID]["dDAlternatives"][]=str_replace(array("(A3+)","(A4+)","(A5+)","(A6)"),"", $optionRowValue);
                     $boxesPlatoonsData["Options"][$optionID]["description"] = $headerRowValue["description"];
 
                 }
@@ -903,6 +1024,15 @@ function saveBox($platoonSaveText, $platoonSaveChanged = ""){
     return $HTML;
 }
 
+function roundAwayFromZero($v) {
+    //had to add for hungarian volunteer rifle.. check so they work when finding the other reason this exists
+    if ($v > 1) return (int)round($v);
+    if ($v < 1&&($v > 0)) return (int)round($v);
+    if ($v > 0) return (int)ceil($v);
+    if ($v < 0) return (int)floor($v);
+    return 0;
+}
+
 function addPlatoonCardToBoxPlatoon($platoonCards, &$boxesPlatoonsDataFormation, $currentBoxNr, $platoonInBox, &$query, $formationNr,$currentBoxInFormation=false) {
     if (!$currentBoxInFormation) {
         $currentBoxInFormation = "{$boxesPlatoonsDataFormation["currentFormation"]}-{$currentBoxNr}";
@@ -928,7 +1058,6 @@ function addPlatoonCardToBoxPlatoon($platoonCards, &$boxesPlatoonsDataFormation,
     }
     if ($boxesPlatoonsDataFormation["boxes"][$currentBoxNr][$platoonInBox]["selected"]??false) {
         if (isset($platoonCards)&&query_exists($platoonCards))
-
         foreach ($platoonCards as $PlatoonCardRow) {
             $typePlatoonEval = ($PlatoonCardRow["platoonTypes"]== "")||
                                 ($PlatoonCardRow["platoonTypes"]== "Platoon")||
@@ -938,15 +1067,22 @@ function addPlatoonCardToBoxPlatoon($platoonCards, &$boxesPlatoonsDataFormation,
             $generalEval = !$thisCardIsLimitedaAndUsedSomewhereElse&&$PlatoonCardRow["platoon"] == $boxesPlatoonsDataFormation["boxes"][$currentBoxNr][$platoonInBox]["platoon"] && isset($PlatoonCardRow["code"])&&$cardPlatoonEval&&$typePlatoonEval;
             
             if ($generalEval) {
-
                 if (isset($query["dPs"])&&($query["dPs"]=="true")&&(!empty($PlatoonCardRow["dynamicPoints"]))) {
                     $PlatoonCardRow["cost"] = $PlatoonCardRow["dynamicPoints"];
                 }
+                if (is_array($PlatoonCardRow["cost"])) {
+                    $useCost = (int)$PlatoonCardRow["cost"][0];
+                } else {
                 $useCost = $PlatoonCardRow["cost"];
+                }
                 $cardIndex++;
-                
                 $cardsPrerequisitEval = true;
-                if ((!empty($PlatoonCardRow["prerequisite"])&&!is_numeric(strpos($currentBoxInFormation,"BlackBox")))&&$PlatoonCardRow["prerequisite"]!="Warrior"&&$PlatoonCardRow["prerequisite"]!="AddOn"&&$PlatoonCardRow["prerequisite"]!="Limited") {
+                if ((!empty($PlatoonCardRow["prerequisite"])&&!is_numeric(strpos($currentBoxInFormation,"BlackBox")))
+                    &&$PlatoonCardRow["prerequisite"]!="Warrior"
+                    &&$PlatoonCardRow["prerequisite"]!="AddOn"
+                    &&$PlatoonCardRow["prerequisite"]!="Limited"
+                    &&$PlatoonCardRow["prerequisite"]!="Remove"
+                    &&$PlatoonCardRow["prerequisite"]!="Block") {
                     $cardsPrerequisitEval =false;
                     $PlatoonCardRow["formcard"]  = true;
                     foreach (explode("|",$PlatoonCardRow["prerequisite"]) as $value) {
@@ -959,6 +1095,11 @@ function addPlatoonCardToBoxPlatoon($platoonCards, &$boxesPlatoonsDataFormation,
                         $cardsPrerequisitEval = is_numeric(strpos($cardsPrerequisitAddOnEvalSource,$value)) || $cardsPrerequisitEval;
                     }
                 }
+                
+                if (!empty($PlatoonCardRow["prerequisite"])&&substr($PlatoonCardRow["prerequisite"],0,5)=="Block") {
+                    $PlatoonCardRow["formcard"]  = false;
+                    $cardsPrerequisitEval = true;
+                }
 
                 if ($generalEval) {
                     $cardInQuery =false;
@@ -970,12 +1111,11 @@ function addPlatoonCardToBoxPlatoon($platoonCards, &$boxesPlatoonsDataFormation,
                         }
                     }
                     $PlatoonCardRow["disabled"] = !$cardsPrerequisitEval;
-
                     $thisCardEval = $cardInQuery || (($PlatoonCardRow["title"] != "")&&(($boxesPlatoonsDataFormation["formCard"]["title"]??"N/A") == $PlatoonCardRow["title"]));
                     if ((($boxesPlatoonsDataFormation["title"]??"") != $PlatoonCardRow["title"])&&(!empty($boxesPlatoonsDataFormation["formCard"]["title"]))&&($PlatoonCardRow["title"] != "")) {
                         unset($query[$currentBoxInFormation . "Card" . $cardIndex]);
                     }
-                    $thisCost = round($useCost * 
+                    $thisCost = roundAwayFromZero($useCost * 
                     $boxesPlatoonsDataFormation["boxes"][$currentBoxNr][$platoonInBox]["boxSections"]["total"] * 
                     $PlatoonCardRow["pricePerTeam"]);
 
@@ -985,7 +1125,6 @@ function addPlatoonCardToBoxPlatoon($platoonCards, &$boxesPlatoonsDataFormation,
                     } else {
                         $PlatoonCardRow["thisCost"] = $useCost;
                     }
-
                     if (!empty($PlatoonCardRow["multiSelect"])) {
                         $optionsInCard = explode("|",$PlatoonCardRow["multiSelect"]);
                         $PlatoonCardRow["thisCost"] = $useCost;
@@ -993,7 +1132,7 @@ function addPlatoonCardToBoxPlatoon($platoonCards, &$boxesPlatoonsDataFormation,
 
                             $PlatoonCardRow["options"][$optionNumber]["value"] = $optionNumber;
                             $PlatoonCardRow["options"][$optionNumber]["description"] = $optionsInCard[1];
-                            $PlatoonCardRow["options"][$optionNumber]["cost"] = $PlatoonCardRow["thisCost"] * $optionNumber;
+                            $PlatoonCardRow["options"][$optionNumber]["cost"] = roundAwayFromZero($PlatoonCardRow["thisCost"] * $optionNumber * ($PlatoonCardRow["pricePerTeam"]!=0?$PlatoonCardRow["pricePerTeam"]:1));
                             $cardInQuery = false;
                             foreach ($cardArray as $key => $value) {
                                 if ($PlatoonCardRow["code"].$optionNumber===$value) {
@@ -1020,10 +1159,18 @@ function addPlatoonCardToBoxPlatoon($platoonCards, &$boxesPlatoonsDataFormation,
                             }
                         }
                     } else {
-                        if ((empty($query["Warrior"])||(isset($query["Warrior"])&&$PlatoonCardRow["code"]==$query["Warrior"]||($PlatoonCardRow["prerequisite"]!="Warrior")))&&$thisCardEval&&$cardsPrerequisitEval) {
 
+                        if ((empty($query["Warrior"])||(isset($query["Warrior"])&&$PlatoonCardRow["code"]==$query["Warrior"]||($PlatoonCardRow["prerequisite"]!="Warrior")))&&$thisCardEval&&$cardsPrerequisitEval) {
                             $PlatoonCardRow["selected"] = true;
                             $PlatoonCardRow["currentCost"] = $PlatoonCardRow["thisCost"];
+                            while (isset($query[$currentBoxInFormation . "Card" . $cardIndex])&&$cardIndex <= 20) {
+                                if (($PlatoonCardRow["code"] == $query[$currentBoxInFormation . "Card" . $cardIndex])) {
+                                    break;
+                                }
+                                if (isset($query[$currentBoxInFormation . "Card" . $cardIndex])) {
+                                    $cardIndex++;
+                                }
+                            }
                             $query[$currentBoxInFormation . "Card" . $cardIndex] = $PlatoonCardRow["code"];
                             $boxesPlatoonsDataFormation["boxes"][$currentBoxNr][$platoonInBox]["platoonCost"] =($boxesPlatoonsDataFormation["boxes"][$currentBoxNr][$platoonInBox]["platoonCost"]??0) + $PlatoonCardRow["thisCost"];
                             if ($PlatoonCardRow["prerequisite"]=="Warrior") {
@@ -1033,12 +1180,19 @@ function addPlatoonCardToBoxPlatoon($platoonCards, &$boxesPlatoonsDataFormation,
                                 $query[$PlatoonCardRow["code"]] = $currentBoxInFormation;
                             }
 
-                        } 
+                        }
+                    }
+                    while (isset($query[$currentBoxInFormation . "Card" . $cardIndex])&&$cardIndex <= 20) {
+                        if (($PlatoonCardRow["code"] == $query[$currentBoxInFormation . "Card" . $cardIndex])) {
+                            break;
+                        }
+                        if (isset($query[$currentBoxInFormation . "Card" . $cardIndex])) {
+                            $cardIndex++;
+                        }
                     }
                     $boxesPlatoonsDataFormation["boxes"][$currentBoxNr][$platoonInBox]["platoonCards"][$cardIndex] = $PlatoonCardRow;
 
                     if ($thisCardEval) {
-
                         if ($PlatoonCardRow["replacedText"] == "After") {
                             $boxesPlatoonsDataFormation["boxes"][$currentBoxNr][$platoonInBox]["title"] = $boxesPlatoonsDataFormation["boxes"][$currentBoxNr][$platoonInBox]["title"] . $PlatoonCardRow["replaceWith"];
                         } elseif (($PlatoonCardRow["replacedText"] == "") && ($PlatoonCardRow["replaceWith"] != "")) {
@@ -1080,11 +1234,13 @@ function addUnitCardsToBoxPlatoon($unitCards,&$boxesPlatoonsData,$query,$current
             if ($unitCardRow["unit"] == $boxesPlatoonsData["unitType"] && !empty($unitCardRow["code"])) {
                 $cardIndex++;
                 if ($unitCardRow["pricePerTeam"] != "0") {
-                    $thisCost = round($unitCardRow["cost"] * $boxesPlatoonsData["boxSections"]["total"] * $unitCardRow["pricePerTeam"]);
+                $thisCost = round($unitCardRow["cost"] * $boxesPlatoonsData["boxSections"]["total"] * $unitCardRow["pricePerTeam"]);
                 } else {
                     $thisCost = $unitCardRow["cost"];
                 }
-                $thisCost = max($thisCost,1.0);
+                if ($thisCost != 0) {
+                    $thisCost = max($thisCost,1.0);
+                }
                 $unitCardRow["thisCost"] = $thisCost;
                 if (isset($query[$currentBoxInFormation . "uCd" . $cardIndex])&&$unitCardRow["code"] === $query[$currentBoxInFormation . "uCd" . $cardIndex]) {
                     $unitCardRow["selected"] = true;
@@ -1096,9 +1252,11 @@ function addUnitCardsToBoxPlatoon($unitCards,&$boxesPlatoonsData,$query,$current
     }
 }
 
-function generateTitleImanges($insignia, $title, $nation) {
+function generateTitleImanges($insignia, $title, $nation, $setInsignia = null) {
     $HTML = "";
-
+    if ($setInsignia != null) {
+        return "<img src='img/{$setInsignia}.svg'>";
+    }
     foreach ($insignia as $row) {
         if ((strpos($title,$row["term"]) !== false)&&(($row["ntn"] == "")||(($nation == $row["ntn"])))) {
             $HTML  = "<img src='img/{$row['img']}.svg'>";
@@ -1115,32 +1273,32 @@ function generateTitleImanges($insignia, $title, $nation) {
     return $HTML;
 }
 
-
 function platoonOptionChangedAnalysis($row, $platoonOptionHeaders, $platoonOptionOptions) {
     $platoonOptionChanged = [];
     $platoonOptionHeadersChanged = [];
     if (!empty($row["optionChange"])&&$row["optionChange"] != "Remove") {
-        $optionChangeRow = explode("\n",$row["optionChange"]);
+        $optionChangeRow = explode("|",$row["optionChange"]);
         $optionNr=0;
         $code = $row["platoon"];
-        foreach ($optionChangeRow as $replaceOptionValue) {
-            $temp = explode("|",$replaceOptionValue);
+
+        for ($i=0; $i < (empty($optionChangeRow[1])?1:$optionChangeRow[1]); $i++) { 
             $platoonOptionChanged[] = array(
                 "code" => $row["platoon"],
-                "description" =>     (empty($temp[0])?"":$temp[0]),
-                "nrOfOptions" =>    (empty($temp[1])?0:$temp[1]),
-                "optionSelection" => (empty($temp[2])?0:$temp[2]),
-                "price" =>           (empty($temp[3])?0:$temp[3]),
-                "teams" =>           (empty($temp[4])?"":$temp[4]),
-                "removeTeam" =>      (empty($temp[5])?"":$temp[5]),
-                "image" =>           (empty($temp[6])?"":$temp[6]),
-                "addUnit" =>         (empty($temp[7])?"":$temp[7]),
-                "replaceText" =>     (empty($temp[8])?"":$temp[8]),
-                "ReplacementOrSufix" =>  (empty($temp[9])?"":$temp[9]),
-                "addSufixTo" =>          (empty($temp[10])?0:$temp[10]),
-                "dynamicPoints" =>       (empty($temp[11])?null:$temp[11])
+                "description" =>     (empty($optionChangeRow[0])?"":$optionChangeRow[0]),
+                "nrOfOptions" =>    (empty($optionChangeRow[1])?0:$optionChangeRow[1]),
+                "optionSelection" => (empty($optionChangeRow[1])?0:$optionChangeRow[1]),
+                "price" =>           (empty($optionChangeRow[2])?0:$optionChangeRow[2]),
+                "teams" =>           (empty($optionChangeRow[3])?"":$optionChangeRow[3]),
+                "removeTeam" =>      (empty($optionChangeRow[4])?"":$optionChangeRow[4]),
+                "image" =>           (empty($optionChangeRow[5])?"":$optionChangeRow[5]),
+                "addUnit" =>         (empty($optionChangeRow[6])?"":$optionChangeRow[6]),
+                "replaceText" =>     (empty($optionChangeRow[7])?"":$optionChangeRow[7]),
+                "ReplacementOrSufix" =>  (empty($optionChangeRow[8])?"":$optionChangeRow[8]),
+                "addSufixTo" =>          (empty($optionChangeRow[9])?"":$optionChangeRow[9]),
+                "dynamicPoints" =>       (empty($optionChangeRow[10])?null:$optionChangeRow[10])
             );
-            $description = $temp[0];
+        
+            $description = $optionChangeRow[0];
             $needle = ["code" => $code,"description" => $description, "oldNr" => 0, "dynamicPoints" => ($row["optionChangeDp"]??"")];
             // Check if the combination of Nation and period exists in the unique array
             if (!in_array($needle, $platoonOptionHeadersChanged[$code]??[])) {
@@ -1156,6 +1314,43 @@ function platoonOptionChangedAnalysis($row, $platoonOptionHeaders, $platoonOptio
     } else {
         $platoonOptionHeadersChanged = $platoonOptionHeaders;
         $platoonOptionChanged = $platoonOptionOptions;
+    }
+    return [$platoonOptionHeadersChanged, $platoonOptionChanged];
+}
+function newPlatoonOptionChangedAnalysis($row, $platoonOptionHeaders) {
+    $platoonOptionChanged = [];
+    $platoonOptionHeadersChanged = [];
+    if (!empty($row["optionChange"])&&$row["optionChange"] != "Remove") {
+        $optionChangeRow = explode("\n",$row["optionChange"]);
+        $optionNr=0;
+        $code = $row["platoon"];
+        foreach ($optionChangeRow as $replaceOptionValue) {
+            $temp = explode("|",$replaceOptionValue);
+            $platoonOptionHeadersChanged[] = array(
+                "code" => $row["platoon"],
+                "description" =>     (empty($temp[0])?"":$temp[0]),
+                "nrOfOptions" =>    (empty($temp[1])?0:$temp[1]),
+                "price" =>           (empty($temp[2])?0:floatval($temp[2])),
+                "teams" =>           (empty($temp[3])?"":$temp[3]),
+                "removeTeam" =>      (empty($temp[4])?"":$temp[4]),
+                "image" =>           (empty($temp[5])?"":$temp[5]),
+                "addUnit" =>         (empty($temp[6])?"":$temp[6]),
+                "replaceText" =>     (empty($temp[7])?"":$temp[7]),
+                "ReplacementOrSufix" =>  (empty($temp[8])?"":$temp[8]),
+                "addSufixTo" =>          (empty($temp[9])?0:$temp[9]),
+                "dynamicPoints" =>       (empty($temp[10])?null:$temp[10]),
+                "action" =>              (empty($temp[11])?"":$temp[11]),
+                "numberaction" =>      (empty($temp[12])?"":$temp[12]),
+                "eachPrice" =>       (empty($temp[13])?"":$temp[13]),
+                "optionID" => $optionNr++
+            );
+        }
+    } elseif ((!empty($row["optionChange"])&&$row["optionChange"] == "Remove")) {
+        $code = $row["platoon"];
+        $platoonOptionHeaders[$code] =[];
+        $platoonOptionHeadersChanged = [];
+    } else {
+        $platoonOptionHeadersChanged = $platoonOptionHeaders;
     }
     return [$platoonOptionHeadersChanged, $platoonOptionChanged];
 }
@@ -1291,7 +1486,12 @@ function calculatePlatoonCost($cardRowPlatoon, $boxRow) {
     
     if ($cardRowPlatoon["pricePerTeam"] != 0.0) {
         $sections = explode("|", $boxRow["sections"]);
-        $nrOfTeams = array_sum($sections);
+        //had to add for hungarian volunteer rifle.. check so they work when finding the other reason this exists
+        if (0 == ($boxRow["nrOfTeamsOld"] ?? 0)) {
+            $nrOfTeams = array_sum($sections);
+        } else {
+            $nrOfTeams = $boxRow["nrOfTeamsOld"];
+        }
         $thisCost *= ($nrOfTeams > 0 ? $nrOfTeams : $boxRow["nrOfTeams"]) * $cardRowPlatoon["pricePerTeam"];
     }
     return round($thisCost > 0.0 ? max($thisCost, 1.0) : ($thisCost == 0.0 ? 0 : min($thisCost, -1.0)));
@@ -1318,8 +1518,8 @@ function createAttachment($exploded, $platoonIndex, $cardRowPlatoon) {
     return ["code" => $exploded[2], "platoonIndex" => $platoonIndex, "title" => $cardRowPlatoon["title"]];
 }
 
-function printBoxImageAndGeneratePlatoonOptionsHTML($platoonOptionHeaders, $platoonOptionOptions,$boxRow, &$configRow, $query, &$weaponsTeamsInForce, &$attachmentsInForce, $platoonIndex, $currentFormation, $unitCardImage, &$platoonCardMod) {
-    $optionsHTML = generatePlatoonOptionsPrintHTML($platoonOptionHeaders, $platoonOptionOptions,$boxRow, $configRow, $query, $weaponsTeamsInForce, $attachmentsInForce, $platoonIndex, $currentFormation, $platoonsInForce);
+function printBoxImageAndGeneratePlatoonOptionsHTML($platoonOptionHeaders, $platoonOptionOptions,$boxRow, &$configRow, $query, &$weaponsTeamsInForce, &$attachmentsInForce, $platoonIndex, $currentFormation, $unitCardImage, &$platoonCardMod, $currentBoxInFormation=null) {
+    $optionsHTML = generatePlatoonOptionsPrintHTML($platoonOptionHeaders, $platoonOptionOptions,$boxRow, $configRow, $query, $weaponsTeamsInForce, $attachmentsInForce, $platoonIndex, $currentFormation, $platoonsInForce, $currentBoxInFormation);
     $boxImageHTML = "";//printBoxImageHTML($boxRow, $configRow, $weaponsTeamsInForce, $attachmentsInForce, $platoonIndex, $currentFormation, $unitCardImage, $platoonCardMod);
     return  [$boxImageHTML,$optionsHTML];
 }
@@ -1329,84 +1529,99 @@ function generatePlatoonOptionsPrintHTML($platoonOptionHeaders, $platoonOptionOp
     $sections = explode("|",$configRow["sections"],15);
     $configImage = explode("|",$configRow["image"],15);
     $configTeams = explode("|",$configRow["teams"],15);
-    $actualSections = explode("|",$configRow["actualSections"]??$configRow["sections"],15);
-    $actualSectionsMultiplyer = [];
-    foreach ($actualSections as $key => $value) {
-        $actualSectionsMultiplyer[$key] = substr($value,strpos($value,"x")+1);
-    }
 
-    $tempImage = [];
-    $tempConfigImage = [];
-    $tempTeams = [];
-    $tempConfigTeams = [];
-    $tempSections = [];
-    $tempSectionsEval = [];
-    $tempActualSections = [];
-    $tempActualSectionsEval = [];
+    if (isset($configRow["actualSections"])) {
+        foreach (explode("|", $configRow["actualSections"], 15) as $key => $boxSection) {
 
-    foreach ($configImage as $key => $boxImage) {
-        $tempConfigImage = array_merge($tempConfigImage, array_fill(0, $sections[$key], $boxImage));
-        $tempConfigTeams = array_merge($tempConfigTeams, array_fill(0, $sections[$key], $configTeams[$key]??""));
-        $tempActualSections = array_merge($tempActualSections, array_fill(0, $sections[$key], $actualSectionsMultiplyer[$key]??""));
+            $parts = explode("x", $boxSection, 15);
+            if (count($parts) > 1) {
+                $numbersOfTeams = intval($parts[0])*intval($parts[1]);
+            } else {
+                $numbersOfTeams = $boxSection;
+            }
+            $explodeNumberTeams[$key] = $numbersOfTeams;
+        }
     }
     $currentPlatoon = $boxRow["platoon"];
     if (!isset($currentBoxInFormation)) {
         $currentBoxInFormation = $currentFormation ."-" . ($boxRow["box_nr"]??"");
     }
     $optionsHTML ="";
-
-    $optionImageReplaceNumber = 0;
     if (isset($platoonOptionHeaders[$currentPlatoon])) {
         foreach ($platoonOptionHeaders[$currentPlatoon] as $key5 => $row5) {
         if  ($row5["code"] == $currentPlatoon){
 
-            foreach($platoonOptionOptions as $row4) {
+            foreach($platoonOptionOptions as $platoonOptionOptionsRow) {
 
-                if  (($row4["code"] == $currentPlatoon)&&($row5["description"] == $row4["description"])) {
+                if  (($platoonOptionOptionsRow["code"] == $currentPlatoon)&&($row5["description"] == $platoonOptionOptionsRow["description"])) {
 
-                        if ((isset($query[$currentBoxInFormation . "Option" .$row5["oldNr"]])&&$row4["optionSelection"] == $query[$currentBoxInFormation . "Option" .$row5["oldNr"]])||$row4["optionSelection"] === ($query[$currentBoxInFormation . "Op" . $key5]??"")) {
-                        $optionTeamReplaceNumber = $row4["nrOfOptions"];
-                        $platoonsInForce[$platoonIndex]["option"][] = $row4["description"];
-                        if ($row4["replaceText"] != "") {
-                            $optionImageReplaceNumber = $row4["nrOfOptions"];
-                        }
-                        else if (($row4["ReplacementOrSufix"] == "")&&$row4["image"] != "") {
-                            for ($i=0; $i < $row4["optionSelection"]; $i++) { 
-                                $tempConfigTeams[] = $row4["teams"];
-                                $tempConfigImage[] = $row4["image"];
-                            } 
+                    if ((isset($query[$currentBoxInFormation . "Option" .$row5["oldNr"]])&&$platoonOptionOptionsRow["optionSelection"] == $query[$currentBoxInFormation . "Option" .$row5["oldNr"]])||$platoonOptionOptionsRow["optionSelection"] === ($query[$currentBoxInFormation . "Op" . $key5]??"")) {
+                        $platoonsInForce[$platoonIndex]["option"][] = $platoonOptionOptionsRow["description"];
+                        $teamadded = false;
+
+                        if ($platoonOptionOptionsRow["teams"] != "") {
+                            
+                            if ($platoonOptionOptionsRow["removeTeam"]  != "") {
+                                
+                                foreach ($configTeams as $key => $value) {
+
+                                    if ($value == $platoonOptionOptionsRow["removeTeam"]) {
+
+                                        if (is_numeric(strpos(" " . $configImage[$key]." ", $platoonOptionOptionsRow["addSufixTo"]))&&$platoonOptionOptionsRow["addSufixTo"] != ""&&$platoonOptionOptionsRow["addSufixTo"][0]=="-") {
+                                            $configTeams[$key] =$platoonOptionOptionsRow["teams"];
+                                            
+                                            $configImage[$key] = str_replace($platoonOptionOptionsRow["replaceText"], $platoonOptionOptionsRow["ReplacementOrSufix"], $configImage[$key]);
+                                            $teamadded = true;
+                                            continue 1;
                         } 
-                        if ($row4["teams"] != "") {
-                            $weaponsTeamsInForce[] = $row4["teams"];
+                                        if (($explodeNumberTeams[$key]==1||$key==0)&&is_numeric(strpos( $configImage[$key],"nfantry" ))) {
+                                            continue 1;
+                                        }
+                                        $explodeNumberTeams[$key] -= ($platoonOptionOptionsRow["optionSelection"]==1&&$platoonOptionOptionsRow["nrOfOptions"] == $platoonOptionOptionsRow["optionSelection"])?$platoonOptionOptionsRow["optionSelection"]:$platoonOptionOptionsRow["nrOfOptions"];
+                                        if ($explodeNumberTeams[$key]<=0) {
+                                            unset($configTeams[$key]);
+                                            unset($explodeNumberTeams[$key]);
+                                            unset($configImage[$key]);
+                                            unset($sections[$key]);
+                                        }
+                                        break;
+                                    }
+                                    if ($platoonOptionOptionsRow["teams"] == $value&&!$teamadded&&($explodeNumberTeams[$key]>1||$key>0)) {
+                                        $explodeNumberTeams[$key] += ($platoonOptionOptionsRow["optionSelection"]==1&&$platoonOptionOptionsRow["nrOfOptions"] == $platoonOptionOptionsRow["optionSelection"])?$platoonOptionOptionsRow["optionSelection"]:$platoonOptionOptionsRow["nrOfOptions"];
+                                        $teamadded = true;
                         }
-
-                        $optionsHTML .= "{$row5["description"]}". (isset($row5["nrOfOptions"])&&$row5["nrOfOptions"]>1?" ({$row4["optionSelection"]} selected)":"") . "<br>\n";
-                        if ($row4["addUnit"] != "") {
-                            $configRow["attachmentArray"][] = array("code" => $row4["addUnit"], "platoonIndex" => $platoonIndex, "title" => $row4["teams"]);
-                        }
-                        foreach ($tempConfigTeams as $key1 => $boxTeam){
-                            if (($boxTeam == $row4["removeTeam"])&&($optionTeamReplaceNumber>0)) {
-                                $tempConfigTeams[$key1]=$row4["teams"];
-                                $optionTeamReplaceNumber--;
-                            } elseif (is_numeric(strpos($boxTeam . "EOL", $row4["removeTeam"]. "EOL"))&&($optionTeamReplaceNumber>0)) {
-                                $tempConfigTeams[$key1] = str_replace($row4["teams"],$row4["removeTeam"], $boxTeam );
-                                $optionTeamReplaceNumber--;
+                                }
+                                
+                                if (!$teamadded) {
+                                    $configTeams[] = $platoonOptionOptionsRow["teams"];
+                                    $explodeNumberTeams[] = ($platoonOptionOptionsRow["optionSelection"]==1&&$platoonOptionOptionsRow["nrOfOptions"] == $platoonOptionOptionsRow["optionSelection"])?$platoonOptionOptionsRow["optionSelection"]:$platoonOptionOptionsRow["nrOfOptions"];
+                                    $configImage[] = $platoonOptionOptionsRow["ReplacementOrSufix"];
+                                    $teamadded = true;
+                                }
                             } 
-                        }
-                        foreach ($tempConfigImage as $key1 => $boxImage){
 
-                            if (($boxImage == $row4["replaceText"])&&($optionImageReplaceNumber>0)) {
-                                $tempConfigImage[$key1]=$row4["ReplacementOrSufix"];
-                                $optionImageReplaceNumber--;
-
-                            } elseif (is_numeric(strpos($boxImage . "EOL", $row4["replaceText"]. "EOL"))&&($optionImageReplaceNumber>0)) {
-                                $tempConfigImage[$key1] = str_replace($row4["replaceText"],$row4["ReplacementOrSufix"], $boxImage );
-                                $optionImageReplaceNumber--;
-                            } elseif ( $row4["addSufixTo"] != "") {
-                                if (is_numeric(strpos($boxImage, $row4["addSufixTo"]))) {
-                                    $tempConfigImage[$key1] .= $row4["ReplacementOrSufix"];
+                            if (($platoonOptionOptionsRow["image"] != "")&&!$teamadded&&($platoonOptionOptionsRow["addSufixTo"] == "")&&!is_numeric(strpos($platoonOptionOptionsRow["teams"], "faust"))) {
+                                $configImage[] = $platoonOptionOptionsRow["image"];
+                                $configTeams[] = $platoonOptionOptionsRow["teams"];
+                                $explodeNumberTeams[] = ($platoonOptionOptionsRow["optionSelection"]==1&&$platoonOptionOptionsRow["nrOfOptions"] == $platoonOptionOptionsRow["optionSelection"])?$platoonOptionOptionsRow["optionSelection"]:$platoonOptionOptionsRow["nrOfOptions"];
+                                $sections[] = ($platoonOptionOptionsRow["optionSelection"]==1&&$platoonOptionOptionsRow["nrOfOptions"] == $platoonOptionOptionsRow["optionSelection"])?$platoonOptionOptionsRow["optionSelection"]:$platoonOptionOptionsRow["nrOfOptions"];
+                            } elseif (!$teamadded) {
+                                foreach ($configImage as $key => $value) {
+                                    if (is_numeric(strpos($value, $platoonOptionOptionsRow["addSufixTo"]))) {
+                                        $configImage[$key] .= $platoonOptionOptionsRow["ReplacementOrSufix"];
+                                    }
                                 }
                             }
+                            $weaponsTeamsInForce[] = $platoonOptionOptionsRow["teams"];
+                        }
+
+                        $optionsHTML .= "&#9673; {$row5["description"]}". 
+                        ($row5["dynamicPoints"] != ""?" (dyn. {$row5["dynamicPoints"]}p)":"") . 
+                        (isset($row5["nrOfOptions"])&&$row5["nrOfOptions"]>1?" ({$platoonOptionOptionsRow["optionSelection"]} selected)":"") . 
+                        " (" . ($row5["dynamicPoints"] != ""? intval($row5["dynamicPoints"])*intval($platoonOptionOptionsRow["nrOfOptions"]):$platoonOptionOptionsRow["price"]) ."p)<br>\n";
+
+                        if ($platoonOptionOptionsRow["addUnit"] != "") {
+                            $configRow["attachmentArray"][] = array("code" => $platoonOptionOptionsRow["addUnit"], "platoonIndex" => $platoonIndex, "title" => $platoonOptionOptionsRow["teams"]);
                         }
                     }
                 }                                  
@@ -1418,28 +1633,10 @@ function generatePlatoonOptionsPrintHTML($platoonOptionHeaders, $platoonOptionOp
         }
     }
     
-    
-    foreach ($tempConfigImage as $key1 => $boxImage){
-        $tempSectionsEval[$key1] = $boxImage.$tempConfigTeams[$key1];
-        $tempActualSectionsEval[$key1]=((empty($tempActualSections[$key1]))?"":"x".$tempActualSections[$key1]);
-    }
-    $tempActualSections =[];
-    foreach (array_unique($tempSectionsEval) as $key1 => $value1) {
-        $tempSections[$key1] = 0;
-        foreach ($tempSectionsEval as $key2 => $value2) {
-            if ($value2 ==$value1) {
-                $tempSections[$key1]++;
-                $tempTeams[$key1] = $tempConfigTeams[$key2];
-                $tempImage[$key1] = $tempConfigImage[$key2];
-                $tempActualSections[$key1] = $tempActualSectionsEval[$key2];
-            }
-        }
-        $tempActualSections[$key1] =$tempSections[$key1]. $tempActualSections[$key1];
-    }
-    $configRow["sections"] = is_array($tempSections)?implode("|", $tempSections):$tempSections;
-    $configRow["teams"] = is_array($tempTeams)?implode("|",$tempTeams):$tempTeams;
-    $configRow["image"] = is_array($tempImage)?implode("|",$tempImage):$tempImage;
-    $configRow["actualSections"] = is_array($tempActualSections)?implode("|",$tempActualSections):$tempActualSections;
+    $configRow["sections"] = is_array($sections)?implode("|",$sections):$sections;
+    $configRow["image"] = is_array($configImage)?implode("|",$configImage):$configImage;
+    $configRow["teams"] = is_array($configTeams)?implode("|",$configTeams):$configTeams;
+    $configRow["actualSections"] = is_array($explodeNumberTeams)?implode("|",$explodeNumberTeams):$explodeNumberTeams;
     }
     return $optionsHTML;
 
@@ -1477,7 +1674,7 @@ function printBoxImageHTML($boxRow, &$configRow, &$weaponsTeamsInForce, &$attach
         $total = explode("x",$value);
         $total = is_numeric($total[1]??"")?intval($total[1])*intval($total[0]):intval($value);
         $sections[$key] = $total;
-        $thisImage  = $configImage[$key];
+        $thisImage  = $configImage[$key]??"";
         
         if (is_numeric(strpos($thisImage, "Infantry"))) {
             $thisImageFirst = substr($thisImage,0,strpos($thisImage,"5")?strpos($thisImage,"5"):(strpos($thisImage,"4")?strpos($thisImage,"4"):strpos($thisImage,"3")));
@@ -1517,7 +1714,7 @@ function printBoxImageHTML($boxRow, &$configRow, &$weaponsTeamsInForce, &$attach
     $tempOGConfigImage = [];
     foreach ($configImage as $key => $boxImage) {
 
-        for ($i=0; $i < $sections[$key]; $i++) {
+        for ($i=0; $i < ($sections[$key]??1); $i++) {
             if (is_numeric(strpos($boxImage, "Infantry"))) {
                 $temp = "".(fmod($i,2)==0?$thisImageFiguresNumbers[$key][1]??"":$thisImageFiguresNumbers[$key][2]??"");
                 if (is_numeric(strpos($boxImage, "Kom"))) {
@@ -1527,12 +1724,9 @@ function printBoxImageHTML($boxRow, &$configRow, &$weaponsTeamsInForce, &$attach
                 } else {
                     $tempConfigImage[] = $boxImage . $temp . ($thisImageAddon[$key]??"");
                 }
-                
-
             } else {
                 $tempConfigImage[] = $boxImage;
             }
-            
             $tempOGConfigImage[] = $configImageOG[$key];
         } 
     }
@@ -1545,47 +1739,129 @@ function printBoxImageHTML($boxRow, &$configRow, &$weaponsTeamsInForce, &$attach
         $attachmentsInForce[] = array("code" => $configRow["attachmentArray"]["addUnit"], "platoonIndex" => $platoonIndex, "title" => $configRow["attachmentArray"]["teams"] . ($platoonCardMod[$platoonIndex]["card"]??""));
     }
 
-    foreach ($tempConfigImage as $key1 => $boxImage){
-        if (isset($platoonCardMod[$platoonIndex])&&
-           (isset($platoonCardMod[$platoonIndex]["ReplaceImg"])&&
-           ($platoonCardMod[$platoonIndex]["ReplaceImg"] == $tempConfigImage[$key1])&&
-           (($platoonCardMod[$platoonIndex]["numbers"]>0)||(is_string($platoonCardMod[$platoonIndex]["numbers"]))&&($platoonCardMod[$platoonIndex]["numbers"][1]>0)))) {
-            if (isset($platoonCardMod[$platoonIndex]["perTeam"])) {
-                unset($tempConfigImage[$key1]);
-                for ($i=0; $i < $platoonCardMod[$platoonIndex]["numbers"][1]; $i++) {
-                    $addonSet = false;
-                    foreach ($legitAddons as $addon) {
-                        if (is_numeric(strpos($platoonCardMod[$platoonIndex]["replaceImgWith"],$addon))) {
-                            $tempConfigImage[] = $baseImageName . $addon;
-                            $addonSet = true;
+    // Initialize replacement counter for ReplaceTransport with string numbers (e.g., "P7")
+    $replaceTransportCounter = 0;
+    $replaceTransportMaxCount = null;
+    if (isset($platoonCardMod[$platoonIndex]["ReplaceImg"]) &&
+        isset($platoonCardMod[$platoonIndex]["replaceLimitFromString"])) {
+        // Use the P-format limit stored during card modification parsing
+        $limitString = $platoonCardMod[$platoonIndex]["replaceLimitFromString"];
+        if (is_string($limitString) && $limitString[0] == "P") {
+            // Extract divisor from P-format (e.g., "P1" = 1 per 1, "P7" = 1 per 7)
+            $divisor = intval(substr($limitString, 1));
+            if ($divisor > 0) {
+                // Different semantics for transport vs. generic Replace cards:
+                // - For transport-style cards (marked with 'transport'), count non-target units (infantry/support)
+                //   and compute replacements as floor(nonTargetCount / divisor) (keeps older behaviour).
+                // - For generic Replace cards (no 'transport' flag), count target items and compute
+                //   replacements as ceil(targetCount / divisor) so P1 replaces each matching item.
+                if (!empty($platoonCardMod[$platoonIndex]["transport"])) {
+                $unitCount = 0;
+                foreach ($tempConfigImage as $img) {
+                    $isReplaceTarget = ($img == $platoonCardMod[$platoonIndex]["ReplaceImg"]);
+                    if (!$isReplaceTarget) {
+                        $unitCount++;
+                    }
+                }
+                    // Transport: allowed replacements = floor(non-target units / divisor)
+                $replaceTransportMaxCount = intval($unitCount / $divisor);
+                } else {
+                    $targetCount = 0;
+                    foreach ($tempConfigImage as $img) {
+                        if ($img == $platoonCardMod[$platoonIndex]["ReplaceImg"]) {
+                            $targetCount++;
                         }
                     }
-                    if (!$addonSet) {
-                        $tempConfigImage[] = $platoonCardMod[$platoonIndex]["replaceImgWith"];
-                    }
+                    // Generic Replace: replacements = ceil(targetCount / divisor)
+                    $replaceTransportMaxCount = ($targetCount > 0) ? intval(ceil($targetCount / $divisor)) : 0;
                 }
-            } else {
-                $addonSet = false;
-                foreach ($legitAddons as $addon) {
-                    if (is_numeric(strpos($platoonCardMod[$platoonIndex]["replaceImgWith"],$addon))) {
-                        $tempConfigImage[$key1] = $baseImageName . $addon;
-                        $addonSet = true;
-                    }
-                }
-                if (!$addonSet) {
-                    $tempConfigImage[$key1] = $platoonCardMod[$platoonIndex]["replaceImgWith"];
-                }
-                $platoonCardMod[$platoonIndex]["numbers"]--;
             }
         }
     }
 
     $tempConfigImage = array_merge($tempConfigImage,$cardImagestwo);
+        
+    // Apply ReplaceImg replacements to handle transport image swaps (after merge to catch all images)
+    if (isset($platoonCardMod[$platoonIndex]["ReplaceImg"])) {
+        
+        // For P-format limits (works for ReplaceTransport, Replace, etc.), remove all matching items and recalculate based on remaining units
+        if (isset($replaceTransportMaxCount) && $replaceTransportMaxCount !== null) {
+            // If this is a transport-style card, we keep the remove-all + rebuild approach
+            // (transports are typically appended after counting supporting units).
+            if (!empty($platoonCardMod[$platoonIndex]["transport"])) {
+            // Step 1: Remove ALL instances of the item being replaced from the array
+            $nonTransportImages = [];
+            $removedCount = 0;
+            foreach ($tempConfigImage as $boxImage) {
+                if (!empty($boxImage) && $boxImage == $platoonCardMod[$platoonIndex]["ReplaceImg"]) {
+                    $removedCount++;
+            } else {
+                    $nonTransportImages[] = $boxImage;
+                }
+            }            
+
+            // Step 2: Count anything that is NOT the item being replaced (everything else is normal units, excluding HQ)
+            $unitSupport = 0;
+            foreach ($nonTransportImages as $img) {
+                $unitSupport++;
+            }            
+
+            // Step 3: Calculate number of replacements needed using ceiling (round up)
+            // P1 means 1 replacement per 1 unit, P7 means 1 per 7 units, so 9 items needs ceil(9/7) = 2 replacements
+            $divisor = intval(substr($platoonCardMod[$platoonIndex]["replaceLimitFromString"], 1));
+            $replacementsNeeded = ceil($unitSupport / $divisor);
+            
+            // Step 4: Rebuild array with non-replaced items + new items count
+                // Only remove all matching items and rebuild if we actually need replacements.
+                if ($replacementsNeeded > 0) {
+            $tempConfigImage = $nonTransportImages;
+            for ($i = 0; $i < $replacementsNeeded; $i++) {
+                $tempConfigImage[] = $platoonCardMod[$platoonIndex]["replaceImgWith"];
+            }
+        } else {
+                    // No replacements required: leave $tempConfigImage as it was (retains original images)
+                }
+            } else {
+                // Generic Replace cards: perform in-place replacements up to the computed amount
+                $replacementsNeeded = $replaceTransportMaxCount;
+                $replaceDone = 0;
+                foreach ($tempConfigImage as $key1 => $boxImage) {
+                    if (!empty($boxImage) && $boxImage == $platoonCardMod[$platoonIndex]["ReplaceImg"]) {
+                        if ($replaceDone < $replacementsNeeded) {
+                            $tempConfigImage[$key1] = $platoonCardMod[$platoonIndex]["replaceImgWith"];
+                            $replaceDone++;
+                        }
+                    }
+                }
+            }
+        } else {
+            // For non-P-format replacements (Replace|1|..., Team, etc.), do simple iteration-based replacement
+            $replaceCount = 0;
+            $limit = $platoonCardMod[$platoonIndex]["numbers"];
+            
+            foreach ($tempConfigImage as $key1 => $boxImage) {
+                if (!empty($boxImage) && $boxImage == $platoonCardMod[$platoonIndex]["ReplaceImg"]|| str_contains($boxImage,$platoonCardMod[$platoonIndex]["ReplaceImg"])) {
+                    // Check if we should perform the replacement based on numeric limit
+                    $canReplace = (is_numeric($limit) && $limit > 0) || (is_string($limit) && $limit[0] != "P");
+                    
+                    if ($canReplace) {
+                    $tempConfigImage[$key1] = $platoonCardMod[$platoonIndex]["replaceImgWith"];
+                        $replaceCount++;
+                        // Decrement numeric limit only
+                        if (is_numeric($limit)) {
+                            $limit--;
+                }
+                    }
+                }
+            }
+        }
+    }
+
 
     $sectionsSum = array_sum($sections);
     $previousImageIsInfantry = false;
     $isHQ = false;
-    $lookupInfantryTerms = ["Infantry","MG","Bazooka","mortar","2inch","Piat"];
+    $lookupInfantryTerms = ["Infantry","MG","Bazooka","mortar","2inch","Piat","Bren Gun"];
     $thisIsKomi = False;
     foreach ($tempConfigImage as $key1 => $boxImage){
         $isHQ = is_numeric(strpos($boxImage,"HQ"))||$isHQ;
@@ -1601,8 +1877,8 @@ function printBoxImageHTML($boxRow, &$configRow, &$weaponsTeamsInForce, &$attach
         $break = ($infantryPC)?"\n<br>\n":"";
         $scaleClass = $sectionsSum>14?" scale":"";
         $komiClass = $thisIsKomi?" kom":"";
-        $infantryClass = $thisImageISInfantry?"class='inf{$scaleClass}{$komiClass}' ":"";
-        $boxImageHTML .= "{$breakBefore}{$unitCardImage}<img {$infantryClass}src='img/{$boxImage}.svg'>{$break}";
+        $infantryClass = $thisImageISInfantry?" inf {$scaleClass}{$komiClass}":"";
+        $boxImageHTML .= "{$breakBefore}{$unitCardImage}<span class='icon icon-white {$infantryClass}' data-icon='/img/{$boxImage}.svg'></span>{$break}";
     }
     
     return  str_replace("<br>\n\n<br>","<br>",$boxImageHTML) ; //.(isset($platoonCardMod[$platoonIndex])?$platoonCardMod[$platoonIndex]["image"]??"":"")
@@ -1626,7 +1902,7 @@ function configPrintHTML(&$configRow, $platoonIndex, &$weaponsTeamsInForce, &$at
     $explodeBaseTeams = explode("|",$configRow["teams"],10);
     $explodeNumberTeams = explode("|",$configRow["sections"],10);
 
-    if (isset($platoonCardMod[$platoonIndex]["ReplaceTeam"])&&!isset($platoonCardMod[$platoonIndex]["transport"])||isset($platoonCardMod[$platoonIndex]["transport"])&&(!$platoonCardMod[$platoonIndex]["transport"])) {
+    if ((isset($platoonCardMod[$platoonIndex]["ReplaceTeam"])&&!isset($platoonCardMod[$platoonIndex]["transport"]))||(isset($platoonCardMod[$platoonIndex]["transport"])&&(!$platoonCardMod[$platoonIndex]["transport"]))) {
 
         foreach ($explodeBaseTeams as $key => $value) {
             if ($platoonCardMod[$platoonIndex]["originalTeam"]==$value) {
@@ -1636,12 +1912,14 @@ function configPrintHTML(&$configRow, $platoonIndex, &$weaponsTeamsInForce, &$at
                
                             $configRow["teams"] = str_replace($platoonCardMod[$platoonIndex]["originalTeam"], $platoonCardMod[$platoonIndex]["ReplaceTeam"], $configRow["teams"]);
                 } else {
+                    $explodeNumberTeams[$key] -= $platoonCardMod[$platoonIndex]["numbers"];
                     $configRow["teams"] .= "|" . $platoonCardMod[$platoonIndex]["ReplaceTeam"];
-                    $configRow["sections"] .="|" . $platoonCardMod[$platoonIndex]["numbers"];
+                    $explodeNumberTeams[] = $platoonCardMod[$platoonIndex]["numbers"];
                     $platoonCardMod[$platoonIndex]["attachment"] = $platoonCardMod[$platoonIndex]["ReplaceUnit"];
                 }
             }
         }
+        $configRow["sections"] = implode("|",$explodeNumberTeams);
     }
     if (isset($platoonCardMod[$platoonIndex]["team"])) {       
         $configRow["teams"] .= str_repeat("|".$platoonCardMod[$platoonIndex]["team"],$platoonCardMod[$platoonIndex]["numbers"]);
@@ -1657,6 +1935,9 @@ function configPrintHTML(&$configRow, $platoonIndex, &$weaponsTeamsInForce, &$at
         }
         if ((is_string($platoonCardMod[$platoonIndex]["numbers"])&&$platoonCardMod[$platoonIndex]["numbers"][0] =="P")&&(isset($platoonCardMod[$platoonIndex]["ReplaceImg"])||isset($platoonCardMod[$platoonIndex]["imageToAddPerTeam"]))) {
             
+            $originalNrOfTeams = $configRow["nrOfTeams"];
+            $combatTeamsOnly = $originalNrOfTeams; // default
+
             if (isset($platoonCardMod[$platoonIndex]["transport"])) {
                 $sections = explode("|",$configRow["sections"],15);
                 $sectionImages = explode("|",$configRow["image"],15);
@@ -1667,7 +1948,8 @@ function configPrintHTML(&$configRow, $platoonIndex, &$weaponsTeamsInForce, &$at
                 
                 foreach ($configRowTeams as $key => $boxTeams) {
                     if ($platoonCardMod[$platoonIndex]["originalTeam"]??""==$boxTeams){
-                        $configRow["nrOfTeams"] -=$sections[$key];
+                        $combatTeamsOnly = $originalNrOfTeams - $sections[$key];
+                        
                     } else {
                         $tempConfigRow .= ($key==0?"":"|") . $boxTeams;
                         $tempSectionsRow .= ($key==0?"":"|") . $sections[$key];
@@ -1677,14 +1959,18 @@ function configPrintHTML(&$configRow, $platoonIndex, &$weaponsTeamsInForce, &$at
             }
 
             if (isset($platoonCardMod[$platoonIndex]["attachment"])) {
-                $platoonCardMod[$platoonIndex]["numbers"] = ceil(($configRow["nrOfTeams"])/(max(1,intval($platoonCardMod[$platoonIndex]["numbers"][1]. ($platoonCardMod[$platoonIndex]["numbers"][2]??"")))));
+                $platoonCardMod[$platoonIndex]["numbers"] = ceil(($combatTeamsOnly)/(max(1,intval($platoonCardMod[$platoonIndex]["numbers"][1]. ($platoonCardMod[$platoonIndex]["numbers"][2]??"")))));
             } else {
                 $platoonCardMod[$platoonIndex]["perTeam"] =true;
             }
             if (isset($platoonCardMod[$platoonIndex]["transport"])&&!empty($platoonCardMod[$platoonIndex]["ReplaceTeam"])||isset($platoonCardMod[$platoonIndex]["imageToAddPerTeam"])) {
                 $configRow["teams"] =$tempConfigRow . "|". ($platoonCardMod[$platoonIndex]["ReplaceTeam"]??"");
                 $configRow["sections"] = $tempSectionsRow . "|". ($platoonCardMod[$platoonIndex]["numbers"]??"");
+                // Only modify configRow["image"] if NOT doing ReplaceImg transport replacement
+                // ReplaceImg replacements are handled in printBoxImageHTML
+                if (!isset($platoonCardMod[$platoonIndex]["ReplaceImg"])) {
                 $configRow["image"] = $tempImageRow. "|". ($platoonCardMod[$platoonIndex]["replaceImgWith"]??($platoonCardMod[$platoonIndex]["imageToAddPerTeam"]??""));
+                }
             }
         }
 
@@ -1709,7 +1995,7 @@ function configPrintHTML(&$configRow, $platoonIndex, &$weaponsTeamsInForce, &$at
             $attachmentsInForce[] = array("code" => $eachAttachment, "platoonIndex" => $platoonIndex);
         }
     }
-    $configHTML = str_replace("\n","<br>", $configRow["configuration"])."<br>\n";
+    $configHTML = str_replace("\n","<br>", $configRow["configuration"])."\n";
     return [$configCost, $configHTML];
 }
 
@@ -1776,6 +2062,7 @@ function printPlatoonCardHTML($platoonCards, $boxRow, $query, $currentBoxInForma
                 for ($cardIndex = 0; $cardIndex <=12; $cardIndex++){   
                     $queryKey = $currentBoxInFormation . "Card" . $cardIndex;
                     if (isset($query[$queryKey])&&$cardRowPlatoon["code"] == substr($query[$queryKey],0,6) ) {
+                        $multiselect = substr($query[$queryKey],6,1);
                         updateNonEmptyPlatoonCardMod($platoonCardMod, $platoonIndex, $cardRowPlatoon);
 
                         if ($cardRowPlatoon["prerequisite"]=="Warrior") {
@@ -1835,7 +2122,8 @@ function printPlatoonCardHTML($platoonCards, $boxRow, $query, $currentBoxInForma
                                     break;
                                 case "ReplaceTransport":
                                     $platoonCardMod[$platoonIndex] = array_merge($platoonCardMod[$platoonIndex],[
-                                        "numbers" => $exploded[1],
+                                        "numbers" => $numbers,
+                                        "replaceLimitFromString" => $exploded[1],  // Store the P7 value for replacement decisions
                                         "attachment" => $exploded[2],
                                         "originalTeam" => $exploded[3],
                                         "ReplaceTeam" => $exploded[4],
@@ -1860,7 +2148,8 @@ function printPlatoonCardHTML($platoonCards, $boxRow, $query, $currentBoxInForma
                                             "ReplaceTeam" => $exploded[4],
                                             "ReplaceUnit" => $exploded[2],
                                             "replaceImgWith" => $exploded[6] ?? null,
-                                            "ReplaceImg" => $exploded[5] ?? null
+                                            "ReplaceImg" => $exploded[5] ?? null,
+                                            "replaceLimitFromString" => $exploded[1]  // Store P-format or numeric limit
                                         ]);
                                     } else {
                                         $platoonCardMod[$platoonIndex]["attachment"] = $exploded[2];
@@ -1877,7 +2166,7 @@ function printPlatoonCardHTML($platoonCards, $boxRow, $query, $currentBoxInForma
                             $platoonsInForce[$platoonIndex]["title"] = trim($cardRowPlatoon["replaceWith"] . " " . ($platoonsInForce[$platoonIndex]["title"]??""));
                             //$platoonCardMod[$platoonIndex]["title"] = $platoonCardMod[$platoonIndex]["title"]??"" . $cardRowPlatoon["replaceWith"];
                         } elseif ($cardRowPlatoon["replacedText"] != "") {
-                            $platoonsInForce[$platoonIndex]["title"] = str_replace($cardRowPlatoon["replacedText"] , $cardRowPlatoon["replaceWith"], $platoonsInForce[$platoonIndex]["title"]);
+                            $platoonsInForce[$platoonIndex]["title"] = str_replace($cardRowPlatoon["replacedText"] , $cardRowPlatoon["replaceWith"], $platoonsInForce[$platoonIndex]["title"]??"");
                         }
                         if (($cardRowPlatoon["title"] != "")) {
                             $platoonCardMod[$platoonIndex]["title"] .= trim(($platoonCardMod[$platoonIndex]["title"]==""?"":" ").(($platoonCardMod[$platoonIndex]["title"]==$cardRowPlatoon["title"])||(is_numeric(strpos($platoonCardMod[$platoonIndex]["title"],$cardRowPlatoon["title"])))?"":$cardRowPlatoon["title"]));
@@ -1896,12 +2185,12 @@ function printPlatoonCardHTML($platoonCards, $boxRow, $query, $currentBoxInForma
                             $platoonCardChange[$platoonIndex]["html"] ="";
                         }
                         if (strlen($query[$currentBoxInFormation . "Card" . $cardIndex])>6) {
-                            $thisCost = ($cardRowPlatoon["dynamicPoints"]!=""?$cardRowPlatoon["dynamicPoints"]:$cardRowPlatoon["cost"]) * substr($query[$currentBoxInFormation . "Card" . $cardIndex],6,1);
+                            $thisCost = roundAwayFromZero((isset($cardRowPlatoon["dynamicPoints"])&&$cardRowPlatoon["dynamicPoints"]!=""?$cardRowPlatoon["dynamicPoints"]:$cardRowPlatoon["cost"]) * ($cardRowPlatoon["pricePerTeam"]!=0?$cardRowPlatoon["pricePerTeam"]:1)  * substr($query[$currentBoxInFormation . "Card" . $cardIndex],6,1));
                         } else {
                             $thisCost = calculatePlatoonCost($cardRowPlatoon, $boxRow);
                         }
                         $cardNameTargetSplit = explode(":", $cardRowPlatoon["card"]);
-                        $platoonCardChange[$platoonIndex]["html"] .= ((!is_numeric(strpos($platoonCardChange[$platoonIndex]["html"],$cardNameTargetSplit[0])))?"<img src='img/cardSmall.svg'>{$cardNameTargetSplit[0]} ({$thisCost}p)<br>":"");
+                        $platoonCardChange[$platoonIndex]["html"] .= ((!is_numeric(strpos($platoonCardChange[$platoonIndex]["html"],$cardNameTargetSplit[0])))?"<img src='img/cardSmall.svg'>{$cardNameTargetSplit[0]} " :""). ($multiselect !=""?"(" . substr($cardRowPlatoon["multiSelect"],2) . " {$multiselect} selected ({$thisCost}p))<br>":"({$thisCost}p)<br>") ;
                         $cardRowPlatoon["thisCost"] = $thisCost;
                         $CardsInList[] = $cardRowPlatoon;
                     }
@@ -1922,7 +2211,6 @@ function printFormationCardsHTML($formationCards, $formationCardTitle, $formatio
      (!empty($query[$queryKey]))) {
         foreach($formationCards as $formCardRow) {
 
-            
             $evalForSupport = ($formCardRow["code"]!=="")&&isset($query[$queryKey])&&($query[$queryKey]==$formCardRow["code"])&&(is_numeric(strpos($boxRow["formation"],$formCardRow["formation"])));
             $evalForFormation = isset($formCardRow["title"])&&(($formationCardTitle[$formationNr]??"nn") == (isset($formCardRow["title"])?trim($formCardRow["title"]):"na"))&&(is_numeric(strpos($boxRow["formation"],$formCardRow["formation"])));
 //command card platoon
@@ -2045,15 +2333,18 @@ function processPlatoonAttribute($attribute, $platoonRow, $platoonSoftStatRow, $
     $platoonIndex = $platoonRow['platoonIndex']??"";
     $cardMod = $platoonCardMod[$platoonIndex]??null;
     if (!isset($platoonRow["attachment"])) {
-
+        // Non-attachment rows: apply top-level card modifications
         $cardSmall = applyAttributeReplacement($attribute, $cardMod, $attributeValue);
 
-    }
-    // Attachment-specific replacements
-    elseif (isset($platoonRow["attachment"])) {
-
-        $cardSmall = applyAttributeReplacement($attribute, $cardMod["attachment"]??null, $attributeValue);
-
+    } else {
+        // Attachment rows: apply parent platoon card modifications first,
+        // then apply attachment-specific modifications so they can override.
+        if (!empty($cardMod)) {
+            $cardSmall = applyAttributeReplacement($attribute, $cardMod, $attributeValue) || $cardSmall;
+        }
+        if (!empty($cardMod["attachment"])) {
+            $cardSmall = applyAttributeReplacement($attribute, $cardMod["attachment"], $attributeValue) || $cardSmall;
+        }
     }
 
     // Wrap with small card icon if cardSmall is true

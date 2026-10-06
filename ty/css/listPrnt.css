@@ -1,0 +1,1076 @@
+
+.card{ 
+
+	padding: 5px 2px 0px 2px;
+	margin-bottom: -4px;
+}
+.card, 
+.platoon img, 
+.blackbox img { 
+	color: white !important;
+}
+
+.formHeader .card {
+	margin: 0;
+	padding: 0;
+}
+.IsHitOn img { 
+	filter:invert(100%);
+}
+.title img { 
+	filter:invert(0%); 
+	padding: 0px 0px 0px 0px;
+}
+.collapsible img {
+	height: 20px;
+	width: auto;
+}
+
+.teamHeader {
+	background-color: #eeeeee;
+    padding: 2px 0px 1px 1px;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+.imagerow {
+	vertical-align:middle;
+	filter:invert(var(--image-style-alt));
+}
+
+.formHeader{
+	padding: 5px 2px;
+	margin-top: 0px;
+	margin-bottom: 0;
+	color: var(--text-color-alt);
+	text-decoration: none;
+	text-transform:uppercase;
+	display: flex;
+	align-items: center;
+	gap: 1ch;
+}
+
+.MSI {
+
+	box-sizing: border-box;
+	padding: 2px 2px;
+	border-radius: 6px;
+	background: black;
+	display: inline-block;
+	position: absolute;
+	top: 10px;
+	right: -10px;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+}
+
+.MSI div{
+	border-radius: 3px;
+	border: 1px solid white;
+
+	box-sizing: border-box;
+	padding: 2px 2px;
+	text-decoration: none;
+	font-weight: bold;
+	background: #994949;
+	width:100%;
+	color: white;
+	font-size: 8px;
+	display: inline-block;
+	
+	text-transform:uppercase;
+}
+
+
+.platoon 
+.nation img, 
+.blackbox 
+.nation img{
+	position: absolute;
+    top: -10px;
+    left: 0px;
+}
+
+.floatingImg {
+	position: relative;
+	width: 0px;
+	height: 0px;
+}
+
+.floatingImg img{
+	position: absolute;
+	background-color: white;
+    border-radius: 30%;
+    border: 1.5px solid black;
+	width: 18px;
+    padding: 1px;
+    left: -15px;
+    top: -8px;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+.leftT {
+	text-align: left;
+}
+
+
+.grids {
+
+	display: grid;
+	grid-template-columns: 84px;
+    background: white;
+	width: fit-content;
+	border: 1px solid black;
+    border-radius: 4px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+}
+
+.doubleGrids {
+    background: white;
+	width: fit-content;
+	border: 1.5px solid black;
+    border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+}
+
+.grid-item {
+	background: #fff;
+	display: grid;
+	grid-template-columns: 85px 85px;
+}
+
+.grid-item .right, .grid-item.b .right, .grid-bottom .right {
+	position: relative;
+
+}
+
+.grid-bottom {
+	background: #fff;
+	font-weight: bold;
+	border-radius: 5px;
+	display: grid;
+	grid-template-columns: 85px 85px;
+}
+
+.doubleGrids .grid-heading {
+	display: grid;
+	grid-template-columns: 85px 85px;
+	text-align: left;	
+	
+	font-weight: bold;
+	
+	color: white;
+
+	print-color-adjust: exact;
+}
+
+.grids .grid-heading {
+	border-radius: 5px;
+	text-align: left;	
+	font-weight: bold;
+	color: white;
+
+	print-color-adjust: exact;
+}
+
+.doubleGrids .grid-heading div {
+	padding: 1px;
+	padding-bottom: 0px;
+    background: #dd0000;
+}
+
+.grids .grid-heading div {
+	padding: 1px;
+	border-radius: 5px;
+    background: #dd0000;
+	border: 1px solid white;
+}
+
+.gLeft {
+
+	border: 1.5px solid white;
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+	border-top-right-radius: 0px;
+	border-bottom-right-radius: 0px;
+}
+
+.gRight {
+
+	border: 1.5px solid white;
+	border-left: 0px;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+	border-top-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+}
+
+
+.grid-addon {
+	background: #fff;
+	margin-left: 1px;
+	padding: 1px;
+	font-weight: bold;
+	position: relative;
+	top: -7px;
+	white-space: nowrap;
+	border-radius: 5px;
+}
+
+
+.b {
+	font-weight: bold;
+}
+
+.grids > div:empty {
+	visibility: hidden;
+}
+
+.nation img { 
+	filter:invert(0%); 
+	padding: 2px 2px 2px 2px;
+}
+
+:nth-child(1 of .grid-addon) {
+	border: 1.5px solid black;
+	border-bottom: none;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+}
+
+:nth-child(2 of .grid-addon) {
+	border: 1.5px solid black;
+	border-bottom: none;
+	border-top: none;
+}
+
+:nth-last-child(1 of .grid-addon) {
+
+	border-bottom: 1.5px solid black;
+	border-right: 1.5px solid black;
+	border-left: 1.5px solid black;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+
+  }
+
+.collapsible, .header {
+
+	cursor: pointer;
+	width: 100%;
+	z-index: 1;
+	margin-top: 10px; 
+	position: relative;
+	background-color: var(--accent-color);
+	display: flex;
+  	justify-content: space-between;
+	gap: 1ch;
+	align-items: center;
+	/*border: 2px solid black;*/
+	text-align: center;
+	border-radius: 	5px 5px 0px 0px;
+	padding-left: 1ch;
+	padding-right: 1ch;
+	box-sizing: border-box;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .collapsible:hover {
+  	background-color: #ccc;
+}
+
+a:link {
+  	color: white;
+  	text-decoration: none;
+}
+
+a:visited {
+  	color: white;
+  	text-decoration: none;
+}
+
+.left {
+    float: left;
+}
+.mid {
+	margin-top: 0px;
+}
+ 
+  /* list */
+
+.frame {
+    width: 50px;
+	border: 2px solid white;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+
+body {
+	font-size: 10px;
+	font-family: arial, verdana, tahoma;
+}
+
+
+.page-container {
+
+	width: 726px;
+	margin: 0 auto;
+	padding: 0 3px;
+	page-break-inside: auto;
+	page-break-inside: auto;
+    background-color: var(--background-color-alt);
+}
+
+.IsHitOn , .Points{
+	/*margin-top:5px;*/
+	width: 56px;
+	border-radius: 6px;
+	padding: 1.5px 1.5px;
+	background: black;
+	display: inline-block;
+	box-sizing: border-box;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+}
+
+.Points .Points1{
+	font-size: 8px;
+	padding: 1px;
+	border-radius: 3px;
+	border: 1px solid white;
+	box-sizing: border-box;
+	text-decoration: none;
+	font-weight: bold;
+	background: rgb(18, 83, 18);
+	width: 100%;
+	color: white;
+	display: inline-block;
+	text-transform:uppercase;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+}
+
+.box select{
+    max-width:200px;
+}
+.title select{
+    max-width:180px;
+}
+
+.header {
+	text-align: center;
+	width: 100%;
+	page-break-before: avoid;
+	page-break-after: avoid;
+}
+
+.arsenal,.weapons-list, .rules-list {
+	border: none;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 	0  0 5px 5px;
+}
+
+.Formation{
+	border: none;
+	padding-top: 0.5ch;
+
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+	margin: 0px;
+	background-color: var(--background-color);
+	display: inline-block;
+
+    border-radius: 	0  0 5px 5px;
+	text-align: center;
+	width: 100%;
+	box-sizing: border-box;
+
+}
+
+.outerBox {
+	position: relative;
+	float: left; text-align: center;
+	width: max(315px,33%);
+}
+
+.secondBox {
+	position: relative;
+	float: left; text-align: center;
+	width: 67%;
+}
+
+
+.outerBox .box {
+	width: 98%;
+}
+.secondBox .box {
+	width: 48.5%;
+}
+
+
+.platoon{
+	color: white;
+	text-decoration: none;
+	background: #3D4849;
+	font-size: 15px;
+	width: calc(100% - 4px);
+	display: inline-block;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	text-transform:uppercase;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+}
+
+.images {
+	text-wrap: pretty;
+}
+
+.images .inf:nth-of-type(2n+2) {
+	margin-left: 3px;
+}
+
+.images .inf:nth-of-type(2n+3) {
+	margin-right: 3px;
+}
+
+.images .kom:nth-of-type(2n+2) {
+	margin-left: 0px;
+}
+
+
+.images .kom:nth-of-type(2n+3) {
+	margin-left: 3px;
+	margin-right: 0px;
+}
+
+.images .kom:nth-of-type(2n+4) {
+	margin-right: 3px;
+}
+
+img.scale {
+	padding-top: 3px;
+	padding-right: 0px;
+}
+
+.searchstring {
+	display:none;
+}
+.grid{
+	width: 720px;
+	font-size: 8px;
+}
+
+.box div {
+	font-size: 8px;
+}
+
+.box {
+	margin-top: 6px;
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	padding-bottom: 2px;
+	border-radius: 5px;
+
+    break-inside: avoid-column;
+	text-align: center;
+	width: 226px;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+
+	background: var(--box-background-color);
+	color: var(--text-color);
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+
+
+.box.is-dragging,
+.box.is-positioning-post-drag {
+  background: #C90;
+  z-index: 2;
+}
+
+.packery-drop-placeholder {
+  outline: 3px dashed hsla(0, 0%, 0%, 0.5);
+  outline-offset: -6px;
+  -webkit-transition: -webkit-transform 0.2s;
+          transition: transform 0.2s;
+}
+
+
+.blackbox, .platoon {
+    margin: 2px;
+    color: white;
+    text-decoration: none;
+    font-size: 15px;
+    display: inline-block;
+    border-radius: 4px;
+	width: calc(100% - 4px);
+
+}
+
+.title
+{
+    margin:1px;
+/*	font-weight: bold; */
+	padding: 3px 3px;
+	padding-right:10px;
+	box-sizing: border-box;
+    background: var(--optionBox-background-color);
+	font-size: 13px;
+    color: var(--text-color);
+	display: inline-block;
+	text-transform:none;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	width: calc(100% - 2px);
+	border-radius: 4px;
+}
+.title b{
+    text-transform:uppercase;
+}
+h2{
+	font-size: 12px;
+	padding: 2px 2px;
+	text-decoration: none;
+	background: #3D4849;
+	color: white;
+	display: inline-block;
+	padding-left: 2ch;
+	padding-right: 2ch;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+	
+	text-transform:uppercase;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+}
+
+h3{
+	font-size: 10px;
+	margin: 0px;
+	padding: 2px 2px;
+	text-decoration: none;
+	background: black;
+	color: white;
+	display: inline-block;
+    width: 400px;
+
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;	
+	border-radius: 8px;
+	
+	text-transform:uppercase;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+}
+
+.header .Points {
+	font-size: 8px;
+}
+
+.box .IsHitOn ,.box  .Points{
+	/*margin-top:5px;*/
+	box-sizing: border-box;
+	padding: 2px 2px;
+	width: 110px;
+	background: black;
+	display: inline-block;
+	position: absolute;
+    top: -5px;
+    right: -10px;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+
+}
+
+.box .IsHitOn div, .box .Points div, td .Points div, .cell .Points div{
+
+	border-radius: 3px;
+	border: 1px solid white;
+	box-sizing: border-box;
+	padding: 2px 2px;
+	text-decoration: none;
+	font-weight: bold;
+	background: #994949;
+	width:100%;
+	color: white;
+	font-size: 8px;
+	display: inline-block;
+
+	
+	text-transform:uppercase;
+
+}
+
+.box .Points div, td .Points div , .cell .Points div{
+	background: rgb(18, 83, 18);
+	cursor: pointer;
+	font-size: 8px;
+	border-radius: 3px;
+	border: 1px solid white;
+}
+
+
+
+tr td {
+	border-top:solid lightgrey 1px;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+}
+
+.inside-grid-container {
+    display: grid;
+	width:fit-content;
+}
+
+.inside-grid-header {
+    font-weight: bold;
+    background-color: #eeeeee;
+	padding-right: 10px;
+	padding-left: 3px;
+}
+
+.inside-grid-cell {
+    border: 0.5px solid #ddd;
+	padding-right: 10px;
+	padding-left: 3px;
+}
+
+.row-container {
+	overflow: auto;
+	border-bottom: solid black 0.5px;
+	padding-left: 4px;
+}
+  
+.row-container:last-child {
+	border-bottom: none;
+	padding-bottom: 5px;
+}
+
+.cell-title {
+	font-size: 10px;
+	float: left;
+	margin-right: 7px;
+	margin-top: 4px;
+	max-width: 200px;
+	text-align: left;
+}
+  
+.cell-notes {
+	white-space: normal; /* Allow text to wrap */
+	text-align: left;
+	font-size: 9px;
+	margin-top: 2px;
+}
+  
+.cell-optional {
+	float: right;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	max-width: 280px;
+}
+  
+.optional-item {
+	margin: 2px;
+	text-align: end;
+}
+
+.item-points {
+	flex-basis: 56px;
+}
+
+.cardDescription {
+	font-size: 8px;
+	text-align: left;
+}
+
+.arsenal tr:nth-child(2n+2) td {
+	background-color: var(--box-background-color);
+	border-left:solid gray 1px;
+	border-top:none;
+}
+
+tr:nth-child(2n+2) {
+	break-after: avoid;
+}
+
+table {
+    border-collapse:separate;
+    background: var(--background-color);
+    border:solid lightgray 1.5px;
+    border-radius:0 0 5px 5px;
+    border-spacing: 0;
+    width: 100%;
+}
+
+td, th {
+    padding: 1px 1px 1px 1px;
+    border-left:solid lightgray 1px;
+    border-top:solid lightgray 1px;
+    border-top: none;
+    border-bottom: none;
+	vertical-align: top;
+	text-align: center;
+}
+
+th {
+    background-color: black;
+    color: white;
+    border-top: none;
+}
+
+
+h5 {
+	position: relative;
+	top: -32px;  left: -7px;
+	text-align: right; color: white;
+	height:0px;
+	transform: rotate(-45deg)translate(0, 0);
+	transform-origin: right bottom;
+	z-index:2;
+}
+
+
+td .Armour ,.cell .Armour {
+
+	display: grid;
+	grid-template-columns: 80px;
+
+	font-size: 8px;
+	width: 84px;
+	border: 1.5px solid lightgray;
+	border-radius: 3px;
+    background: white;
+	box-sizing: border-box;
+}
+td .Armour {
+	margin-top: 5px;
+}
+
+
+td .Armour div ,.cell .Armour div{
+	font-weight: bold;
+	font-size: 8px;
+
+	text-transform:uppercase;
+	text-align: left;
+	box-sizing: border-box;
+
+    border: 1.5px ;
+	background: white;
+	color: black;
+	width:100%;
+
+}
+.teamHeader {
+	text-align: left; 
+	background-color: var(--box-background-color);
+	border-left:solid gray 1px;
+}
+
+
+.komTbl td, .komTbl tr{
+	padding: 0px;
+}
+
+.komTbl {
+	border-collapse: separate;
+    background: none;
+    border: 0px;
+    border-radius: 0px;
+    border-spacing: 0px;
+}
+
+tr .firstWeaponrow {
+    padding-left: 5px;
+	border-top:solid lightgray 1px;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+
+}
+
+.bgBlack {
+    text-align: left;
+    box-sizing: border-box;
+    background: black;
+	color: white;
+	display: inline-block; 
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+	padding: 2px;
+	margin: 1px;
+	border-radius: 2px;
+	width: 58px;
+	font-size: 6px;
+
+}
+
+.right, .mot-grid-item.b span.right{
+    margin-right:2px;
+    float: right;
+	font-size: 10px;
+
+}
+
+.Armour div {
+	margin-top: -1px;
+	margin-bottom: -1px;
+}
+
+.Armour div:first-child {
+	margin-top: 0px;
+	margin-bottom: -1px;
+}
+
+.Armour div:last-child {
+	margin-top: -1px;
+	margin-bottom: 0px;
+}
+
+.Armour div:only-child {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+
+.Points {
+	width: 56px;
+	border-radius: 6px;
+}
+
+.box .Points {
+	width: 53px;
+	border-radius: 6px;
+}
+.motivationColumn2 {
+	grid-template-columns: 86px auto;
+}
+
+/* Remove border for the first row */
+tr:first-child th,
+tr:first-child td {
+    border-top: none;
+}
+tr:first-child .imagerow, tr:first-child .statsrow {
+    border-top: solid lightgray 1px;
+}
+
+/* Remove border for the first column */
+th:first-child,
+td:first-child {
+    border-left: none;
+}
+
+
+
+/* Avoid breaking inside elements */
+.page-break {
+    page-break-before: always;
+}
+
+.break-inside-avoid {
+    break-inside: avoid-page;
+}
+
+.no-break {
+    page-break-inside: avoid;
+}
+
+.Points .reservesPoints {
+	background-color: blue;
+}
+
+tbody {
+	background-color: var(--optionBox-background-color);
+}
+
+
+@media screen and (min-width: 1200px) {
+
+	table, .Formation {
+
+		border: none;
+
+	}
+    .page-container, nav{
+        transform: scale(1.5); 
+		transform-origin: 50% 0;
+    }
+
+}
+
+@media (pointer: coarse) {
+.changed, .Points.selected.changed div{
+		 font-size: 2em;
+	}
+}
+
+.icon {
+  display: inline-block;
+
+  margin-right: 2px;
+  margin-left: 2px;
+  margin-top: 5px;
+  height: auto;
+  width: auto;
+
+  background-color: transparent;
+
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  -webkit-mask-size: contain;
+  mask-size: contain;
+
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.icon {
+  display: inline-block;
+  overflow: visible;
+  vertical-align: middle;
+  color: black; /* default */
+}
+
+.inline-icon {
+  fill: currentColor;
+  display: block;
+  overflow: hidden; /* clip on the SVG itself, not the span */
+}
+
+.icon-white {
+  color: white;
+  /* remove background-color and mask properties */
+  background-color: transparent;
+}
+.icon-black {
+  color: black;
+  /* remove background-color and mask properties */
+  background-color: transparent;
+}
+
+
+
+@media print {
+
+	body{
+		background: none;
+	}
+	.searchstring {
+		display:initial;
+	}
+	.header {
+		padding-top: 0px;
+
+	}
+
+	.collapsible:after {
+		display: none;
+	}
+	.page-container {
+		background-color: #ffff; 
+		transform: scale(1); /* default scale */
+	}
+	button, .rearrangeSwitch {
+		display: none;
+	}
+	.grids {
+		background: white;
+	}
+	.doubleGrids {
+		background: white;
+	}
+	.switch {
+		display: none;
+	  }
+	.Formation {
+	background: white;
+	}
+	tbody,table {
+		background: none;
+	}
+	.statsrow {
+		background: none;
+	}
+	.card, 
+	.platoon img, 
+	.blackbox img{
+
+		color: white !important;
+	}
+	.imagerow {
+		background: none;
+	}
+
+	.platoon svg,
+	.blackbox svg {
+
+		color: white !important;
+	}
+	.icon {
+	color: black;
+	}
+
+	.icon.white {
+	color: white;
+	}
+
+}
+
+.Points.selected div {
+	background: blue;
+	cursor: pointer;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+}
+
+/* Simulated print mode */
+.print-mode body {
+    background: none;
+}
+.print-mode .searchstring {
+    display: initial;
+}
+.print-mode .header {
+    padding-top: 0px;
+}
+.print-mode .collapsible:after {
+    display: none;
+}
+.print-mode .page-container {
+    background-color: #ffff;
+    transform: none; /* default scale */
+}
+.print-mode button {
+    display: none;
+}
+.print-mode .grids, 
+.print-mode .doubleGrids {
+    background: white;
+}
+
+.print-mode {
+    padding: 20px;
+    margin: 0 auto;
+    width: calc(100% - 42px); /* Subtract padding */
+    box-sizing: border-box;
+}
+

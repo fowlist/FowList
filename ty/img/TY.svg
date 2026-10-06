@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="12.923564mm"
+   height="15.88037mm"
+   viewBox="0 0 12.923564 15.88037"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   sodipodi:docname="TY.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="4.6617889"
+     inkscape:cx="48.479244"
+     inkscape:cy="20.807463"
+     inkscape:window-width="2560"
+     inkscape:window-height="1368"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3"
+       id="linearGradient6"
+       gradientUnits="userSpaceOnUse"
+       x1="102.6459"
+       y1="86.42524"
+       x2="120.16719"
+       y2="162.12617"
+       gradientTransform="matrix(0.30275703,0,0,0.30275703,68.816619,74.567283)" />
+    <linearGradient
+       id="linearGradient3"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#2b2b2b;stop-opacity:1;"
+         offset="0"
+         id="stop3" />
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="1"
+         id="stop4" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient7"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.28916456,0,0,0.308293,69.389365,73.734667)"
+       x1="118.14017"
+       y1="143.57944"
+       x2="94.403618"
+       y2="93.820709" />
+    <linearGradient
+       id="linearGradient1"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop1" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop2" />
+    </linearGradient>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-92.941406,-105.7207)">
+    <g
+       id="rect1-9">
+      <path
+         style="color:#000000;fill:url(#linearGradient7);stroke-width:0.302757;-inkscape-stroke:none;paint-order:markers stroke fill"
+         d="m 94.130555,105.7207 c -0.629212,0 -1.189149,0.485 -1.189149,1.12351 v 13.75298 c 0,0.63851 0.559937,1.12351 1.189149,1.12351 h 10.642025 c 0.62921,0 1.18975,-0.485 1.18975,-1.12351 v -13.75298 c 0,-0.63851 -0.56054,-1.12351 -1.18975,-1.12351 z m 0,0.90827 h 10.642025 c 0.18531,0 0.28147,0.11203 0.28147,0.21524 v 13.75298 c 0,0.10321 -0.0961,0.21524 -0.28147,0.21524 H 94.130555 c -0.185301,0 -0.280878,-0.11203 -0.280878,-0.21524 v -13.75298 c 0,-0.10321 0.09557,-0.21524 0.280878,-0.21524 z"
+         id="path10" />
+      <path
+         style="color:#000000;fill:url(#linearGradient6);stroke-width:0.302757;-inkscape-stroke:none;paint-order:markers stroke fill"
+         d="m 94.13055,106.17458 h 10.64224 c 0.40726,0 0.73512,0.29858 0.73512,0.66944 v 13.75308 c 0,0.37087 -0.32786,0.66943 -0.73512,0.66943 H 94.13055 c -0.407257,0 -0.735121,-0.29856 -0.735121,-0.66943 v -13.75308 c 0,-0.37086 0.327864,-0.66944 0.735121,-0.66944 z"
+         id="path11" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:2.18425px;text-align:start;letter-spacing:-0.18526px;word-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:0.182021"
+       x="108.15298"
+       y="104.13789"
+       id="text2"
+       transform="scale(0.86461383,1.1565857)"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Arial;-inkscape-font-specification:'Arial Bold';letter-spacing:-0.18526px;word-spacing:0px;fill:#000000;stroke-width:0.182021"
+         x="108.15298"
+         y="104.13789"
+         id="tspan3"
+         dx="0">TEAM YANKEE</tspan></text>
+    <path
+       d="m 96.484593,117.47903 v -8.27754 h -1.558905 v -1.68542 h 4.174996 v 1.68542 H 97.54536 v 8.27754 z m 4.680297,0 v -4.19314 l -1.92444,-5.76982 h 1.24354 l 1.23638,3.94169 1.21128,-3.94169 h 1.22204 l -1.9316,5.78342 v 4.17954 z"
+       style="font-weight:bold;font-size:10.107px;font-family:Arial;-inkscape-font-specification:'Arial Bold';fill:#272727;stroke:#000000;stroke-width:0.8;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill;fill-opacity:1"
+       id="path1" />
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+# Grundinställningar för Strato
+
+Options +FollowSymLinks
+RewriteEngine On
+
+# Standard redirect av www → utan (valfritt)
+#RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+#RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+# Om du vill tvinga HTTPS (endast om SSL är aktiverat)
+#RewriteCond %{HTTPS} off
+#RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]

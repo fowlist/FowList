@@ -1,11 +1,12 @@
 <?php
 // Connect to the database
-include "sqlServerinfo.php";
+$beta = ((is_numeric(strpos($_SERVER['PHP_SELF'],"Beta")))? "Beta": "");
+include "sqlServerinfo{$beta}.php";
 
 // Check if the token is provided in the URL
 if (!isset($_GET['token'])) {
     // Token not provided, redirect user to the reset password form
-    header("Location: reset_password_form.php");
+    header("initiate_reset_password.php");
     exit;
 }
 
@@ -26,14 +27,15 @@ if (!$user) {
 // Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
-
-    // Validate password (add more validation as needed)
-    if (empty($password)) {
+    $password_2 = $_POST['password_2'];
+// Validate password (add more validation as needed)
+    if ($password != $password_2) { $error = "The two passwords do not match"; } 
+    elseif (empty($password)) {
         $error = "Password is required.";
     } else {
         // Hash the password
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
+        //$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $hashed_password = md5($password);
         // Update user's password in the database
         $update_stmt = $pdo->prepare("UPDATE users SET password = :password WHERE email = :email");
         $update_stmt->bindParam(':password', $hashed_password);
@@ -46,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $delete_stmt->execute();
 
         // Redirect user to login page or any other page
-        header("Location: login.php");
+        header("Location: index.php");
         exit;
     }
 }
@@ -59,11 +61,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <h2>Reset Password</h2>
-    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) ?>">
+    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . "?token=" . $token) ?>">
         <div>
             <label for="password">New Password:</label>
             <input type="password" id="password" name="password" required>
         </div>
+        <div>
+            <label>Confirm password</label>
+            <input type="password" id="password_2" name="password_2" required>
+       </div>
+
         <button type="submit">Reset Password</button>
         <?php if (isset($error)) echo "<p>$error</p>"; ?>
     </form>

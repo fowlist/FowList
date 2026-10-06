@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   id="svg1461"
+   width="8mm"
+   height="8mm"
+   viewBox="0 0 8 7.9999994"
+   version="1.1"
+   sodipodi:docname="Polish.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview5"
+     inkscape:document-units="mm"
+     inkscape:zoom="18.902144"
+     inkscape:cx="12.247288"
+     inkscape:cy="1.4019574"
+     inkscape:window-width="2560"
+     inkscape:window-height="1369"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g4394"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:snap-object-midpoints="true"
+     inkscape:snap-page="true"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-nodes="true"
+     inkscape:showpageshadow="0"
+     inkscape:deskcolor="#505050" />
+  <defs
+     id="defs1458">
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect2786"
+       is_visible="true"
+       lpeversion="1"
+       satellites_param="F,0,0,1,0,1.3229167,0,1 @ F,0,0,1,0,1.3229167,0,1 @ F,0,0,1,0,1.3229167,0,1 @ F,0,0,1,0,1.3229167,0,1"
+       unit="px"
+       method="auto"
+       mode="F"
+       radius="5"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false"
+       nodesatellites_param="F,0,0,1,0,1.3229167,0,1 @ F,0,0,1,0,1.3229167,0,1 @ F,0,0,1,0,1.3229167,0,1 @ F,0,0,1,0,1.3229167,0,1" />
+    <clipPath
+       id="t">
+      <path
+         d="m 30,15 h 30 v 15 z m 0,0 V 30 H 0 Z m 0,0 H 0 V 0 Z m 0,0 V 0 h 30 z"
+         id="path5" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath2788">
+      <path
+         d="M 9.2302367,1.3229167 V 28.677083 A 1.3229167,1.3229167 45 0 0 10.553153,30 H 50.02981 a 1.3229167,1.3229167 135 0 0 1.322917,-1.322917 V 1.3229167 A 1.3229167,1.3229167 45 0 0 50.02981,0 H 10.553153 A 1.3229167,1.3229167 135 0 0 9.2302367,1.3229167 Z"
+         id="path2790"
+         style="stroke-width:0.837875"
+         inkscape:path-effect="#path-effect2786"
+         inkscape:original-d="M 9.2302367,0 V 30 H 51.352727 V 0 Z" />
+    </clipPath>
+  </defs>
+  <g
+     id="g4394"
+     transform="matrix(0.87185928,0,0,0.87185928,0.51256287,0.51256308)">
+    <circle
+       style="fill:#333333;stroke-width:0.564999;stroke-linejoin:round;paint-order:markers fill stroke;stop-color:#000000"
+       id="path871"
+       cx="4"
+       cy="3.9999998"
+       r="4.5878963" />
+    <g
+       id="g2-9"
+       transform="matrix(0.03238664,0,0,0.03238664,-0.04835228,-0.04833068)">
+      <circle
+         cx="125"
+         cy="125"
+         r="123"
+         fill="#ffffff"
+         id="circle1" />
+      <path
+         d="m 21,125 a 104,104 0 0 0 104,104 v 16 A 120,120 0 0 1 5,125 Z m 208,0 A 104,104 0 0 0 125,21 V 5 A 120,120 0 0 1 245,125 Z M 21,125 A 104,104 0 0 1 125,21 V 229 A 104,104 0 0 0 229,125 Z"
+         fill="#dc143c"
+         id="path2-4" />
+    </g>
+  </g>
+</svg>

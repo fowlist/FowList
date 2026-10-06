@@ -1,0 +1,618 @@
+.left {
+    float: left;
+}
+
+.right {
+    margin-right:5px;
+    float: right;
+}
+
+a {
+	color: var(--text-color);
+	text-decoration: none;
+}
+
+td button[type=submit] {
+    background-color: #007BFF;
+    color: white;
+    padding: 8px;
+    margin: 0 8px ;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+
+.page-container {
+    display: grid;
+    grid-auto-rows: 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+	background-color: var(--background-color-alt);
+  }
+
+.middleColumn {
+
+    margin: 0 auto;
+    background-color: var(--background-color);
+    padding: 20px;
+	color: var(--text-color);
+}
+
+.leftside {
+
+	background-color: var(--background-color);
+
+}
+.rightside {
+	background-color: var(--background-color);
+}
+
+.left {
+    float: left;
+}
+ 
+.header {
+	text-align: center;
+}
+
+.page-container a:visited{
+    color: var(--text-color);
+	text-decoration: none;
+}
+
+
+.page-container a:link {
+  	text-decoration: none;
+}
+
+.page-container a:-webkit-any-link {
+    color: var(--text-color);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.grid{
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+   -moz-column-count: 4;
+    -moz-column-gap: 0;
+    -webkit-column-count: 4;
+    -webkit-column-gap: 0;
+    column-count: 4;
+    column-gap: 0;
+    margin-top:30px;
+}
+
+
+.editRow {
+	display: flex;
+	gap: 5px;
+	flex-wrap: wrap;
+    position: sticky;
+    top: var(--header-row-height); 
+    z-index: 4; 
+    background-color: var(--accent-color);
+	color: var(--text-color-alt);	
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+	padding: .5rem;
+	width: calc(100% - 1rem);
+
+}
+
+
+
+#platoonStats {
+	font-size: 4px;
+}
+
+.menuButton {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 8px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+	font-size: 14px;
+}
+
+.Formation {
+	display: grid;
+    grid-template-columns: 1fr;
+	gap: 6px;
+
+}
+
+.formationHeader {
+	color: white;
+	text-decoration: none;
+	background: black;
+	font-size: 4em;
+	border-radius: 0.5em;
+	padding: 3px 3px;
+	margin: 0.2em;
+}
+
+.platoonImages {
+	flex-basis: 45em;
+	flex-grow: 2;
+	flex-shrink: 2;
+	align-content: center;
+}
+
+.box {
+    display: flex;
+    flex-flow: row;
+	position: relative;
+	background: #D3D3D3;
+	color: black;
+	transition: all 0.5s;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+
+.platoon, .blackbox{
+	margin:5px;
+	color: white;
+	text-decoration: none;
+	background: #6e7575;
+	font-size: 15px;
+	display: inline-block;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	text-transform:uppercase;
+}
+
+.blackbox{
+    background:black;
+}
+
+.sort-arrow {
+    font-size: 0.8em;
+    margin-left: 5px;
+    color: #555;
+}
+
+.title
+{
+    margin:0.2em;
+	font-weight: bold;
+	padding: .2em .4em;
+	margin-right:1em;
+	box-sizing: border-box;
+    background: white;
+	font-size: 3em;
+    color: black;
+    border-radius: 0.5em;
+	flex-basis: 25em;
+	flex-grow: 2;
+	flex-shrink: 2;
+	display: flex;
+	justify-content: space-between;
+
+}
+
+
+.page-container h2{
+	padding: 2px 2px;
+	text-decoration: none;
+	background: var(--accent-color);
+	color: white;
+	display: inline-block;
+    width: 500px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+	text-transform:uppercase;
+}
+
+.page-container h3{
+	padding: 5px 2px;
+	margin-top: -20px;
+	text-decoration: none;
+	background: black;
+	color: white;
+	display: inline-block;
+    width: 400px;
+	z-index: 6;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;	
+	border-radius: 8px;
+	text-transform:uppercase;
+}
+
+.MSI {
+	margin-top:5px;
+	padding: 1px;
+	width: 40;
+	background: black;
+	display: inline-block;
+	border-radius: 7px;
+	-webkit-border-radius: 7px;
+	font-size: 12px;
+}
+
+.MSI div{
+	border: 2px solid white;
+	padding: 2px 2px;
+	text-decoration: none;
+    text-align: left;
+	background: white;
+	width: 32;
+	color: black;
+	font-size: 15px;
+	display: inline-block;
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+    text-align: center;
+	background: #ba8f8f;
+	color: white;
+	font-weight: bold;
+}
+
+.footer {
+	height: 100px;
+}
+
+.modal .MSI {
+	position: absolute;
+	right: 0px;
+	top: -5px;
+}
+
+/* Modal container */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Modal content */
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 530px;
+    border-radius: 8px;
+}
+
+/* Close button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.edit-button, .action-button {
+	background-color: unset;
+    border: none;
+    padding: 2px 2px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.delete-confirm, .save-btn {
+	background-color: #007BFF;
+	background-color: var(--primary-color);
+    color: white;
+    padding: 4px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;	
+    cursor: pointer;
+}
+
+.sort {
+	cursor: n-resize;
+}
+
+.buttonImage {
+	filter: invert(var(--image-style-alt));	
+}
+
+table {
+	border-collapse:separate;
+	border-spacing: 0;
+	background-color: var(--background-color-alt);
+}
+
+td, th {
+    padding-left: 6px;
+    border-left:solid var(--optionBox-background-color) 1px;
+    border-top:solid  var(--optionBox-background-color) 1px;
+    border-top: none;
+    border-bottom: none;
+	vertical-align: top;
+}
+th {
+
+	background-color: var(--accent-color);
+    color: var(--text-color-alt);
+    border-top: none;
+	position: sticky;
+    top: calc(var(--edit-row-height, 0) + 0px); /* Adjust dynamically */
+    z-index: 4; 
+}
+td {
+	vertical-align:middle;
+}
+
+td img {
+	vertical-align:bottom;
+}
+
+img.insignia {
+    width: 20px;
+	margin-right: 5px;
+}
+tr:nth-child(2n) {
+	background-color: var(--background-color);
+}
+
+.selected-row {
+    background-color: lightblue;
+}
+
+.selected-row:nth-child(2n) {
+    background-color: rgb(214, 230, 235);
+}
+
+
+.row-header {
+	display: none;
+}
+
+
+@media screen and (max-width: 1100px) {
+
+	#platoonStats {
+		font-size: 10px;
+	}
+	
+	.modal-content input {
+		font-size: 1.5em;
+	}
+
+	.modal-content {
+		font-size: 40px;
+		width: 90%;
+		border-radius: 20px;
+	}
+	.close {
+		font-size: 2em;
+	}
+
+	.centerColummn {
+		width: unset;
+	}
+
+	.searchBox {
+		font-size: 40px;
+		padding-top: 20px;
+    	padding-bottom: 20px;
+	}
+	.wide {
+		padding-left: 30px;
+		padding-right: 30px;
+	}
+
+    /* Adjust insignia and images for mobile */
+    img.insignia {
+        height: 70px;
+        width: auto;
+        margin-right: 10px;
+    }
+
+
+	input[type=checkbox] {
+		width: 2rem;
+		height: 2rem;
+		margin: 1.2rem;
+		
+	}
+
+	.buttonImage {
+		height: 70px;
+        width: auto;
+        margin-right: 10px;
+	}
+	.mobileRowControlls a, .mobileRowControlls button {
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+	button, button[type=submit], .menuButton, .delete-confirm, .mobileRowControlls button.save-btn, #openMenuButton {
+		font-size: 40px;
+		padding-top: 20px;
+    	padding-bottom: 20px;
+		border-radius: 20px;
+	}
+	.mobile-controls a {
+		padding: 5px;
+	}
+
+	.bookName {
+		font-size: 2.2rem;
+        padding: 15px 5px;
+	}
+	
+	#filterInput{
+
+		font-size: 1em;
+	}
+	.filter-input{
+		height: 3rem;
+	}
+	select {
+		font-size: 1.5rem;
+	}
+	.MSI {
+		display: none;
+	}
+    tr {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #ddd;
+
+    }
+
+	.rowControlls {
+		display: none;
+	}
+	#period img.insignia, #Book img.insignia {
+		display: none;
+	}
+
+
+	body {
+        background-color: #D6C9AF;
+		font-size: 30px;
+    }
+
+	table {
+		font-size: 2rem;
+        overflow-x: auto; /* Add scroll for small screens */
+    }
+
+	thead {
+        display: block; /* Keep the header visible */
+        width: 100%;
+		position: relative
+    }
+
+    tbody {
+        display: block; /* Allow tbody rows to stack */
+        width: 100%;
+		position: relative
+    }
+
+    th, td {
+        display: block; /* Ensure flexibility in layout */
+        box-sizing: border-box;
+        text-align: left;
+    }
+
+	td {
+		display: grid;
+		grid-template-columns: 310px auto;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+		align-items: center;
+	}
+	
+	td[contenteditable=true], .nameField {
+		font-size: 1.5em;
+	}
+
+    td:before {
+        content: attr(data-label); /* Add data-label for context on small screens */
+        display: inline-block;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+	td[contenteditable=true]:before {
+		font-size: 0.7em;
+	}
+	th {
+		position: unset;
+		z-index: unset; 
+		top: unset;
+		display: grid;
+		grid-template-columns: 18ch auto;
+        text-align: left;
+        font-weight: bold;
+        border-bottom: 2px solid #ddd;
+		width: 100%;
+	}
+
+	th[data-skip-filter] {
+		position: fixed;
+		top: calc(var(--edit-row-height, 0) + 0px); /* Adjust dynamically */
+		z-index: 4; 
+	}
+
+    .row-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .mobile-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .row-checkbox {
+        margin-right: 10px;
+    }
+
+    .mobileRowControlls {
+        display: flex;
+        gap: 10px;
+		align-items: center;
+    }
+
+
+    /* Hide the desktop checkbox */
+    #checkbox {
+        display: none;
+    }
+
+	#Book {
+		display: none;
+	}
+
+	#period {
+		display: none;
+	}
+	#saveDate {
+		display: none;
+	}
+
+	#points {
+		display: none;
+	}
+	#formation a::after {
+		content: " (" attr(data-points) " points)";
+	}
+
+	.page-container {
+		display: unset;
+		width: 100%;
+	}
+	.leftside,.rightside {
+		display: none;
+	}
+
+	.open {
+		width: 500px;
+	}
+	.topnav .closebtn {
+
+		right: 20px;
+		font-size: 70px;
+	}
+	.topnav a {
+
+		font-size: 40px;
+
+	}
+
+}
+.row-updated {
+    background-color: #a4f285; /* Light green */
+    transition: background-color 2s ease;
+}

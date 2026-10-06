@@ -1,0 +1,20 @@
+@import url("listPrntNeo.css");
+
+
+.list tr:nth-child(2n+1) td {
+	background-color: #eeeeee;
+	border-top:none;
+  }
+
+.list tr:nth-child(2n+2) td {
+	background-color: #ffffff;
+	border-top:solid black 1px;
+  }
+
+th {
+	text-align: left;
+}
+
+td, th {
+	text-align: left;
+}

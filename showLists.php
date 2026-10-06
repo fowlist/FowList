@@ -2,17 +2,25 @@
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
-include "functions.php";
+
 include 'sqlServerinfo.php';
 $userID = $_SESSION['user_id']??"";
 $username = $_SESSION['username']??"";
-
+include "functions.php";
 include "login.php";
 include "showListsFunctions.php";
 include "cssVersion.php";
 
 $linkQuery = $_SESSION['linkQuery']??"";
 
+if (!isset($listconn)) {
+    foreach ($Periods as $key => $value) {
+            $listconn[$value["period"]] = new mysqli($servernameArray[$value["period"]], $phpUsernameArray[$value["period"]], $phpPasswordArray[$value["period"]], $dbnameArray[$value["period"]]);
+            $listconn[$value["period"]]->set_charset("utf8mb4");
+            $listconn[$value["period"]]->options(MYSQLI_OPT_CONNECT_TIMEOUT, 30);
+        
+    }
+}
 
 ?>
 <!DOCTYPE html>
@@ -26,6 +34,7 @@ $linkQuery = $_SESSION['linkQuery']??"";
     <script src="showListsScripts.js?v=<?=$cssVersion?>"></script>
 </head>
 <body>
+<input type="hidden" id="csrfToken" value="<?=htmlspecialchars($_SESSION['csrf'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 <?php 
 $beta ="";
 include "menu.php"; 
@@ -34,7 +43,7 @@ include "menu.php";
         <div class="leftside"></div>
         <div class="centerColummn">
 <?php 
-if (isset($_SESSION['username'])) {
+if (is_valid_positive_user_id($_SESSION['user_id'] ?? '') && !empty($_SESSION['username'])) {
 
 
     $dataColumns = [
@@ -60,15 +69,16 @@ if (isset($_SESSION['username'])) {
         "SELECT * 
         FROM saved_lists 
         WHERE user_id=?
-        AND url NOT LIKE '%pd=TY%'
-        ORDER by url, name");
+        AND (url NOT LIKE '%pd=TY%' AND url NOT LIKE '%pd=CpC%')
+        ORDER by saveDate DESC, name");
     $results->execute([$userID]);
 
-    $listArray = generateListArray($results, $conn);
-    ?>
+    $listArray = generateListArray($results, $listconn,$Periods);
+?>
 
 <div class="editRow">
     <form id="deleteForm" method="post" action="delete_selected.php">
+        <input type="hidden" name="csrf" value="<?=htmlspecialchars($_SESSION['csrf'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
         <button type="submit" id="deleteSelectedButton">Delete Selected</button>
     </form>
     <button type="button" id="duplicateSelectedButton" class="delete-confirm">Duplicate Selected</button>
@@ -114,6 +124,7 @@ echo generateShowListRows($listArray);
         <h4>Edit/inspect Entry</h4>
 
         <form id="editForm" method="post">
+            <input type="hidden" name="csrf" value="<?=htmlspecialchars($_SESSION['csrf'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="id" id="entryId">
             
             <label for="editName">Rename:</label>
@@ -141,6 +152,7 @@ echo generateShowListRows($listArray);
         <span class="close">&times;</span>
         <h4>Edit Selected Entries</h4>
         <form id="editSelectedForm" method="post">
+            <input type="hidden" name="csrf" value="<?=htmlspecialchars($_SESSION['csrf'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 
             <label for="editSelectedEventInput">Event:</label>
             <input list="eventList"  type="text" id="editSelectedEventInput" name="event">
@@ -165,6 +177,11 @@ You are not logged in.
     
     <?php
 }
+
+foreach ($listconn as $key => $value) {
+    $value->close();
+}
+
 $conn->close();
 $pdo = null;
 ?>

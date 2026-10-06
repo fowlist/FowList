@@ -1,0 +1,248 @@
+.grids {
+
+	display: grid;
+	grid-template-columns: 17ch;
+	margin-top: 1px;
+
+    background: white;
+}
+
+.doubleGrids {
+
+	display: grid;
+	grid-template-columns: 17ch auto;
+	margin-top: 1px;
+
+    background: white;
+}
+.mot-first-grid-item {
+	font-style: italic;
+	font-size:  0.8em;
+	text-align: center;
+	border-left: 1.5px solid black;
+	border-right: 1.5px solid black;
+	border-top: 1.5px solid black;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+}
+.mot-grid-item {
+	font-style: italic;
+	font-size: 1.2em;
+	border-left: 1.5px solid black;
+	border-right: 1.5px solid black;
+	margin-bottom: -2px;
+
+	text-align: center;
+}
+.mot-grid-item span {
+	font-size: 0.7em;
+	padding-right: 10px;
+}
+.mot-grid-item span.right{
+	font-size: 0.8em;
+	padding-right: 0px;
+}
+
+.mot-grid-item.b span {
+
+	font-style: normal;
+}
+
+.mot-grid-item .right, .mot-grid-item .b .right, .grid-bottom .right {
+	position: relative;
+	top: -5px;
+
+} 
+
+.b {
+	font-weight: bold;
+}
+
+.mot-grid-item.b span.right{
+    margin-right:2px;
+    float: right;
+
+}
+
+.grid-bottom {
+	padding-bottom: 2px;
+	font-weight: bold;
+	border-left: 1.5px solid black;
+	border-right: 1.5px solid black;
+	border-bottom: 1.5px solid black;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+	text-align: center;
+}
+
+.grid-heading {
+	text-align: left;	
+	
+	font-weight: bold;
+    background: #dd0000;
+	color: white;
+	border: 1.5px solid black;
+    border-radius: 5px;
+	print-color-adjust: exact;
+	-webkit-print-color-adjust: exact;
+}
+
+.grid-addon {
+	background: #fff;
+	margin-left: 1px;
+
+	font-weight: bold;
+	position: relative;
+	top: -7px;
+	white-space: nowrap;
+}
+
+.grid-heading > div{
+	padding: 1.5px;
+	border: 1.5px solid white;
+	border-radius: 4px;
+}
+
+.grids > div:empty {
+	visibility: hidden;
+}
+.inside-grid-container {
+    display: grid;
+	width:fit-content;
+}
+
+.inside-grid-header {
+    font-weight: bold;
+    background-color: #eeeeee;
+	padding-right: 10px;
+	padding-left: 3px;
+}
+
+.inside-grid-cell {
+    border: 0.5px solid #ddd;
+	padding-right: 10px;
+	padding-left: 3px;
+}
+
+.row-container {
+	overflow: auto;
+	border-bottom: solid black 0.5px;
+	padding-left: 4px;
+}
+  
+.row-container:last-child {
+	border-bottom: none;
+	padding-bottom: 5px;
+}
+
+.cell-title {
+	font-size: 10px;
+	float: left;
+	margin-right: 7px;
+	margin-top: 4px;
+	max-width: 200px;
+	text-align: left;
+}
+  
+.cell-notes {
+	white-space: normal; /* Allow text to wrap */
+	text-align: left;
+	font-size: 9px;
+	margin-top: 2px;
+}
+
+#infoOverlay .cell-notes {
+	font-size: inherit;
+}
+  
+.cell-optional {
+	float: right;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	max-width: 280px;
+}
+
+.optional-item {
+	margin: 2px;
+	text-align: end;
+}
+
+.Armour div {
+	margin-top: -1px;
+	margin-bottom: -1px;
+}
+
+.Armour div:first-child {
+	margin-top: 0px;
+	margin-bottom: -1px;
+}
+
+.Armour div:last-child {
+	margin-top: -1px;
+	margin-bottom: 0px;
+}
+
+.Armour div:only-child {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+td .Armour ,.cell .Armour {
+
+	display: grid;
+	width: 17ch;
+	border: 1.5px solid black;
+	border-radius: 3px;
+    background: white;
+	box-sizing: border-box;
+}
+td .Armour {
+	margin-top: 5px;
+}
+
+
+td .Armour div ,.cell .Armour div{
+	font-weight: bold;
+
+
+	text-transform:uppercase;
+	text-align: left;
+	box-sizing: border-box;
+
+    border: 1.5px solid white;
+	background: white;
+	color: black;
+	width:100%;
+    border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+}
+
+.movementTable {
+
+        border-collapse:separate;
+        background: white;
+        border:solid black 1.5px;
+        border-radius:7px;
+        border-spacing: 0;
+        width: 100%;
+    
+}
+.movementTable td, th {
+    padding: 1px 1px 1px 1px;
+    border-left:solid black 1px;
+    border-top:solid black 1px;
+    border-top: none;
+    border-bottom: none;
+	vertical-align: top;
+	text-align: center;
+}
+
+th {
+    background-color: black;
+    color: white;
+    border-top: none;
+}
+

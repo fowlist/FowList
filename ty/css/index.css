@@ -1,0 +1,822 @@
+
+
+html {
+	scroll-padding-top: 6rem;
+}
+
+body {
+	min-height: 100vh;
+    overflow-x: hidden;
+}
+.MSI {
+	background-color: var(--box-background-color);
+	display: inline-block;
+	border-radius: 7px;
+	-webkit-border-radius: 7px;
+}
+.disabledLabel {
+    opacity: 0.5;
+    pointer-events: none;
+}
+.MSI div{
+	margin: 2px;
+	padding: 0px 2px;
+	text-decoration: none;
+    text-align: left;
+	background: white;
+	width: 32;
+	color: black;
+	font-size: 12px;
+	display: inline-block;
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+    text-align: center;
+	background-color: #994949;
+	color: white;
+	font-weight: bold;
+}
+
+.topright {
+	position: absolute;
+	top: -15px;
+	right: -14px;
+	z-index: 10;
+}
+	
+/* Apply common styles to elements with images */
+.card, .platoon img, .blackbox img {
+    filter: invert(var(--image-style));
+    padding: 12px 5px 0px 5px;
+	margin-bottom: -4px;
+}
+
+/* Apply specific styles for nation images */
+.nation img{
+    filter: invert(0%);
+    /*padding: 10px 5px 5px 5px;*/
+}
+
+.optionBox img {
+	filter: invert(0%);
+	padding: 0;
+	margin-bottom: 0;
+ }
+
+/* Apply styles to .card specifically */
+.card {
+    padding: 2px;
+}
+
+/* Apply styles to elements with class .img */
+.img {
+    object-fit: cover;
+    height: 100px;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    margin-right:5px;
+    float: right;
+}
+
+.page-container {
+    width: 80%; /* Set your desired width (e.g., 80% of the viewport width) */
+    max-width: 1120px; /* Set a maximum width if needed */
+    margin: 0 auto; /* Center the container horizontally */
+    background-color: var(--background-color-alt);
+    padding: 5px; /* Add padding as needed */
+	min-height: 100vh;
+	text-align: center;
+	box-shadow: 0 0px 20px rgba(0, 0, 0, 0.8);
+	overflow-x: hidden;
+	overflow-y: hidden;
+}
+
+.box b{
+	text-transform: uppercase;
+}
+
+.row-container {
+	font-size: 12px;
+}
+
+.cell-notes {
+	font-size: 12px !important;
+}
+
+.grid-heading {
+	background-color: #994949 !important;
+}
+
+.formConfig {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 1ch;
+}
+
+.title select{
+    max-width:180px;
+}
+
+.collapsible {
+	cursor: pointer;
+	width: 100%;
+	z-index: 1;
+	margin-top: 20px; 
+	position: relative;
+	background-color: var(--accent-color);
+	display: flex;
+  	justify-content: space-between;
+	gap: 1ch;
+	align-items: center;
+	/*border: 2px solid black;*/
+	text-align: center;
+	border-radius: 	5px 5px 0px 0px;
+	padding-left: 1ch;
+	padding-right: 1ch;
+	box-sizing: border-box;
+}
+
+input[type="checkbox"][id*="box"] {
+	display: none;
+  }
+
+  input[type="checkbox"][id*="box-O"] {
+	display:initial;
+  }
+
+  input[type="checkbox"][id*="box-Card"] {
+	display:initial;
+  }
+label {
+	cursor: pointer;
+	position: relative;
+	box-sizing: border-box;
+	display: inline-block;
+}
+
+.box label {
+	width: 100%;
+}
+.platoonImageSpan {
+	position: relative;
+	width: 100%;
+	box-sizing: border-box;
+	display: inline-block;
+}
+
+label:before {
+	background-color: white;
+	color: white;
+	content: " ";
+	display: block;
+	border-radius: 50%;
+	border: 1px solid grey;
+	position: absolute;
+	top: -15px;
+	left: -10px;
+	width: 25px;
+	height: 25px;
+	text-align: center;
+	line-height: 28px;
+	transition-duration: 0.4s;
+	transform: scale(0);
+  }
+
+:checked + label:before {
+	content: "✓";
+	background-color: rgba(76, 118, 255, 0.6);
+	transform: scale(1);
+	z-index: 3;
+}
+
+:checked + label img {
+	filter: invert(49%) sepia(74%) saturate(1418%) hue-rotate(157deg) brightness(97%) contrast(99%);
+}
+
+:checked + label .title, :checked + label .cardTitle  {
+	background: rgba(202, 212, 255, 0.404);
+
+}
+
+.Formation{
+	
+	background-color: var(--background-color);
+	border-radius: 	0  0 5px 5px;
+	padding-top: 0.5ch;
+	/* border: 2px solid #000000; */
+	position: relative;
+	z-index: 0;
+	display: inline-block;
+	box-sizing: border-box;
+	text-align: center;
+	width: 100%;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+a:visited{
+    color: white;
+	text-decoration: none;
+}
+
+a:link {
+  text-decoration: none;
+}
+
+a:-webkit-any-link {
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.grid{
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	grid-auto-rows: 20px; 
+	gap: 15px;
+	column-gap: 19px;
+	margin: 4px;
+    /*margin-top:30px;*/
+	transition: all 0.3s ease-in-out;
+}
+
+.topGrid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+}
+
+
+.smallCard {
+	position: absolute;
+	left: -10px;
+	background-color: white;
+	padding: 1px;
+	border: 1px solid black;
+	box-sizing: border-box;
+	border-radius: 2px;
+	top: -5px;
+	font-size: 1px;
+}
+
+.box {
+	position: relative;
+	font-size: 14px;
+	background: #D3D3D3;
+	background-color: var(--box-background-color);
+	color: black;
+	color: var(--box-color);
+    break-inside: avoid-column;
+	transition: all 0.5s;
+	border-radius: 8px;
+	padding-top: 4px;
+	text-align: center;
+	/*margin:7px;*/
+	grid-row-end: span 6;
+	width: auto;
+	transition: transform 0.3s ease-in-out, grid-row-end 0.3s ease-in-out, box-shadow 0.2s;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.platoon:hover, .blackbox:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+div.optionBox, div.configBox {
+	position: relative;
+	border-radius: 4px;
+	background: #D3D3D3;
+	background-color: var(--optionBox-background-color);
+	box-sizing: border-box;
+	color: black;
+	color: var(--box-color);
+	margin: 1px;
+	margin-top: 0.2em;
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+	font-size: 0.75em;
+	display: grid;
+    gap: 0.4ch;
+}
+
+
+div.configBox {
+	background: white;
+	padding-top: 0em;
+	padding-bottom: 0em;
+}
+.configBox select, .optionBox select {
+	margin: 0ch;
+	width: 100%;
+}
+
+
+.optionBox label{
+	text-align: left;
+	display: flex;
+	align-items: center;
+}
+
+.blackbox, .platoon{
+    margin-top: 5px;
+	margin-bottom: 5px;
+	padding: 2px;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 8px;
+	width: 100%;
+	box-sizing: border-box;
+	position: relative;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+
+button.platoon {
+	cursor: pointer;
+	padding-inline: 0px;
+	grid-row-end: span 5;
+	width:auto;
+}
+
+button .title {
+    border-radius: unset;
+	border: unset;
+	margin: 0; 
+	width: 100%;
+	min-height: 65px;
+}
+
+/* Additional specific styles for .blackbox */
+.blackbox {
+    background: black;
+}
+
+/* Additional specific styles for .platoon */
+.platoon {
+    background: #6e7575;
+}
+.title
+{
+	text-transform: uppercase;
+    width: 100%;
+	font-weight: bold;
+	padding: 3px 0 0 3px;
+	box-sizing: border-box;
+    background: white;
+	background-color: var(--optionBox-background-color);
+    color: black;
+	color: var(--box-color);
+    border-radius: 6px;
+	-webkit-border-radius: 6px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+}
+
+.title span {
+	font-size: 11px;
+}
+.title span.div_title {
+	font-size: 0.8em;
+	font-style: italic;
+	color: #5e5e5e;
+}
+
+.title span.cardCode {
+	font-size: 0.7em;
+}
+.title {
+    display: grid;
+
+	grid-template-areas: 
+    "insignia title title title"
+    "insignia cardCode info msi";
+  grid-template-columns: 35px 1fr auto;
+}
+
+.insignia {
+	grid-area: insignia;
+}
+
+.title br {
+	height: 0px;
+}
+
+.title span br {
+	display:initial;
+}
+
+
+.titleGrid {
+	grid-area: title;
+}
+
+.cardCode {
+	grid-area: cardCode;
+}
+label .nation img {
+	filter:none;
+	padding: 0px;
+}
+
+button.initial {
+	height: 100px;
+	width: 100%;
+	margin: 0px;
+	background-color:#6e7575;
+}
+
+button.initial br {
+	display: block;
+}
+
+h2{
+	padding: 2px 2px;
+	text-decoration: none;
+	background: #3D4849;
+	color: white;
+	display: inline-block;
+	width: min(1011px, calc(100vw - 100px));
+	-webkit-border-radius: 8px;
+	border-radius: 8px;
+	text-transform:uppercase;
+	margin-block-start: 0;
+}
+
+.formHeader{
+	padding: 5px 2px;
+	margin-top: 0px;
+	margin-bottom: 0;
+	color: white;
+	text-decoration: none;
+	text-transform:uppercase;
+	display: flex;
+	align-items: center;
+	gap: 1ch;
+}
+
+.selectedPlatoon {
+	display: none;
+}
+
+.selected {
+	display: block;
+}
+
+.forceCard label {
+	margin-top: 2px;
+	margin-bottom: 2px;
+	padding: 2px;
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: 8px;
+	width: 100%;
+	box-sizing: border-box;
+	display: grid;
+	grid-template-columns: 45px auto;
+	background: #6e7575;
+}
+
+.forceCard label img {
+	filter: invert(100%);
+    padding: 5px;
+}
+
+.cardTitle {
+	display: block;
+	background-color: var(--optionBox-background-color);
+	color: #000;
+	color: var(--text-color);
+	font-weight: bold;
+	font-size: 1.2em;
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+}
+
+.cardPoints {
+	font-style: italic;
+	font-size: 0.7em;
+}
+
+.box .IsHitOn ,.box .Points, .IsHitOn{
+	margin-top:5px;
+	padding: 1px;
+	width: 130px;
+	background: black;
+	display: inline-block;
+	border-radius: 7px;
+	-webkit-border-radius: 7px;
+}
+
+.IsHitOn div{
+	border: 2px solid white;
+	text-decoration: none;
+    text-align: left;
+	background: white;
+	width: 126px;
+	color: black;
+	font-size: 15px;
+	display: inline-block;
+}
+
+
+.Points div{
+	border: 2px solid white;
+	padding: 2px 2px;
+	text-decoration: none;
+    text-align: left;
+	background: white;
+	width: 122px;
+	color: black;
+	font-size: 15px;
+	display: inline-block;
+	
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+
+    text-align: center;
+	background: green;
+	color: white;
+	font-weight: bold;
+}
+
+ .IsHitOn div:first-child{
+    font-weight: bold;
+	text-transform:uppercase;     
+    text-align: left;	
+    background: #dd0000;
+    padding: 2px 2px;
+    border: 2px solid white;
+	color: white;
+	width: 122px;
+    border-radius: 6px;
+	-webkit-border-radius: 6px;
+}
+
+.IsHitOn div:last-child{
+
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+    
+}
+
+#pointsOnTop {
+	position: fixed; 
+	top: 20px; 
+	z-index: 5;
+	right: 40px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Optional: Add shadow for visibility */
+	transition: all 0.3s ease; /* Smooth transition for floating */
+  }
+  
+  #pointsOnTop.floating {
+	position: fixed; /* Make it float */
+  }
+
+  .info-btn {
+
+	position: absolute;
+	height: 20px;
+	width: 20px;
+	border-radius: 50%;
+	border: solid black 1.5px;
+	left: -10px;
+	top: 20px;
+	font-family: 'Times New Roman', Times, serif;
+	font-weight: bold;
+	font-style: italic;
+	background-color: #a0c2d8c0;
+	z-index: 100;
+}
+
+@media only screen and (max-width: 1400px) {
+	.page-container {
+        width: 100%;
+        padding: 0px; 
+    }
+	.grid{
+		grid-template-columns: repeat(5, 1fr);
+	    margin-top:5px;
+	}
+}
+
+@media only screen and (max-width: 1100px) {
+	.header {
+		margin-left: 0;
+		width:100%;
+	}
+
+	.collapsible{
+		margin-left: 5px;
+		margin-right: 0px;
+		width: 800px;
+		width: calc(100vw - 6px);
+	}
+
+	.Formation{
+		margin-left: 5px;
+		margin-right: 0px;
+		width: 800px;
+		width: calc(100vw - 10px);
+	}
+
+	.grid{
+		grid-template-columns: repeat(4, 1fr);
+	}
+	.info-btn {
+
+		height: 35px;
+		width: 35px;
+
+	}
+}
+
+@media only screen and (max-width: 870px) {
+	.grid{
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	h3 {
+		width:min(400px, 100%);
+	}
+}
+@media only screen and (max-width: 630px) {
+	.grid{
+		grid-template-columns: repeat(2, 1fr);
+	    column-gap: 5px;
+	    margin-top:5px;
+	}
+}
+@media only screen and (max-width: 490px) {
+
+	.grid{
+		grid-template-columns: repeat(2, 1fr);
+
+	}
+}
+
+
+ #backToTopButton {
+    display: none;
+	position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 99;
+    background-color: #007BFF;
+	background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+ #process-link {
+
+	position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 99;
+    background-color: #007BFF;
+	background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+#viewlistOnTop a, #backToTopButton a {
+    text-decoration: none;
+    color: #fff;
+}
+
+
+button.platoon img {
+	padding: 5px 5px 5px 5px;
+	padding-bottom: 0px;
+	
+}
+
+
+button .nation img {
+	padding: 0px 5px 5px 5px;
+}
+
+.left img {
+	padding: 2px 2px 5px 5px;
+}
+/*
+.floatingImg {
+	position: relative;
+	width: 0px;
+	height: 0px;
+}
+*/
+
+button .floatingImg img{
+
+	background-color: white;
+    border-radius: 30%;
+    border: 2px solid black;
+	width: 18px;
+    padding: 5px 5px 5px 5px;
+
+}
+
+.addFormButton {
+    background-color: #007BFF;
+	background-color: var(--primary-color);
+    color: white;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  #infoOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#infoOverlay.hidden {
+    display: none;
+}
+
+#infoContent {
+    background: #fff;
+    padding: 20px;
+    max-width: 900px;
+	max-height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+	overflow: scroll;
+	scrollbar-width: none; /* Hides scrollbar in Firefox */
+}
+#infoContent::-webkit-scrollbar {
+	display: none; /* Hides scrollbar in WebKit browsers (e.g., Chrome, Safari) */
+  }
+
+#closeOverlay {
+    display: block;
+    margin-bottom: 10px;
+    background: red;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#platoonDetails {
+	border: solid black 1.5px;
+	margin: 0;
+	padding: 0;
+	border-collapse: separate;
+	border-radius: 7px;
+    border-spacing: 0;
+}
+#platoonDetails td {
+	border: solid black 1.5px;
+	margin: 0;
+	padding: 5px;
+	border-radius: 7px;
+    border-spacing: 0;
+}
+
+li {
+	text-align: left;
+	margin-top: 0.5em;
+}
+
+.config {
+	font-weight: bold;
+}
+
+.hidden {
+	display: none !important;
+}
+
+.flash-effect {
+    animation: flash-animation 1s ease-in-out;
+}
+
+@keyframes flash-animation {
+    0% { background-color: yellow; }
+    50% { background-color: green; }
+    100% { background-color: green; }
+}

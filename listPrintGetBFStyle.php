@@ -2,9 +2,8 @@
 // Start the session
 session_start();
 
-
-include "functions.php";
 include "sqlServerinfo.php";
+include "functions.php";
 include "login.php";
 include "cssVersion.php";
 
@@ -78,11 +77,11 @@ if (isset($loadedListNumber)) {
 $linkQuery ="";
 
 
-foreach($query as $key => $row) {;
-    if ($key !== "cost") {
-        $_SESSION[$key]= (($key == "latestSelectID")? "": $query[$key]);
-        $linkQuery .= ($key !== 'lsID') ? "&" . $key . "=" . $query[$key] : "";
-        $backQuery .= "&" . $key . "=" . (($key == "latestSelectID")? "": $query[$key]);
+foreach($query as $key => $queryRow) {;
+    if ($key !== "cost"&&!empty($queryRow)) {
+        $_SESSION[$key]= (($key == "latestSelectID")? "": $queryRow);
+        $linkQuery .= ($key !== 'lsID') ? "&" . $key . "=" . $queryRow : "";
+        $backQuery .= "&" . $key . "=" . (($key == "latestSelectID")? "": $queryRow);
     }
 }
 
@@ -169,9 +168,10 @@ if (isset($query['dpVer'])||isset($query['dPs'])) {
     }
 }
 
-    foreach ($Books as $row) if (($row["code"] == $query['Book']??"na")||($row["Book"]??"" == $query['Book']??"na")){
+    foreach ($Books as $row) if (($row["code"] == ($query['Book']??"na"))||(($row["Book"]??"") == ($query['Book']??"na"))){
         $bookCode = $row["code"]; 
         $bookTitle = $row["Book"]; 
+    $ccBookTitle = $row["commandCardBook"]??$row["Book"];
         $bookSelected = true;
     }
 if ($Books instanceof mysqli_result) {
@@ -223,7 +223,7 @@ $maxSupportBoxNr = 0;
     $platoonCardsQuery= $conn->query(
         "SELECT  *
         FROM    cmdCardPlatoonModForPrintDB
-        WHERE   Book = '{$bookTitle}'");
+        WHERE   Book = '{$ccBookTitle}'");
 
     $platoonCards =[];
     foreach ($platoonCardsQuery as $key => $value) {
@@ -235,7 +235,7 @@ $maxSupportBoxNr = 0;
     $unitCards= $conn->query(
         "SELECT  *
         FROM    cmdCardUnitModForPrintDB
-        WHERE   Book = '{$bookTitle}'");
+        WHERE   Book = '{$ccBookTitle}'");
 
 
     $forceCards= $conn->query(
@@ -252,7 +252,7 @@ $maxSupportBoxNr = 0;
                 LEFT JOIN cmdCardsText
                 ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
             ON cmdCardCost.Book = cmdCardsForceMod_link.Book AND cmdCardCost.card = cmdCardsForceMod_link.card         
-        WHERE   cmdCardsForceMod_link.Book LIKE '%" . $bookTitle . "%'");  
+        WHERE   cmdCardsForceMod_link.Book LIKE '%" . $ccBookTitle . "%'");  
 
         
     $weapons = $conn->query(
@@ -268,10 +268,10 @@ $maxSupportBoxNr = 0;
     $cards = $conn->query(
        "SELECT  * 
         FROM    cmdCardsText 
-        WHERE   cmdCardsText.Book LIKE '%" . $bookTitle . "%'");
+        WHERE   cmdCardsText.Book LIKE '%" . $ccBookTitle . "%'");
 }
 
-if ($bookSelected && $query['Book'] <> "")  {
+if ($bookSelected && $query['Book']??"" <> "")  {
 
     $platoonOptionOptions= $conn->query(
 "SELECT  * 
@@ -324,6 +324,7 @@ $attachmentsInForce=[];
 $weaponsTeamsInForce=[];
 $rulesInForce=[];
 $SummaryOfCards = [];
+$distinguishingAdditions = ["(A3+)","(A4+)","(A5+)","(A6)","(IT)","(L)","(para)","(no HE)","(ROF2)","(ROF4)"];
 
 ?>
 <!DOCTYPE html>
@@ -399,7 +400,7 @@ $SummaryOfCards = [];
 if ($bookSelected) { //   Formation
     $nrOfFormationsInForce = ($query['nOF']??0)+($query['nOFoB']??0);
     $formationTitle=[];
-    $formationCardTitley=[];
+    $formationCardTitle=[];
     $formationCardNote=[];
     $platoonImages = [];
     $platoonCardMod = []; 
@@ -469,7 +470,7 @@ if (isset($query[$currentFormation])) {
                     unitType,
                     platoonNation
             FROM    cmdCardAddToBox  
-            WHERE   Book LIKE '%" . $bookTitle . "%'
+                    WHERE   Book LIKE '%" . $ccBookTitle . "%'
             AND     formation LIKE '%{$query[$currentFormation]}%'");
 }
     
@@ -498,7 +499,7 @@ if (isset($query[$currentFormation])) {
             LEFT JOIN cmdCardsText
             ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
         ON cmdCardCost.Book = cmdCardFormationMod.Book AND cmdCardCost.card = cmdCardFormationMod.card 
-    WHERE   cmdCardsText.Book LIKE '%" . $bookTitle . "%'
+        WHERE   cmdCardsText.Book LIKE '%" . $ccBookTitle . "%'
     AND     cmdCardFormationMod.formation LIKE '%" . $query[$currentFormation] . "%'");  
     }        
 
@@ -710,7 +711,7 @@ if ($bookSelected && $bookTitle !="") { // ----------- support
                 replaceUnitStats,
                 platoonNation
         FROM    cmdCardAddToBox  
-        WHERE   Book LIKE '%{$bookTitle}%'
+        WHERE   Book LIKE '%{$ccBookTitle}%'
         AND     formation LIKE '%Support%'");
 $platoonConfigQuery = $conn->query(
             "SELECT  *
@@ -878,10 +879,12 @@ $boxAllHTML[$currentBoxInFormation] .= "<tr><td>".$currentConfig. $optionsHTML .
 // ----------- BB support 
 if ($bbEval) {
     $BBSupport_DB = $conn->query(
-        "SELECT  DISTINCT platoon , title, alliedBook AS Book, unitType, Nation, relevance 
+            "SELECT  DISTINCT platoon , title, alliedBook AS Book, unitType, Nation
         FROM formationSupport_DB
         WHERE Book = '{$bookTitle}'
-    ORDER BY platoon, relevance  desc");
+        GROUP by platoon
+        ORDER BY relevance desc");
+
 }
 if ((isset($BBSupport_DB)&&$BBSupport_DB->num_rows > 0)&&$bbEval) { //  BB support 
 
@@ -932,7 +935,7 @@ $currentFormation="BlackBox";
             if ($row4["platoon"] == $row["platoon"]){
                 //$thisBoxType = $row4["box_type"];
                 $BBSupport_DBUsed[$key]["box_type"] = $row4["box_type"];
-                $BBSupport_DBUsed[$key]["box_nr"] = $currentBoxNr;
+                $BBSupport_DBUsed[$key]["box_nr"] = $key;
             }
         }
         mysqli_data_seek($BBSupport_type ,0);  
@@ -972,7 +975,7 @@ $currentFormation="BlackBox";
             LEFT JOIN cmdCardsText
             ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
         ON cmdCardCost.Book = cmdCardFormationMod.Book AND cmdCardCost.card = cmdCardFormationMod.card 
-        WHERE   cmdCardsText.Book LIKE '%{$bookTitle}%'
+        WHERE   cmdCardsText.Book LIKE '%{$ccBookTitle}%'
         AND ({$sqlTempStatement})");
 }
     foreach ($BBSupport_DBUsed as $currentBoxNr => $row) { //  BB support 
@@ -1019,7 +1022,7 @@ $platoonConfig = $conn->query(
                     list($cardImage, $cardsHTML) = printPlatoonUnitCardHTML($unitCards, $row, $query, $platoonCardMod, $attachmentsInForce, $CardsInList, $currentBoxInFormation, $platoonIndex);
                     list($configCost, $currentConfig) = configPrintHTML($row3, $platoonIndex, $weaponsTeamsInForce, $attachmentsInForce, $platoonCardMod);
 // ------------------- image print -----------
-                    list($temp1,$optionsHTML) = printBoxImageAndGeneratePlatoonOptionsHTML($platoonOptionHeadersChanged, $platoonOptionChanged, $row, $row3, $query, $weaponsTeamsInForce, $attachmentsInForce, $platoonIndex, $currentFormation, $cardImage, $platoonCardMod);
+                    list($temp1,$optionsHTML) = printBoxImageAndGeneratePlatoonOptionsHTML($platoonOptionHeadersChanged, $platoonOptionChanged, $row, $row3, $query, $weaponsTeamsInForce, $attachmentsInForce, $platoonIndex, $currentFormation, $cardImage, $platoonCardMod, $currentBoxInFormation);
 //------- check if the formation have cards for the box --------------
                     $formationCardHTML = printFormationCardsHTML($formationCards, $formationCardTitle, $formationNr, $platoonIndex, $currentBoxNr, $platoonCardMod, $row, $row3, $query, $CardsInList, $platoonsInForce, $attachmentsInForce);
                     // ------------ platoon cards (pioneer etc.)
@@ -1068,9 +1071,10 @@ $currentBoxNr = 0;
             configChange,
                  optionChange,
             card as title,
-            unitType
+                 unitType,
+                 platoonNation
     FROM    cmdCardAddToBox  
-    WHERE   Book LIKE '%" . $bookTitle . "%'
+         WHERE   Book LIKE '%" . $ccBookTitle . "%'
          AND     formation LIKE '%Support%'
          AND     boxNr > " . $maxSupportBoxNr);
 }
@@ -1530,7 +1534,8 @@ foreach ($weaponsTeamsInForce as $row1) if (( $row1 <> "")&&( $row1 <> "Komissar
     $waponsRow=array();
     $weaponsPerTeam=2;
     foreach ($weapons as $key => $row2) 
-        if ( $row1 === $row2["team"]) {
+        if ( strtolower($row1) === strtolower($row2["team"])) {
+
             $weaponsRow[$key]=$row2;
             $weaponsPerTeam++;
             $teamImage = $row2["image"];
@@ -1544,15 +1549,15 @@ foreach ($weaponsTeamsInForce as $row1) if (( $row1 <> "")&&( $row1 <> "Komissar
         <td class='imagerow'  style='page-break-inside:avoid;' rowspan='{$weaponsPerTeam}'><img src='img/{$teamImage}.svg'></td>
 
     </tr>
-            <tr style='page-break-inside:avoid;'>
-            <td class='teamHeader' colspan='8'>{$teamTeam}
+            <tr style=class='break-inside-avoid'>
+            <td class='teamHeader' colspan='8'>" . str_replace($distinguishingAdditions,"", $teamTeam) ."
             </td>
     </tr>";
     }
     if (isset($weaponsRow)) {
 
         foreach ($weaponsRow as $row2) {
-        if ( ($row1 === $row2["team"])||isset($row2["teams"])&&($row1 === $row2["teams"]) ) {
+        if ( (strtolower($row1) === strtolower($row2["team"]))||isset($row2["teams"])&&(strtolower($row1) === strtolower($row2["teams"])) ) {
                     
                     foreach ($rules as $row3) {
                         if (isset($row2["notes"])&&$row2["notes"] != ""&&isset($row3["name"])&&is_numeric(strrpos(strtoupper($row2["notes"]), strtoupper($row3["name"]),-1))) {
@@ -1568,7 +1573,7 @@ foreach ($weaponsTeamsInForce as $row1) if (( $row1 <> "")&&( $row1 <> "Komissar
                     echo "
                     <tr>
                         <td class='firstWeaponrow' style='text-align: left;'>
-                            <b>".$row2["weapon"]." </b>
+                            <b>".str_replace($distinguishingAdditions,"", $row2["weapon"])." </b>
                         </td>
                         <td class='firstWeaponrow' >
                             <b>".$row2["ranges"]." </b>
@@ -1665,7 +1670,9 @@ if (isset($rules)&&$rules->num_rows > 0) {
         Link QR Code
         </div>
     </div>        
-    <div class="formation">
+    <div class="formation break-inside-avoid">
+        Scan the QR code to get back to this list on your device. <br>
+        <br>
 <div id="qrcode" data-url="http://www.fowlist.com/listPrintGet.php?<?=$linkQuery?>"></div>
     </div>
     
@@ -1677,6 +1684,7 @@ if (isset($rules)&&$rules->num_rows > 0) {
   const qrDiv = document.getElementById("qrcode");
   const url = qrDiv.dataset.url;  // read data-url
   new QRCode(qrDiv, {
+    correctLevel : QRCode.CorrectLevel.L,
     text: url,
     width: 256,
     height: 256

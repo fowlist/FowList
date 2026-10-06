@@ -16,20 +16,46 @@ function queryToItems($query, $conn) {
 }
 
 $data = json_decode(file_get_contents("php://input"), true)??[];
+$platoonInfo = $data['platoonInfo']??false;
 $codes = $data['codes']??false;
+
+// Handle both new format (platoonInfo) and legacy format (codes)
+if ($platoonInfo) {
+    $codes = is_array($platoonInfo) && isset($platoonInfo['codes']) 
+             ? $platoonInfo['codes'] 
+             : (is_array($platoonInfo) && isset($platoonInfo['platoon']) 
+                ? [$platoonInfo['platoon']] 
+                : false);
+    $period = $platoonInfo['period'] ?? null;
+} else {
+    $period = null;
+}
+
+// Allow pd to be provided directly in the payload; prefer explicit pd, then period
+$pd = $data['pd'] ?? $period ?? null;
+
+// If pd is provided in JSON body, inject it into REQUEST_URI so sqlServerinfo.php detects it
+if ($pd) {
+    if (strpos($_SERVER['REQUEST_URI'], 'pd=') === false) {
+        $sep = (strpos($_SERVER['REQUEST_URI'], '?') === false) ? '?' : '&';
+        $_SERVER['REQUEST_URI'] = $_SERVER['REQUEST_URI'] . $sep . 'pd=' . urlencode($pd);
+    }
+}
+// Also set $query['pd'] so other includes can read it
+$query['pd'] = $pd ?? "";
 
 if ($codes) {
     include_once "sqlServerinfo.php";
     include "functions.php";
 
-    $placeholders = "'" . implode("','", $codes) . "'";
+$placeholders = "'" . implode("','", $codes) . "'";
 
 try {
 
-    // Query for the platoonconfig table
+// Query for the platoonconfig table
     $platoonConfigQuery = " SELECT * 
-                FROM platoonConfig 
-                WHERE platoon IN ({$placeholders})";
+            FROM platoonConfig 
+            WHERE platoon IN ({$placeholders})";
 
     $configItems = queryToItems($platoonConfigQuery, $conn);
 

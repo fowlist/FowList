@@ -1,0 +1,87 @@
+:root{
+  --bg: #f5f7fb;
+  --bg-alt: #ffffff;
+  --surface: #ffffff;
+  --surface-hover: rgba(15, 23, 42, 0.04);
+  --border: #d1d5db;
+  --border-hi: #e5e7eb;
+
+  --accent: #2563eb;
+  --accent-hi: #3b82f6;
+  --accent-lo: rgba(59, 130, 246, 0.12);
+
+  --text: #111827;
+  --text-mid: #475569;
+  --text-dim: #94a3b8;
+  --text-inverse: #ffffff;
+
+  --danger: #b91c1c;
+  --success: #16a34a;
+}
+.dark-mode{
+  --bg: #0d0f11;
+  --bg-alt: #13161a;
+  --surface: #1a1e24;
+  --surface-hover: rgba(255, 255, 255, 0.04);
+  --border: #252b34;
+  --border-hi: #313948;
+
+  --accent: #3b82f6;
+  --accent-hi: #60a5fa;
+  --accent-lo: rgba(59, 130, 246, 0.12);
+
+  --text: #e2e8f0;
+  --text-mid: #94a3b8;
+  --text-dim: #475569;
+  --text-inverse: #ffffff;
+
+  --danger: #ef4444;
+  --success: #22c55e;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  transition:background .15s,color .15s;
+}
+
+/* Theme switch */
+.theme-switch{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-left:8px;
+}
+
+.theme-switch input{display:none}
+
+.theme-switch .slider{
+  width:48px;
+  height:26px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  position:relative;
+  box-sizing:border-box;
+  cursor:pointer;
+}
+
+.theme-switch .slider::after{
+  content:"";
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:20px;
+  height:20px;
+  background:var(--fg);
+  border-radius:50%;
+  transition:left .15s,background .15s;
+}
+
+.theme-switch input:checked + .slider::after{left:25px}
+
+.theme-label{
+  font-size:13px;
+  color:var(--muted);
+  user-select:none;
+}

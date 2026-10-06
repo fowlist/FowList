@@ -14,7 +14,13 @@ if (isset($_SESSION["lastPage"])) {
     }
 }
 
-$insignia = fetchData($conn, $query, "insigniaQuery", "SELECT * FROM insignia ORDER BY autonr");
+$insignia = [];
+$insigniaQuery = $conn->query(
+    "SELECT * FROM insignia ORDER BY autonr");  
+foreach ($insigniaQuery as $key => $value) {
+    $insignia[] = $value;
+}
+
 $Books = [];
 $BooksQuetry = $conn->query(
     "SELECT * FROM nationBooks");  
@@ -42,8 +48,36 @@ foreach ($dpVersions as $key => $value) {
 
     }
 }
+// Store oneFront checkbox state in session
+if (isset($query["oneFront"])) {
+    $_SESSION["oneFront"] = $query["oneFront"];
+} else {
+    $_SESSION["oneFront"] = "0";
+}
 
 $setDpVersion = $setDpVersion==""?$latestdp:$setDpVersion;
+
+// Honor user session preference for dp version when creating a new list
+// If no explicit dpVer/dPs query parameter is present, use the session `dpPresets`.
+if (empty($query['dpVer']) && empty($query['dPs']) && !empty($_SESSION['dpPresets'])) {
+    $pref = $_SESSION['dpPresets'];
+    if ($pref === 'Latest') {
+        $setDpVersion = $latestdp;
+    } elseif ($pref === 'Book') {
+        // For Book preference, prefer book-related selection when available;
+        // otherwise keep previously-determined value (which defaults to latestdp).
+        if (empty($setDpVersion)) {
+            $setDpVersion = $latestdp;
+        }
+    }
+}
+
+// If we applied a session preference, ensure the query flags are set so
+// the downstream DP-loading logic runs (it checks for dpVer/dPs).
+if (!empty($setDpVersion) && empty($query['dpVer']) && empty($query['dPs'])) {
+    $query['dpVer'] = $setDpVersion;
+    $query['dPs'] = "true";
+}
 
 $platoonOptiondpArray =  [];
 $platoonConfigdpArray = [];
@@ -56,21 +90,21 @@ if (isset($query['dpVer'])||isset($query['dPs'])) {
     }
 
     $platoonOptiondp = $conn->query(
-    "SELECT  * 
+        "SELECT  * 
         FROM    dpDatabase
         WHERE   type = 'option'
-        AND     year = {$setDpVersion}");  
+        AND     year = {$setDpVersion}");
     $platoonConfigdp = $conn->query(
-    "SELECT  * 
+        "SELECT  * 
         FROM    dpDatabase
         WHERE   type = 'config'
-        AND     year = {$setDpVersion}");  
+        AND     year = {$setDpVersion}");
 
     $platoonCardgdp = $conn->query(
-    "SELECT  * 
+        "SELECT  * 
         FROM    dpDatabase
         WHERE   type = 'card'
-        AND     year = {$setDpVersion}");  
+        AND     year = {$setDpVersion}");
 
 
     foreach ($platoonOptiondp as $key => $value) {
@@ -83,7 +117,7 @@ if (isset($query['dpVer'])||isset($query['dPs'])) {
 
     foreach ($platoonCardgdp as $key => $value) {
         $platoonCarddpArray[$value["code"]] = $value;
-    }   
+    }
 }
 
 $bookSelected = FALSE;
@@ -111,10 +145,12 @@ foreach ($Books as $eachBook) {
                 "selected" => (($query['ntn']??null) == $nation) ? 1 : 0
             ];
         }
-    }
+    } 
+    /*
     if (!in_array([ "period" => $period,  "periodLong" => $periodLong], $Periods)) {
             $Periods[]  = [ "period" => $period,  "periodLong" => $periodLong];
     }
+             */
     if (isset($query['pd'])&&isset($query['ntn'])&&isset($query['Book'])) {
         if  (($eachBook["Nation"] == $query['ntn'])&&($eachBook["period"] == $query['pd'])&&($eachBook["code"] == $query['Book'])) {
             $bookSelected = true;
@@ -124,6 +160,7 @@ foreach ($Books as $eachBook) {
         if (($eachBook["code"] == $query['Book'])||($eachBook["Book"] == $query['Book'])){
                     $bookCode = $eachBook["code"]; 
                     $bookTitle = $eachBook["Book"];
+                    $ccBookTitle = $eachBook["commandCardBook"]??$eachBook["Book"];
         }            
     }
     if (isset($query['pd'])&&isset($query['ntn'])&&$query['ntn'] == $eachBook["Nation"]&&($eachBook["period"] == $query['pd'])) {
@@ -146,10 +183,9 @@ if (count($nationBooks) == 1) {
     $bookCode = $nationBooks[0]["code"];
     $nationBooks[0]["selected"] = 1;
     $bookTitle = $nationBooks[0]["Book"];
+    $ccBookTitle = $nationBooks[0]["commandCardBook"]??$nationBooks[0]["Book"];
     $bookSelected = true;
 }
-
-
 
 
 if (isset($query["lsID"])) {
@@ -181,7 +217,6 @@ foreach ($bBQuery as $key => $value) {
             foreach ($needles as $needle) {
                 if (is_numeric(strpos($key2,$needle,6))&&is_numeric(strpos($key2,$key))&&!empty($value2)) {
                     $mod = substr($key2,strlen($key));
-
                     $query[$value."box".$mod]=$value2;
                     unset($query[$key2]);
                 }
@@ -210,7 +245,7 @@ if (isset($query['pd'])&&$bookSelected) {
     $platoonCardsQuery= $conn->query(
         "SELECT  *
         FROM    cmdCardPlatoonModDB
-        WHERE   Book = '{$bookTitle}'");
+        WHERE   Book = '{$ccBookTitle}'");
     $platoonCards =[];
     foreach ($platoonCardsQuery as $key => $value) {
         $platoonCards[$key] = $value;
@@ -222,7 +257,7 @@ if (isset($query['pd'])&&$bookSelected) {
     $unitCards= $conn->query(
         "SELECT  *
         FROM    cmdCardUnitModDB
-        WHERE   Book = '{$bookTitle}'");
+        WHERE   Book = '{$ccBookTitle}'");
 
     $platoonOptionOptionsQuery= $conn->query(
     "SELECT  * 
@@ -263,7 +298,8 @@ if (!isset($query['nOFoB'])) {
 }
 
 
-
+$recon = false;
+$oneFormationLimiter = "";
 $formationCost= [] ;
 $boxCost=[];
 $boxesPlatoonsData =[];
@@ -271,6 +307,8 @@ $supportBoxesPlatoonsData = [];
 $formSupBoxesPlatoonsData = [];
 $teamsInFormations = "";
 $prerequisisteString = "";
+$formationNations = [];
+$unitsInFormtion = "";
 if (isset($query['pd'])&&isset($query["ntn"])&&isset($query['Book'])) {
     for ($formationNr = 1; $formationNr <= $nrOfFormationsInForce+$query['nOFoB']; $formationNr++) { //  Formation 
         $boxesPlatoonsData[$formationNr]["formCost"] = 0;
@@ -281,16 +319,35 @@ if (isset($query['pd'])&&isset($query["ntn"])&&isset($query['Book'])) {
             $Formations = $thisBookFormations;
             foreach ($Formations as $row) {
                 if (($row["Book"] == $bookTitle)) {
+                    if (($row["restriction"]??"") === "Recon") {
+                        if ($recon) {
+                            continue; // skip if recon already found in previous formation
+                        }
+                        if (isset($query[$currentFormation])&&$query[$currentFormation] == $row["code"]) {
+                            $recon = true;
+                        }
+                    }
+                    if (($row["restriction"]??"") === "One") {
+                        if (is_numeric(strpos($oneFormationLimiter,$row["code"]))) {
+                            continue; // skip if already used in previous formation
+                        }
+                        if (isset($query[$currentFormation])&&$query[$currentFormation] == $row["code"]) {
+                            $oneFormationLimiter = $oneFormationLimiter . "," . $row["code"];
+                        }
+                    }
                     if (isset($query[$currentFormation])&&$query[$currentFormation] == $row["code"]) {
                         $correctBook = TRUE;
                         $row["selected"] = true;
+                        $formationNations[] = $query["ntn"];
                     }
                     $row["value"] = $row["code"];
                     $row["description"] = $row["title"];
+                    $row["insignia"] = !empty($row["card"])?$row["card"]:null;
                     $boxesPlatoonsData[$formationNr]["thisFormationList"][]=$row;
                     $boxesPlatoonsData[$formationNr]["book"] = $row["Book"];
                 }
             }
+            
         }
 
         $boxesPlatoonsData[$formationNr]["thisNation"] = $query["ntn"]??null;
@@ -309,7 +366,17 @@ if (isset($query['pd'])&&isset($query["ntn"])&&isset($query['Book'])) {
             
             $optionsArrayKey=0;
             foreach ($Books as $bookRow) {
-                if ((is_numeric(strpos($bookRow["Allies"],$query['ntn']))||($query['ntn']==$bookRow["Nation"]))&&($query['pd']==$bookRow["period"])&&($bookRow["code"] != $query['Book'])) {
+                if ((is_numeric(strpos($bookRow["Allies"] . "|",$query['ntn'] . "|"))||($query['ntn']==$bookRow["Nation"]))&&($query['pd']==$bookRow["period"])&&($bookRow["code"] != $query['Book'])) {
+                    $alliedApplicable = FALSE;
+                    foreach ($formationNations as $formationAbove) {
+                        if ($formationAbove == $query['ntn']) {
+                            $alliedApplicable = TRUE;
+                        }
+                    }
+
+                    if ($alliedApplicable || $query['ntn'] == $bookRow["Nation"]) {
+                        $boxesPlatoonsData[$formationNr]["books"][$optionsArrayKey] = $bookRow;
+                        
                     if (isset($query[$currentFormation . "Book"])&&($bookRow["code"] == $query[$currentFormation . "Book"])) {
                         $formationNation[$currentFormation . "Book"] = $bookRow["Nation"];
                         $formationNation[$currentFormation . "BookTitle"] = $bookRow["Book"];
@@ -327,17 +394,24 @@ if (isset($query['pd'])&&isset($query["ntn"])&&isset($query['Book'])) {
                         "selected" => ($bookRow["code"] == ($query[$currentFormation . "Book"]??null)) ? 1 : 0
                     ];
                     $optionsArrayKey++;
+                    }
                 }
             }
+            if (isset($boxesPlatoonsData[$formationNr]["books"])) {
             $nationArray = array_column($boxesPlatoonsData[$formationNr]["books"], "description");
             array_multisort($nationArray, SORT_DESC, SORT_NUMERIC, $boxesPlatoonsData[$formationNr]["books"]);
+            } else
+            {
+                $boxesPlatoonsData[$formationNr]["books"] = [];
+                $nationArray = [];
+            }
 
             if (isset($query[$currentFormation . "Book"])&&$bookSelected) {
 
                 $boxesPlatoonsData[$formationNr]["thisNation"] = $formationNation[$currentFormation . "Book"];
                 $otherBookFormations = [];
                 if (!empty($formationNation[$currentFormation . "BookTitle"])&&$formationNation[$currentFormation . "BookTitle"]!=$bookTitle) {
-
+                    $formationNations[] = $formationNation[$currentFormation . "Book"];
                     $Formations = $conn->query(
                         "SELECT  * 
                         FROM    formations 
@@ -354,7 +428,9 @@ if (isset($query['pd'])&&isset($query["ntn"])&&isset($query['Book'])) {
                             $otherBookFormations[] = $formationRow;
                             $formationRow["value"] = $formationRow["code"];
                             $formationRow["description"] = $formationRow["title"];
+                            $formationRow["insignia"] = $formationRow["card"]!=""?$formationRow["card"]:null;
                             $boxesPlatoonsData[$formationNr]["thisFormationList"][]=$formationRow;
+                            $boxesPlatoonsData[$formationNr]["thisNation"] = ($formationRow["otherNation"]==""?($boxesPlatoonsData[$formationNr]["thisNation"]??null):$formationRow["otherNation"]);
                         }
                     }
                 }
@@ -398,13 +474,15 @@ if (isset($query['pd'])&&isset($query["ntn"])&&isset($query['Book'])) {
                         cmdCardCost.price AS cost,
                         cmdCardsText.code AS code,
                         cmdCardsText.title AS title,
-                        cmdCardsText.notes AS notes
+                        cmdCardsText.notes AS notes,
+                        cmdCardsText.limited AS limited
+
                 FROM    cmdCardFormationMod
                     LEFT JOIN cmdCardCost
                         LEFT JOIN cmdCardsText
                         ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
                     ON cmdCardCost.Book = cmdCardFormationMod.Book AND cmdCardCost.card = cmdCardFormationMod.card 
-                WHERE   cmdCardsText.Book LIKE '%" . $bookTitle . "%'
+                WHERE   cmdCardsText.Book LIKE '%" . $ccBookTitle . "%'
                 AND     cmdCardFormationMod.formation LIKE '%" . $query[$currentFormation] . "%'");  
     
         // ---- formation title and text
@@ -414,6 +492,12 @@ if (isset($query['pd'])&&isset($query["ntn"])&&isset($query['Book'])) {
                 $query[$formationNr."title"]= $boxesPlatoonsData[$formationNr]["formationTitle"] = $formationRow["title"];
                 $boxesPlatoonsData[$formationNr]["formationCode"] = $formationRow["code"];
                 $boxesPlatoonsData[$formationNr]["formationNote"] = !empty($formationRow["Notes"])?$formationRow["Notes"]:null;
+                $boxesPlatoonsData[$formationNr]["insignia"] = !empty($formationRow["card"])?$formationRow["card"]:null;
+                if (!empty($formationRow["otherNation"])) {
+                    $boxesPlatoonsData[$formationNr]["thisNation"] = $formationRow["otherNation"];
+                } elseif (empty($boxesPlatoonsData[$formationNr]["thisNation"]??"")) {
+                    $boxesPlatoonsData[$formationNr]["thisNation"] = $query["ntn"]??null;
+                }
                 break;
             }
         }
@@ -467,7 +551,7 @@ if (isset($query['pd'])&&isset($query["ntn"])&&isset($query['Book'])) {
                      platoonNation,
                      prerequisite
              FROM    cmdCardAddToBox  
-             WHERE   Book LIKE '%" . $bookTitle . "%'
+             WHERE   Book LIKE '%" . $ccBookTitle . "%'
              AND     formation LIKE '%{$query[$currentFormation]}%'");
 
         addCardPlatoonToSection($cardPlatoon,$Formation_DB,$formationSpecificPlatoonConfig,$formationNr,$query,$conn,'formation');
@@ -569,15 +653,25 @@ if (isset($query['pd'])&&isset($query["ntn"])&&isset($query['Book'])) {
 
                     if (!empty($platoonInBox["teams"])&&($query[$currentBoxInFormation]??false == $currentPlatoon)&&($platoonInBox["box_type"] !== "Headquarters")) {
                         $teamsInFormations .= "<>".$platoonInBox["teams"]??"";
+                        $unitsInFormtion .= "<>".$platoonInBox["title"]??"";
                     }
                     $boxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]]["selected"]=true;
                     if (!empty($platoonInBox["optionChange"])&&!empty($platoonOptiondpArray[($platoonInBox["cardNr"]??"")."|0"])) {
                         $platoonInBox["optionChangeDp"] = $platoonOptiondpArray[$platoonInBox["cardNr"]."|0"]["cost"];
                     }
-
+                    $platoonOptionHeaders = [];
+                    $platoonOptionQuery= $conn->query(
+                        "SELECT  * 
+                         FROM    platoonoptionsnew
+                         wHERE   code = '{$platoonInBox["platoon"]}'
+                         ORDER by optionID ASC");    
+                    foreach ($platoonOptionQuery as $key => $value) {
+                        $value["dynamicPoints"] = $platoonOptiondpArray[$currentPlatoon."|".$value["optionID"]]["cost"]??"";
+                        $platoonOptionHeaders[] = $value;
+                    }
                     addConfigToBoxPlatoon($platoonConfigChanged,  $boxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]],$query,$currentBoxInFormation);
-                    list($platoonOptionHeadersChanged, $platoonOptionChanged) = platoonOptionChangedAnalysis($platoonInBox, $platoonOptionHeaders,$platoonOptionOptions);
-                    addOptionsToBoxPlatoon($platoonOptionHeadersChanged, $platoonOptionChanged,$boxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]], $query, $currentBoxInFormation);
+                    list($platoonOptionHeadersChanged, $platoonOptionChanged) = newPlatoonOptionChangedAnalysis($platoonInBox, $platoonOptionHeaders);
+                    newAddOptionsToBoxPlatoon($platoonOptionHeadersChanged, $boxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]], $query, $currentBoxInFormation);
                     addFormationCardToBoxPlatoon($formationCards,$boxesPlatoonsData[$formationNr],$currentBoxNr,$platoonInBox["platoon"],$query,$formationNr);
                     generateCardArrays([], $platoonInBox["box_type"], $formationCard, $unitCards, $currentUnit, $unitCard, $platoonCards, $currentPlatoon, $platoonCard);
                     addPlatoonCardToBoxPlatoon($platoonCards,$boxesPlatoonsData[$formationNr],$currentBoxNr,$platoonInBox["platoon"],$query,$formationNr);
@@ -588,7 +682,7 @@ if (isset($query['pd'])&&isset($query["ntn"])&&isset($query['Book'])) {
                     $boxesPlatoonsData[$formationNr]["formCost"] += $boxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr]["boxCost"];
                     $formationCost[$formationNr] += $boxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr]["boxCost"];
                 }
-                $boxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$currentPlatoon]["insignia"] = generateTitleImanges($insignia, $boxesPlatoonsData[$formationNr]["cmdCardsOfEntireFormationTitle"] . $platoonInBox["title"] . $boxesPlatoonsData[$formationNr]["formationTitle"], (isset($platoonInBox["Nation"])&&$platoonInBox["platoonNation"]<>"")?$platoonInBox["platoonNation"]:$boxesPlatoonsData[$formationNr]["thisNation"]);
+                $boxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$currentPlatoon]["insignia"] = generateTitleImanges($insignia, $boxesPlatoonsData[$formationNr]["cmdCardsOfEntireFormationTitle"] . $platoonInBox["title"] . $boxesPlatoonsData[$formationNr]["formationTitle"], (isset($platoonInBox["Nation"])&&$platoonInBox["platoonNation"]<>"")?$platoonInBox["platoonNation"]:$boxesPlatoonsData[$formationNr]["thisNation"],$boxesPlatoonsData[$formationNr]["insignia"]);
             }
         }
     }
@@ -656,8 +750,8 @@ if (isset($Support_DB)) { //-Support
                  platoonNation,
                  prerequisite
          FROM    cmdCardAddToBox  
-         WHERE   Book LIKE '%" . $bookTitle . "%'
-         AND     formation LIKE '%". $bookTitle . "%Support'");
+         WHERE   Book LIKE '%" . $ccBookTitle . "%'
+         AND     formation LIKE '%". $ccBookTitle . "%Support'");
 
     addCardPlatoonToSection($cardPlatoon,$Support_DB,$supportPlatoonConfig,$formationNr,$query,$conn,'support');
 
@@ -677,8 +771,8 @@ if (isset($Support_DB)) { //-Support
                         LEFT JOIN cmdCardsText
                         ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
                     ON cmdCardCost.Book = cmdCardFormationMod.Book AND cmdCardCost.card = cmdCardFormationMod.card 
-                WHERE   cmdCardsText.Book LIKE '%" . $bookTitle . "%'
-                AND     cmdCardFormationMod.formation LIKE '%" . $bookTitle . "%'");  
+                WHERE   cmdCardsText.Book LIKE '%" . $ccBookTitle . "%'
+                AND     cmdCardFormationMod.formation LIKE '%" . $ccBookTitle . "%'");  
 
     $SupporboxNrs =[];
     $boxTypes =[];
@@ -705,6 +799,10 @@ if (isset($Support_DB)) { //-Support
             $supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]] = array_merge($supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]]??[],$platoonInBox);
             $currentPlatoon =   $platoonInBox["platoon"];
             $currentUnit =      $platoonInBox["unitType"] ??"";
+            if (isset($platoonInBox["otherNation"])&&$platoonInBox["otherNation"]<>"") {
+                $platoonInBox["platoonNation"] = $platoonInBox["otherNation"];
+                $platoonInBox["Nation"] = $platoonInBox["otherNation"];
+            }
 
             if (!isset($supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr]["boxCost"])) {
                 $boxCost[$formationNr][$currentBoxNr] =null;
@@ -735,7 +833,7 @@ if (isset($Support_DB)) { //-Support
                 $prerequisisteString .= ($prerequisisteString==""?"":"," ). $platoonInBox["platoon"];
 
                 if (isset($platoonInBox["prerequisite"])&&$platoonInBox["prerequisite"]!="" && !is_numeric(strpos($platoonInBox["prerequisite"],"C")) && !is_numeric(strpos($platoonInBox["prerequisite"],"Limited"))) {
-                    $prerequisiteSplit = explode(",",$platoonInBox["prerequisite"]);
+                    $prerequisiteSplit = array_map('trim',explode(",",$platoonInBox["prerequisite"]));
                     $prerequisisteFound = false;
                     foreach ($prerequisiteSplit as $prerequisite) {
                         if (is_numeric(strpos($prerequisisteString,$prerequisite))) {
@@ -754,10 +852,19 @@ if (isset($Support_DB)) { //-Support
                 if (!empty($platoonInBox["optionChange"])&&!empty($platoonOptiondpArray[($platoonInBox["cardNr"]??"")."|0"])) {
                     $platoonInBox["optionChangeDp"] = $platoonOptiondpArray[$platoonInBox["cardNr"]."|0"]["cost"];
                 }
-
+                $platoonOptionHeaders = [];
+                $platoonOptionQuery= $conn->query(
+                    "SELECT  * 
+                        FROM    platoonoptionsnew
+                        wHERE   code = '{$platoonInBox["platoon"]}'
+                        ORDER by optionID ASC");    
+                foreach ($platoonOptionQuery as $key => $value) {
+                    $value["dynamicPoints"] = $platoonOptiondpArray[$currentPlatoon."|".$value["optionID"]]["cost"]??"";
+                    $platoonOptionHeaders[] = $value;
+                }
                 addConfigToBoxPlatoon($platoonConfigChanged,  $supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]],$query,$currentBoxInFormation);
-                list($platoonOptionHeadersChanged, $platoonOptionChanged) = platoonOptionChangedAnalysis($platoonInBox, $platoonOptionHeaders,$platoonOptionOptions);
-                addOptionsToBoxPlatoon($platoonOptionHeadersChanged, $platoonOptionChanged,$supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]], $query, $currentBoxInFormation);
+                list($platoonOptionHeadersChanged, $platoonOptionChanged) = newPlatoonOptionChangedAnalysis($platoonInBox, $platoonOptionHeaders);
+                newAddOptionsToBoxPlatoon($platoonOptionHeadersChanged, $supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]], $query, $currentBoxInFormation);
                 addFormationCardToBoxPlatoon($formationCards??[],$supportBoxesPlatoonsData[$formationNr],$currentBoxNr,$platoonInBox["platoon"],$query,$formationNr);
                 generateCardArrays([], $platoonInBox["box_type"], $formationCard, $unitCards, $currentUnit, $unitCard, $platoonCards, $currentPlatoon, $platoonCard);
                 addPlatoonCardToBoxPlatoon($platoonCards,$supportBoxesPlatoonsData[$formationNr],$currentBoxNr,$platoonInBox["platoon"],$query,$formationNr);
@@ -800,21 +907,53 @@ if ($bookSelected) //  --Formation supoport
                     LEFT JOIN cmdCardsText
                     ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card 
                 ON cmdCardCost.Book = cmdCardFormationMod.Book AND cmdCardCost.card = cmdCardFormationMod.card 
-            WHERE   cmdCardFormationMod.Book LIKE '%{$bookTitle}%'
-            AND     cmdCardFormationMod.formation LIKE '%" . ($bookTitle) . "%'");
+            WHERE   cmdCardFormationMod.Book LIKE '%{$ccBookTitle}%'
+            AND     cmdCardFormationMod.formation LIKE '%" . ($ccBookTitle) . "%'");
     } else {
         $formationCards =[];
     }
 
+
+    if ($query["pd"]=="CP") {
+        $BBSupport_DB = $conn->query(
+            "SELECT  DISTINCT platoon, formation_DB.title, formations.Book, unitType, formation_DB.motivSkillHitOn, box_type, platoonsStats.teams
+            FROM formation_DB
+                LEFT JOIN platoonsStats
+                    ON formation_DB.platoon = platoonsStats.code 
+                    LEFT JOIN formations
+                        ON formation_DB.formation = formations.code
+            WHERE formations.Book = '{$bookTitle}'
+            AND BlackBox = 1
+            GROUP by platoon");
+
+    } elseif (($query["oneFront"]??"0")=="1") {
+
+        $bookFront = explode(":",$bookTitle)[0];
+
+        $BBSupport_DB = $conn->query(
+            "SELECT  DISTINCT platoon, formation_DB.title, formations.Book, unitType, formation_DB.motivSkillHitOn, box_type, platoonsStats.teams
+            FROM formation_DB
+                LEFT JOIN platoonsStats
+                    ON formation_DB.platoon = platoonsStats.code 
+                    LEFT JOIN formations
+                        ON formation_DB.formation = formations.code
+            WHERE formations.Book like '{$bookFront}%'
+            AND formations.Book like '{$bookFront}%'
+            AND formation_DB.formation NOT LIKE '%C%'
+            AND BlackBox = 1
+            GROUP by platoon");
+
+
+    } else {
     $BBSupport_DB = $conn->query(
-        "SELECT  DISTINCT platoon, formationSupport_DB.title, alliedBook AS Book, unitType, Nation, motivSkillHitOn, box_type, platoonsStats.teams, booksForPlatoon
+        "SELECT  DISTINCT platoon, formationSupport_DB.title, alliedBook AS Book, unitType, Nation, motivSkillHitOn, box_type, platoonsStats.teams
         FROM formationSupport_DB
             LEFT JOIN platoonsStats
                 ON formationSupport_DB.platoon = platoonsStats.code 
         WHERE Book = '{$bookTitle}'
         GROUP by platoon
         ORDER BY relevance desc");
-    
+    }
     
     $BBSupport_DBformation = $conn->query(
         "SELECT  DISTINCT platoon ,  formation
@@ -824,6 +963,27 @@ if ($bookSelected) //  --Formation supoport
     $BBSupport_unique_type = [];
 
     foreach($BBSupport_DB as $currentBoxNr => $platoonInBox) {
+            if ($query["pd"]=="CP") {
+                $platoonInBox["Nation"] = $query["ntn"]??"";
+            } elseif (($query["oneFront"]??"0")=="1") {
+
+                foreach ($Books as $key2 => $bookRow) { 
+                    if ($bookRow["Book"] == $platoonInBox["Book"]) {
+                        if (!str_contains($bookRow["Allies"], $query["ntn"]??"")&&!str_contains($bookRow["Nation"], $query["ntn"]??"")) {
+
+                            $platoonInBox=null;
+                            break;
+                        }
+
+                        $platoonInBox["Nation"] = $bookRow["Nation"];
+                        break;
+                    }
+                }
+            }
+            if ($platoonInBox==null) {
+                continue;
+            }
+
             $BBSupport_unique_type[$platoonInBox["box_type"]][$platoonInBox["teams"]][$platoonInBox["platoon"]] = $platoonInBox;
         /*if (!is_numeric(strpos($teamsInFormations . "<>",($platoonInBox["teams"]??"")."<>"))) {
             $BBSupport_unique_type[$platoonInBox["box_type"]][$platoonInBox["teams"]][$platoonInBox["platoon"]] = $platoonInBox;
@@ -835,6 +995,7 @@ if (isset($BBSupport_DB)&&query_exists($BBSupport_DB)) {
 
     $otherNationBox =false;
     $mwAvantiGermanSupport =0;
+
     foreach ($BBSupport_unique_type as $unique_type => $unique_types) { //  --Formation supoport 
 
         $formSupBoxesPlatoonsData[$unique_type]["formCost"] = 0;
@@ -845,7 +1006,6 @@ if (isset($BBSupport_DB)&&query_exists($BBSupport_DB)) {
     foreach ($unique_types as $currentTeamType => $platoons){
         
         foreach ($platoons as $currentBoxNr => $platoonInBox){ 
-
     // ------- set reused variables
             $formSupBoxesPlatoonsData[$unique_type]["boxes"][$currentTeamType]["codes"][] = $platoonInBox["cardNr"]??$platoonInBox["platoon"];
             $currentBoxInFormation = $platoonInBox["platoon"]."box";
@@ -910,14 +1070,23 @@ if (isset($BBSupport_DB)&&query_exists($BBSupport_DB)) {
                 $formSupBoxesPlatoonsData[$unique_type]["boxes"][$currentTeamType][$platoonInBox["platoon"]]["selected"]=true;
 
                 foreach ($platoonCards as $key => $thisplatoonCard) {
-                    if ($thisplatoonCard["platoon"] == $currentPlatoon && isset($thisplatoonCard["code"])) {
-                        $platoonCards[$key]["dynamicPoints"] = $platoonCarddpArray[$thisplatoonCard["code"]]["cost"];
+                    if ($thisplatoonCard["platoon"] == $currentPlatoon && isset($thisplatoonCard["code"]) && isset($platoonCarddpArray[$thisplatoonCard["code"]])) {
+                        $platoonCards[$key]["dynamicPoints"] = $platoonCarddpArray[$thisplatoonCard["code"]]?$platoonCarddpArray[$thisplatoonCard["code"]]["cost"]:"";
                     }
                 }
-
+                $platoonOptionHeaders = [];
+                $platoonOptionQuery= $conn->query(
+                    "SELECT  * 
+                        FROM    platoonoptionsnew
+                        wHERE   code = '{$platoonInBox["platoon"]}'
+                        ORDER by optionID ASC");    
+                foreach ($platoonOptionQuery as $key => $value) {
+                    $value["dynamicPoints"] = $platoonOptiondpArray[$currentPlatoon."|".$value["optionID"]]["cost"]??"";
+                    $platoonOptionHeaders[] = $value;
+                }
                 addConfigToBoxPlatoon($platoonConfigChanged,  $formSupBoxesPlatoonsData[$unique_type]["boxes"][$currentTeamType][$platoonInBox["platoon"]],$query,$currentBoxInFormation);
-                list($platoonOptionHeadersChanged, $platoonOptionChanged) = platoonOptionChangedAnalysis($platoonInBox, $platoonOptionHeaders,$platoonOptionOptions);
-                addOptionsToBoxPlatoon($platoonOptionHeadersChanged, $platoonOptionChanged,$formSupBoxesPlatoonsData[$unique_type]["boxes"][$currentTeamType][$platoonInBox["platoon"]], $query, $currentBoxInFormation);
+                list($platoonOptionHeadersChanged, $platoonOptionChanged) = newPlatoonOptionChangedAnalysis($platoonInBox, $platoonOptionHeaders);
+                newAddOptionsToBoxPlatoon($platoonOptionHeadersChanged, $formSupBoxesPlatoonsData[$unique_type]["boxes"][$currentTeamType][$platoonInBox["platoon"]], $query, $currentBoxInFormation);
 
                 generateCardArrays($formationCards, $platoonInBox["box_type"], $formationCard, $unitCards, $currentUnit, $unitCard, $platoonCards, $currentPlatoon, $platoonCard);
                 addFormationCardToBoxPlatoon($formationCards??[],$formSupBoxesPlatoonsData[$unique_type],$currentTeamType,$platoonInBox["platoon"],$query,$formationNr);
@@ -935,6 +1104,7 @@ if (isset($BBSupport_DB)&&query_exists($BBSupport_DB)) {
         }
         
         }
+        
     }
 }
 
@@ -965,9 +1135,10 @@ if ($bookSelected) { //- Card platoons
             configChange,
             optionChange,
             card as title,
+            platoonNation,
             unitType
     FROM    cmdCardAddToBox  
-    WHERE   Book LIKE '%" . $bookTitle . "%'
+    WHERE   Book LIKE '%" . $ccBookTitle . "%'
     AND     formation LIKE '%Support%'
     AND     boxNr > " . $maxSupportBoxNr);
 
@@ -979,7 +1150,7 @@ if ($bookSelected) { //- Card platoons
         ON cmdCardCost.Book = cmdCardsText.Book AND cmdCardCost.card = cmdCardsText.card
         ON cmdCardsForceMod_link.Book = cmdCardCost.Book AND cmdCardsForceMod_link.card = cmdCardCost.card
         WHERE cmdCardsForceMod_link.card NOT LIKE ''
-        AND cmdCardsForceMod_link.Book LIKE '%" . $bookTitle . "%'");
+        AND cmdCardsForceMod_link.Book LIKE '%" . $ccBookTitle . "%'");
 }
 
 
@@ -1079,10 +1250,19 @@ if (isset($cardSupport)&&query_exists($cardSupport)) {
                 if (!empty($platoonInBox["optionChange"])&&!empty($platoonOptiondpArray[($platoonInBox["cardNr"]??"")."|0"])) {
                     $platoonInBox["optionChangeDp"] = $platoonOptiondpArray[$platoonInBox["cardNr"]."|0"]["cost"];
                 }
-
+                $platoonOptionHeaders = [];
+                $platoonOptionQuery= $conn->query(
+                    "SELECT  * 
+                        FROM    platoonoptionsnew
+                        wHERE   code = '{$platoonInBox["platoon"]}'
+                        ORDER by optionID ASC");    
+                foreach ($platoonOptionQuery as $key => $value) {
+                    $value["dynamicPoints"] = $platoonOptiondpArray[$currentPlatoon."|".$value["optionID"]]["cost"]??"";
+                    $platoonOptionHeaders[] = $value;
+                }
                 addConfigToBoxPlatoon($platoonConfigChanged,  $supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]],$query,$currentBoxInFormation);
-                list($platoonOptionHeadersChanged, $platoonOptionChanged) = platoonOptionChangedAnalysis($platoonInBox, $platoonOptionHeaders,$platoonOptionOptions);
-                addOptionsToBoxPlatoon($platoonOptionHeadersChanged, $platoonOptionChanged,$supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]], $query, $currentBoxInFormation);
+                list($platoonOptionHeadersChanged, $platoonOptionChanged) = newPlatoonOptionChangedAnalysis($platoonInBox, $platoonOptionHeaders);
+                newAddOptionsToBoxPlatoon($platoonOptionHeadersChanged, $supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$platoonInBox["platoon"]], $query, $currentBoxInFormation);
                 //addFormationCardToBoxPlatoon($formationCards,$supportBoxesPlatoonsData[$formationNr],$currentBoxNr,$platoonInBox["platoon"],$query,$formationNr);
                 generateCardArrays([], $platoonInBox["box_type"], $formationCard, $unitCards, $currentUnit, $unitCard, $platoonCards, $currentPlatoon, $platoonCard);
                 addPlatoonCardToBoxPlatoon($platoonCards,$supportBoxesPlatoonsData[$formationNr],$currentBoxNr,$platoonInBox["platoon"],$query,$formationNr);
@@ -1094,7 +1274,7 @@ if (isset($cardSupport)&&query_exists($cardSupport)) {
                 $formationCost[$formationNr] += $supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr]["boxCost"];
 
             }
-            $supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$currentPlatoon]["insignia"] = generateTitleImanges($insignia, $platoonInBox["title"], (isset($platoonInBox["Nation"])&&$platoonInBox["platoonNation"]<>"")?$platoonInBox["platoonNation"]:$supportBoxesPlatoonsData[$formationNr]["thisNation"]);
+            $supportBoxesPlatoonsData[$formationNr]["boxes"][$currentBoxNr][$currentPlatoon]["insignia"] = generateTitleImanges($insignia, $platoonInBox["title"], ($platoonInBox["platoonNation"]<>"")?$platoonInBox["platoonNation"]:$supportBoxesPlatoonsData[$formationNr]["thisNation"]);
             
             if (($repeats>=1)) {
 

@@ -1,8 +1,5 @@
 
-.card, 
-.platoon img, 
-.blackbox img, .platoon svg, 
-.blackbox svg { 
+.card{ 
 
 	padding: 5px 2px 0px 2px;
 	margin-bottom: -4px;
@@ -10,8 +7,7 @@
 .card, 
 .platoon img, 
 .blackbox img { 
-	filter:invert(var(--image-style));
-
+	color: white !important;
 }
 
 .formHeader .card {
@@ -259,11 +255,11 @@
 
 .collapsible, .header {
 
-	cursor: pointer;
+  	cursor: pointer;
 	width: 100%;
 	z-index: 1;
 	margin-top: 10px; 
-	position: relative;
+ 	position: relative;
 	background-color: var(--accent-color);
 	display: flex;
   	justify-content: space-between;
@@ -318,7 +314,7 @@ body {
 .page-container {
 
 	width: 726px;
-	margin: 0 auto;
+	margin: 0 auto; 
 	padding: 0 3px;
 	page-break-inside: auto;
 	page-break-inside: auto;
@@ -368,6 +364,11 @@ body {
 	page-break-after: avoid;
 }
 
+.arsenal,.weapons-list, .rules-list {
+	border: none;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 	0  0 5px 5px;
+}
 
 .Formation{
 	border: none;
@@ -621,7 +622,7 @@ h3{
 
 
 tr td {
-	border-top:solid black 1px;
+	border-top:solid lightgrey 1px;
 	print-color-adjust: exact;
 	-webkit-print-color-adjust: exact;
 }
@@ -695,6 +696,7 @@ tr td {
 
 .arsenal tr:nth-child(2n+2) td {
 	background-color: var(--box-background-color);
+	border-left:solid gray 1px;
 	border-top:none;
 }
 
@@ -705,7 +707,7 @@ tr:nth-child(2n+2) {
 table {
     border-collapse:separate;
     background: var(--background-color);
-    border:solid black 1.5px;
+    border:solid lightgray 1.5px;
     border-radius:0 0 5px 5px;
     border-spacing: 0;
     width: 100%;
@@ -713,8 +715,8 @@ table {
 
 td, th {
     padding: 1px 1px 1px 1px;
-    border-left:solid black 1px;
-    border-top:solid black 1px;
+    border-left:solid lightgray 1px;
+    border-top:solid lightgray 1px;
     border-top: none;
     border-bottom: none;
 	vertical-align: top;
@@ -746,7 +748,7 @@ td .Armour ,.cell .Armour {
 
 	font-size: 8px;
 	width: 84px;
-	border: 1.5px solid black;
+	border: 1.5px solid lightgray;
 	border-radius: 3px;
     background: white;
 	box-sizing: border-box;
@@ -770,9 +772,52 @@ td .Armour div ,.cell .Armour div{
 	width:100%;
 
 }
+
+.platoonConfig {
+	margin: 0px 2px 0px 2px;
+  display: flex;
+  gap: 2px;
+  width: 226px; /* Din fasta bredd */
+  align-items: flex-start;
+}
+
+.code {
+  /* Låt koden ta sin plats (auto), men tillåt den att krympa (shrink: 1) */
+  flex: 0 1 auto;
+  /* Viktigt: Tillåt radbrytning vid mellanslag (innan parentesen) */
+  white-space: normal; 
+  font-weight: normal;
+
+}
+.boxType {
+	font-weight: bold;
+}
+.config {
+  /* Låt config ta resten av platsen, och tillåt den att krympa (shrink: 1) */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+hr { 
+	border: 0; 
+	height: 1px; 
+	background: #ccc; 
+	margin: 1px;
+}
+
+.code {
+	text-transform: none;
+	margin-left: 2px;
+}
+
+.code i {
+	font-size: 7px;
+}
+
 .teamHeader {
 	text-align: left; 
 	background-color: var(--box-background-color);
+	border-left:solid gray 1px;
 }
 
 
@@ -790,7 +835,7 @@ td .Armour div ,.cell .Armour div{
 
 tr .firstWeaponrow {
     padding-left: 5px;
-	border-top:solid black 1px;
+	border-top:solid lightgray 1px;
 	print-color-adjust: exact;
 	-webkit-print-color-adjust: exact;
 
@@ -859,7 +904,7 @@ tr:first-child td {
     border-top: none;
 }
 tr:first-child .imagerow, tr:first-child .statsrow {
-    border-top: solid black 1px;
+    border-top: solid lightgray 1px;
 }
 
 /* Remove border for the first column */
@@ -889,8 +934,8 @@ td:first-child {
 
 tbody {
 	background-color: var(--optionBox-background-color);
-}
-
+  }
+  
 
 @media screen and (min-width: 1200px) {
 
@@ -911,6 +956,53 @@ tbody {
 		 font-size: 2em;
 	}
 }
+
+.icon {
+  display: inline-block;
+
+  margin-right: 2px;
+  margin-left: 2px;
+  margin-top: 5px;
+  height: auto;
+  width: auto;
+
+  background-color: transparent;
+
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  -webkit-mask-size: contain;
+  mask-size: contain;
+
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.icon {
+  display: inline-block;
+  overflow: visible;
+  vertical-align: middle;
+  color: black; /* default */
+}
+
+.inline-icon {
+  fill: currentColor;
+  display: block;
+  overflow: hidden; /* clip on the SVG itself, not the span */
+}
+
+.icon-white {
+  color: white;
+  /* remove background-color and mask properties */
+  background-color: transparent;
+}
+.icon-black {
+  color: black;
+  /* remove background-color and mask properties */
+  background-color: transparent;
+}
+
+
 
 @media print {
 
@@ -946,9 +1038,35 @@ tbody {
 	.Formation {
 	background: white;
 	}
-	tbody {
-		background: white;
+	tbody,table {
+		background: none;
 	}
+	.statsrow {
+		background: none;
+	}
+  .card, 
+  .platoon img, 
+	.blackbox img{
+
+    color: white !important;
+  }
+	.imagerow {
+		background: none;
+	}
+
+  .platoon svg,
+  .blackbox svg {
+
+    color: white !important;
+  }
+  .icon {
+  color: black;
+}
+
+.icon.white {
+  color: white;
+  }
+
 }
 
 .Points.selected div {

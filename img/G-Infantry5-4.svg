@@ -7,8 +7,8 @@
    viewBox="0 0 34.831593 5.8347969"
    version="1.1"
    id="svg15601"
-   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
-   sodipodi:docname="inkporter-svg-fswrd51t.svg"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   sodipodi:docname="G-Infantry5-4.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -23,44 +23,24 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.2810466"
-     inkscape:cx="358.6911"
-     inkscape:cy="503.49457"
+     inkscape:zoom="4.2817618"
+     inkscape:cx="67.262033"
+     inkscape:cy="93.41949"
      inkscape:window-width="1889"
-     inkscape:window-height="1656"
-     inkscape:window-x="3581"
-     inkscape:window-y="141"
+     inkscape:window-height="1368"
+     inkscape:window-x="671"
+     inkscape:window-y="0"
      inkscape:window-maximized="0"
-     inkscape:current-layer="G-Infantry-MG5-4-Pfx3"
+     inkscape:current-layer="layer1"
      inkscape:snap-nodes="true"
      inkscape:snap-bbox="true"
      inkscape:snap-others="true"
      inkscape:bbox-paths="true"
-     inkscape:snap-global="true" />
+     inkscape:snap-global="true"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1" />
   <defs
-     id="defs15598">
-    <clipPath
-       clipPathUnits="userSpaceOnUse"
-       id="clipPath48514-9-5-6-7-4">
-      <path
-         d="M 309.111,103.342 H 547.1 V 372.047 H 309.111 Z"
-         id="path48512-3-2-8-8-0" />
-    </clipPath>
-    <clipPath
-       clipPathUnits="userSpaceOnUse"
-       id="clipPath48514-9-5-6-7-4-5">
-      <path
-         d="M 309.111,103.342 H 547.1 V 372.047 H 309.111 Z"
-         id="path48512-3-2-8-8-0-2" />
-    </clipPath>
-    <clipPath
-       clipPathUnits="userSpaceOnUse"
-       id="clipPath48514-9-5-6-7-4-1">
-      <path
-         d="M 309.111,103.342 H 547.1 V 372.047 H 309.111 Z"
-         id="path48512-3-2-8-8-0-4" />
-    </clipPath>
-  </defs>
+     id="defs15598" />
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"

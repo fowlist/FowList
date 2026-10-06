@@ -1,0 +1,111 @@
+    TRUNCATE TABLE alliedformations;
+
+INSERT INTO alliedformations
+SELECT
+	DISTINCT 
+    nationbooks.Book AS currentBook,
+    formations.*
+FROM
+    nationbooks
+LEFT JOIN
+    nationbooks AS nb 
+    ON 
+    nb.period = nationbooks.period
+    AND 
+    (nb.Nation = nationbooks.Nation
+    OR
+    nb.Allies LIKE CONCAT('%', nationbooks.Nation, '%'))
+LEFT JOIN 
+  	formations
+    ON 
+    nb.Book = formations.Book
+WHERE
+	formations.code NOT LIKE '%Support%'
+ORDER BY
+currentBook,
+formations.Book;
+
+TRUNCATE TABLE support_db;
+
+INSERT INTO support_db
+
+    SELECT  
+            support_structure.formation AS formation, 
+            support_structure.box_nr AS box_nr,  
+            support_structure.box_type AS box_type, 
+            support_structure.platoon AS platoon, 
+            support_structure.title AS title, 
+            support_structure.unitType AS unitType, 
+            formations.code AS code, 
+            formations.Book AS Book, 
+            support_structure.box_nr AS ogBoxNr,
+            support_structure.motivSkillHitOn AS motivSkillHitOn,
+            support_structure.nation AS nation
+    FROM    support_structure 
+    LEFT    JOIN    formations 
+        ON      formations.code = support_structure.formation
+    WHERE   formations.title LIKE '%Support%';
+
+    TRUNCATE TABLE formationsupport_db;
+
+INSERT INTO formationsupport_db
+SELECT
+	DISTINCT 
+    nationbooks.Book,
+    nb.Book AS alliedBook,
+    formation_db.formation AS formation, formation_db.platoon , formation_db.title AS title, formation_db.unitType, formation_db.box_type AS box_type, nb.Nation AS Nation,
+	(FIND_IN_SET(nationbooks.Book, nb.Book) + FIND_IN_SET(nationbooks.Nation, nb.Nation)) AS relevance,  formation_db.motivSkillHitOn AS motivSkillHitOn
+FROM
+    nationbooks
+LEFT JOIN
+    nationbooks AS nb 
+    ON 
+    nb.period = nationbooks.period
+    AND 
+    (nb.Nation = nationbooks.Nation
+    OR
+    nb.Allies LIKE CONCAT('%', nationbooks.Nation, '%'))
+LEFT JOIN 
+  	formations
+    ON 
+    nb.Book = formations.Book
+LEFT JOIN
+    formation_db
+    ON
+    formations.code = formation_db.formation
+WHERE
+	formations.code NOT LIKE '%Support%'
+    AND
+    formation_db.BlackBox = 1
+    AND
+    formations.code NOT LIKE '%CC%'
+ORDER BY 
+relevance DESC,
+formation_db.box_type ASC,
+nationbooks.Book;
+
+
+
+TRUNCATE TABLE platoonconfigdb;
+
+INSERT INTO platoonconfigdb
+        SELECT  platoonconfig.* , unitT.unitType AS unitType , unitT.formation AS formation
+    FROM    platoonconfig
+    left    JOIN    (   SELECT DISTINCT unitType, platoon, formation
+                        FROM formation_db )
+                    AS
+                    unitT
+            ON unitT.platoon = platoonconfig.platoon;
+
+
+TRUNCATE TABLE platoonconfigsupportdb;
+
+INSERT INTO platoonconfigsupportdb
+
+    SELECT  platoonconfig.* , unitT.unitType AS unitType, unitT.formation AS formation, Book
+    FROM    platoonconfig
+    INNER    JOIN    (   
+        SELECT DISTINCT unitType, platoon, formation, Book
+        FROM support_db )
+        AS unitT
+    ON unitT.platoon = platoonconfig.platoon;

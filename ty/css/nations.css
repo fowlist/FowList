@@ -1,0 +1,126 @@
+.West {
+    background-color: #3f473c !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.American {
+    background-color: #31471B !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.British {
+    background-color: #003E6B !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.Soviet {
+    background-color: #7A0708 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.Finnish {
+    background-color: #0066AE !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Canadian {
+    background-color: #AE1A1E !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Dutch {
+    background-color: #DE761B !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Belgian {
+    background-color: #CE282B !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Norwegian {
+    background-color: #20265B !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Danish {
+    background-color: #B72126 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Syrian {
+    background-color: #006E2F !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.French {
+    background-color: #3D546C !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.ANZAC {
+    background-color: #55644A !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Swedish {
+    background-color: #435D41 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Israel {
+    background-color: #00386C !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Iraqi {
+    background-color: #292829 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Iranian {
+    background-color: #006E2F !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.East {
+    background-color: #1D1D1B !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Czechoslovak {
+    background-color: #123363 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Polish {
+    background-color: #9C0F0B !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.Cuban {
+    background-color: #7E1206 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+/* Override for non-default themes */
+.theme-overridden {
+    background-color: var(--accent-color) !important;
+}   

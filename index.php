@@ -89,7 +89,11 @@ $pdo = null;?>
             <button value='' onClick="clearParameterAndSubmit('Book', this.form)"><img src="img/filter.svg" alt="clear" title="Clear Book"></button></span>
         
         <br>
-
+        <label for="oneFront">
+            <input type="checkbox" id="oneFront" name="oneFront" class="oneFront" value="1" <?=(($query["oneFront"]??"0") == "1" ? "checked" : "")?> onchange="this.form.submit()">
+            Limit to same front
+        </label>
+        
         <select name="dpVer" id="dpVer" onchange="this.form.submit()">
             <option value='Book' selected>Book Points</option>
             <?php foreach ($dpVersions as $dpVersion) :?>
@@ -99,7 +103,7 @@ $pdo = null;?>
         <select name='nOF' id='nOF' onchange='this.form.submit();'>
         <?php for ($i = 0; $i <=6; $i++): ?>
 
-            <option <?=(isset($query['nOF'])&&($i == $query['nOF'])||((!isset($query['nOF']))&&($i==1))) ? " selected " : ""?> value=<?=$i?>>
+            <option <?=(isset($query['nOF'])&&($i == $query['nOF'])||((!isset($query['nOF'])&&(!isset($query['nOFoB'])||$query['nOFoB']==0))&&($i==1))) ? " selected " : ""?> value=<?=$i?>>
             <?=$i?> formation<?=($i!=1)?"s":""?> from this book 
             </option>
         <?php endfor ?>
@@ -140,7 +144,6 @@ if (!(isset($Formation_DB)&&(count($Formation_DB) > 0)&&(!($BBSupport_DB instanc
         </div>
         <div class='Formation'>
             <?=(count($Books)> 0)?generateBookBoxes($Books,$query):"" ?>
-
         </div>
         <?php elseif (!empty($query['pd'])): ?>
     <div class="header collapsible">
@@ -208,12 +211,14 @@ foreach ($boxesPlatoonsData as $formationNr => $formation) {
     // -----------This Formation Title print --------------------
     ?>
 
-    <div id="F<?=$formationNr?>" class="header collapsible <?=$formation["thisNation"]??""?>">
+    <div id="F<?=$formationNr?>" 
+    <?=isset($formation["formCard"]["title"])? 'data-cardTitle="' .$formation["formCard"]["title"] . '"':""?> 
+    class="header collapsible <?=$formation["thisNation"]??""?>">
         <div class="formHeader">
             <?php if ((!empty($formation["formCard"]["title"])||(is_numeric(strpos($formation["formationCode"]??"","C"))))) :?>
                 <img class='card' src='img/Card.svg'>
                 <?php endif ?>
-            <?=generateTitleImanges($insignia, ($formation["formCard"]["title"]??"") . ($formation["formationTitle"]??""), $formation["thisNation"]) ?> 
+            <?=generateTitleImanges($insignia, ($formation["formCard"]["title"]??"") . ($formation["formationTitle"]??""), $formation["thisNation"], $formation["insignia"]??null) ?> 
 
         
             <b>
@@ -267,7 +272,7 @@ if (isset($formation["boxes"])) {
         <select fCardSelect name="<?=$formationNr?>-Card" id="<?=$formationNr?>-Card" onchange='this.form.submit()'>
             <option value='' selected>Select Card</option>
             <?php foreach ($formation["formationCard"] as $option) :?>
-                <option <?=(isset($option["selected"])&&$option["selected"]==1) ? "selected='selected' ": ""?> value='<?=$option["value"]?>'><?=$option["description"]?></option>
+                <option <?=(isset($option["selected"])&&$option["selected"]==1) ? "selected='selected' ": ""?> <?=(isset($option["limited"])&&$option["limited"]==1) ? "limited ": ""?> data-cardTitle='<?=$option["title"]?>' value='<?=$option["value"]?>'><?=$option["description"]?></option>
             <?php endforeach ?>
         </select>
     </div>
@@ -313,7 +318,7 @@ if (isset($formation["boxes"])) {
                         "formation" => $platoonInBox["formation"]??false,
                         "nation" => $formation["thisNation"]??$query["ntn"],
                         "forceNation" => $query["ntn"]??false,
-                        "book" => $bookTitle??false,
+                        "book" => $ccBookTitle??false,
                         "boxPositionID" => $boxPositionID??false,
                         "formCard" => $formation["formCard"]["code"]??false,
                         "formCardTitle" => $formation["formCard"]["code"]??false,
@@ -331,7 +336,11 @@ if (isset($formation["boxes"])) {
                     <?=platoonTitle($platoonInBox,$formation)?>
                 </label>
 
-                <div class="selectedPlatoon <?=!empty($platoonInBox["selected"])?"selected":""?>" currentNrOfTeams="<?=$platoonInBox["boxSections"]["total"]??""?>" lastPrice="<?=$boxRow["boxCost"]?>" >
+                <div 
+                class="selectedPlatoon 
+                <?=!empty($platoonInBox["selected"])?"selected":""?>" 
+                currentNrOfTeams="<?=$platoonInBox["boxSections"]["nrOfTeamsOld"]??""?>" 
+                lastPrice="<?=$boxRow["boxCost"]?>" >
                 <?php if (!empty($platoonInBox["selected"])): ?>
                     <?=platoonConfigHTML($platoonInBox,$boxPositionID)?>
                     <?=boxOptionPrintHTML($platoonInBox,$boxPositionID)?>
@@ -346,7 +355,7 @@ if (isset($formation["boxes"])) {
                 <?php endif ?>
                 </div>
                 <?php if (empty($platoonInBox["selected"])): ?>
-                    <?=isset($platoonInBox["prerequisite"])&&$platoonInBox["prerequisite"]!=""?"<b>Prerequisites:</b> <br>":""?><?=str_replace(",",", ",$platoonInBox["prerequisite"]??"")?>
+                    <?=isset($platoonInBox["prerequisite"])&&($platoonInBox["prerequisite"]!="")&&(!is_numeric(strpos($platoonInBox["prerequisite"], "C")))?("<b>Prerequisites:</b> <br>" . str_replace(",",", ",$platoonInBox["prerequisite"]??"")):""?>
                 <?php endif ?>
     </div><?php
         } 
@@ -396,11 +405,11 @@ if (isset($formation["boxes"])) {
 
     if ( $formationNr == $nrOfFormationsInForce ): ?>
         <div  id="F<?=$formationNr?>" class='header collapsible <?=$formation["thisNation"]??""?>'>
-            <div class="formHeader"><b>Aditional formation</b></div>
+            <div class="formHeader"><b>Additional formation</b></div>
         </div>
         <div class="Formation">
-            <button type="button" name="F<?=($nrOfFormationsInForce+1)?>" class="addFormButton" onclick="incrementNOF('nOF')">Add <?=$nrOfFormationsInForce>0?"one aditional ":"" ?>formation from <?=$bookTitle?></button>
-            <button type="button" name="F<?=($nrOfFormationsInForce+1)?>" class="addFormButton" onclick="incrementNOF('nOFoB')">Add <?=$query['nOFoB']>0?"one aditional ":"" ?>formation from other book</button>
+            <button type="button" name="F<?=($nrOfFormationsInForce+1)?>" class="addFormButton" onclick="incrementNOF('nOF')">Add <?=$nrOfFormationsInForce>0?"one additional ":"" ?>formation from <?=$bookTitle?></button>
+            <button type="button" name="F<?=($nrOfFormationsInForce+1)?>" class="addFormButton" onclick="incrementNOF('nOFoB')">Add <?=$query['nOFoB']>0?"one additional ":"" ?>formation from other book</button>
         </div>
     <?php endif;
 }
@@ -438,7 +447,8 @@ if (!empty($listCards)) {
             value='<?=$eachCard["code"]?>'                    
             data-cardInfo="<?=htmlspecialchars(json_encode(
                         ["code" => $eachCard["code"]??false,
-                        "numbers" => $eachCard["numbers"]??1
+                        "numbers" => $eachCard["numbers"]??1,
+                        "pd" => $query["pd"]??false
                         ]??[]))?>">
         <label for='fCd-<?=$cardKey?>box1'>
             <img src='img/Card.svg'>
@@ -451,7 +461,7 @@ if (!empty($listCards)) {
 
             <?php endif ?>
             </span>
-            <button type="button" class="info-btn" data-cards="<?=htmlspecialchars(json_encode([$eachCard["code"]]??[]))?>">i</button>
+            <button type="button" class="info-btn" data-cards="<?=htmlspecialchars(json_encode([$eachCard["code"],"pd" => $query["pd"]??false]??[]))?>">i</button>
         </label>
         <div class="selectedCard <?=!empty($eachCard["checked"])?"selected":""?>"  lastPrice="<?=!empty($eachCard["checked"])?$eachCard["totalPrice"]??$eachCard["cost"]:""?>" >
     <?php if ($eachCard["checked"]): ?>
@@ -498,7 +508,7 @@ foreach ($supportBoxesPlatoonsData as $formationNr => $formation) {
             <div id='<?=$boxPositionID?>box' class='box'><b><?=implode(", ",array_unique(explode("|",$boxRow["thisBoxType"])))?></b>
             <?php foreach ($boxRow??[] as $key => $platoonInBox) {
                 if (isset($platoonInBox["title"])) { ?>
-                <div class="platoon">
+                <div class="platoon <?=$platoonInBox['otherNation']??$platoonInBox['platoonNation']??$query["ntn"]?>">
                     <?php if ($first&&isset($boxRow["codes"])) :?>
                         <button type="button" class="info-btn" data-codes="<?=htmlspecialchars(json_encode($boxRow["codes"]??""))?>">i</button>
                         <?php $first = false; ?>
@@ -521,7 +531,7 @@ foreach ($supportBoxesPlatoonsData as $formationNr => $formation) {
                             "formation" => $platoonInBox["formation"]??false,
                             "nation" => $formation["thisNation"]??$query["ntn"],
                             "forceNation" => $query["ntn"]??false,
-                            "book" => $bookTitle??false,
+                            "book" => $ccBookTitle??false,
                             "boxPositionID" => $boxPositionID??false,
                             "formCard" => $formation["formCard"]["code"]??false,
                             "cardNr" => $platoonInBox["cardNr"]??false,
@@ -535,7 +545,6 @@ foreach ($supportBoxesPlatoonsData as $formationNr => $formation) {
                         <?php foreach ($platoonInBox["images"] as $key => $image) :?><img src="img/<?=$image?>.svg"><?php endforeach ?>
                         </span>
                         <?=platoonTitle($platoonInBox,$formation)?>
-                        
                     </label>
                     
                     <div class="selectedPlatoon <?=!empty($platoonInBox["selected"])?"selected":""?>" currentNrOfTeams="<?=$platoonInBox["boxSections"]["total"]??""?>" lastPrice="<?=$boxRow["boxCost"]?>" >
@@ -631,7 +640,7 @@ foreach ($formSupBoxesPlatoonsData as $unique_type => $type_boxes) {
                     }
                     
                     if (isset($platoonInBox["title"])) { 
-                        $platoonInBox["title"] = $platoonInBox["booksForPlatoon"] . ": ". $platoonInBox["title"];
+                        $platoonInBox["title"] = $platoonInBox["Book"] . ": ". $platoonInBox["title"];
                         if (count($boxRow["codes"])>1) : ?>
                             <div class="platoon <?=$platoonInBox["Nation"]?>" id="<?=$boxPositionID?>">
                         <?php endif ?>
@@ -659,6 +668,7 @@ foreach ($formSupBoxesPlatoonsData as $unique_type => $type_boxes) {
                                 "cardNr" => $platoonInBox["cardNr"]??false,
                                 "dynamic" => $query["dpVer"]??false,
                                 "pd" => $query["pd"]??false,
+                                "forceBook" => $ccbookTitle??false,
                                 "currentFormation" => $type_boxes["currentFormation"]??false
                                 ]??[]))?>">
                         <label for="<?=$boxPositionID?>1">

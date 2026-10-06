@@ -8,6 +8,16 @@
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
 }
+.Australian {
+    background-color: #07542b !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.Japanese {
+    background-color: #9c1418 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
 .British {
     background-color: #531d2d !important;
     print-color-adjust: exact;
@@ -38,9 +48,24 @@
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
 }
+.Combattimento {
+    background-color: #07542b !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+.French {
+    background-color: #20473F !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+.Polish {
+    background-color: #9C0F0B !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
 
 /* Override for non-default themes */
 .theme-overridden {
     background-color: var(--accent-color) !important;
-    color:  var(--text-color-alt) !important;;
 }   

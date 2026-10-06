@@ -14,9 +14,14 @@ function queryToItems($query, $conn, $placeholders = "") {
     return $items;
 }
 ob_start();
-$data = json_decode(file_get_contents("php://input"), true)??[];
+$data = json_decode(file_get_contents("php://input"), true) ?? [];
+$info = $data['cardInfo'] ?? $data;  // fallback to $data for backwards compat
+$codes = $data['code'] ?? false;
+if ($codes && !is_array($codes)) {
+    $codes = [$codes];
+}
+$query["pd"] = $info["pd"] ?? "";
 
-$codes = $data['code']??false;
 
 if ($codes) {
     include_once "sqlServerinfo.php";

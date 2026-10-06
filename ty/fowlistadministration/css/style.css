@@ -1,0 +1,574 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ── Variables ────────────────────────────────────────────── */
+:root {
+  --bg:        #0d0f11;
+  --bg-alt:    #13161a;
+  --surface:   #1a1e24;
+  --border:    #252b34;
+  --border-hi: #313948;
+
+  --accent:    #3b82f6;
+  --accent-lo: rgba(59, 130, 246, 0.12);
+  --accent-hi: #60a5fa;
+
+  --text:      #e2e8f0;
+  --text-mid:  #94a3b8;
+  --text-dim:  #475569;
+
+  --danger:    #ef4444;
+  --success:   #22c55e;
+
+  --sidebar-w: 220px;
+  --topbar-h:  56px;
+  --toolbar-h: 52px;
+  --toolbar-h2:100px;
+  --radius:    6px;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'DM Sans', sans-serif;
+  --transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Reset ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ───────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg-alt);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar h2 {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 20px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#table-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+#table-list::-webkit-scrollbar { width: 3px; }
+#table-list::-webkit-scrollbar-track { background: transparent; }
+#table-list::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+
+/* Table list items — injected by JS, style the anchors/buttons */
+#table-list a,
+#table-list button,
+.table-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-mid);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  transition: color var(--transition), background var(--transition);
+  position: relative;
+}
+
+#table-list a::before,
+#table-list button::before,
+.table-item::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--border-hi);
+  flex-shrink: 0;
+  transition: background var(--transition);
+}
+
+#table-list a:hover,
+#table-list button:hover,
+.table-item:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+#table-list a.active,
+#table-list button.active,
+.table-item.active {
+  color: var(--accent-hi);
+  background: var(--accent-lo);
+}
+
+#table-list a.active::before,
+#table-list button.active::before,
+.table-item.active::before {
+  background: var(--accent);
+}
+
+/* ── Content area ─────────────────────────────────────────── */
+.content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── Topbar ───────────────────────────────────────────────── */
+.topbar {
+  height: var(--topbar-h);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 50px 0 40px;
+  flex-shrink: 0;
+  background: var(--bg-alt);
+}
+
+.topbar h1,
+#current-table {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-mid);
+  letter-spacing: 0.02em;
+}
+
+#current-table::before {
+  content: '> ';
+  color: var(--accent);
+}
+
+/* ── Toolbar ──────────────────────────────────────────────── */
+.toolbar {
+  
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px 0 40px;
+  flex-shrink: 0;
+  background: var(--bg-alt);
+  overflow: auto;
+}
+#toolbar-buttons, #generator-toolbar-buttons
+{
+  height: var(--toolbar-h);
+}
+
+/* Buttons */
+.toolbar button,
+#add-row,
+#rebuild-table {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  height: 32px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+#add-row {
+  background: var(--accent);
+  color: var(--text-inverse);
+  border-color: var(--accent);
+}
+
+#add-row:hover {
+  background: var(--accent-hi);
+  border-color: var(--accent-hi);
+  box-shadow: 0 0 0 3px var(--accent-lo);
+}
+
+#add-row:active { transform: scale(0.97); }
+
+#rebuild-table {
+  background: transparent;
+  color: var(--text-mid);
+  border-color: var(--border-hi);
+}
+
+#rebuild-table:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+  background: var(--surface-hover);
+}
+
+/* Search input */
+#search {
+  margin-left: auto;
+  height: 32px;
+  padding: 0 12px 0 32px;
+  width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  color: var(--text);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+
+#search::placeholder { color: var(--text-dim); }
+
+#search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-lo);
+}
+
+/* ── Table container ──────────────────────────────────────── */
+#table {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+.table-padding-wrapper {
+  flex: 1;
+  padding: 0px;
+  overflow: hidden; /* eller ta bort helt om du inte vill begränsa */
+  display: flex;
+  flex-direction: column;
+}
+.jss_worksheet > tbody > tr > td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 0;
+  background-color: #f3f3f3;
+  text-align: center;
+}
+.jss_worksheet > tbody > tr > td:nth-child(2) {
+  position: sticky;
+      position: -webkit-sticky !important;
+  left: 45px;
+  z-index: 0;
+  background-color: #f3f3f3;
+  text-align: center;
+}
+
+#table::-webkit-scrollbar { width: 6px; height: 6px; }
+#table::-webkit-scrollbar-track { background: transparent; }
+#table::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+
+  /* Design för hjälpknappen */
+  .help-label {
+      cursor: pointer;
+      padding: 4px 8px;
+      background: #eee;
+      color: #333;
+      border-radius: 4px;
+      font-size: 12px;
+  }
+
+  /* När hjälpknappen är aktiverad: avaktivera knapparnas vanliga funktioner på mobilen */
+  #toggle-help:checked ~ #toolbar-buttons button, #toggle-help:checked ~  #generator-toolbar-buttons button {
+      pointer-events: none; /* Gör att knapparna INTE går att klicka på (inget JS triggas!) */ 
+  }
+
+  /* När hjälpknappen är aktiverad: tvinga fram titlarna som fast text ovanför/under */
+  #toggle-help:checked ~ #toolbar-buttons button::after, #toggle-help:checked ~  #generator-toolbar-buttons button::after {
+      content: attr(title);
+      padding: 4px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+      z-index: 10;
+  }
+
+
+
+/* ── Responsive tweak ─────────────────────────────────────── */
+@media (max-width: 700px) {
+  .layout { grid-template-columns: 1fr; }
+  #search { width: 140px; }
+
+  .jss_worksheet > tbody > tr > td:nth-child(2) {
+    position: unset;
+    left: auto;
+    z-index: auto;
+    background-color: #f3f3f3;
+    text-align: center;
+  }
+
+}
+
+/* Tvinga hela tabellhuvudet att bli sticky i Jspreadsheet CE */
+
+
+/* Säkerställ att raden med kolumnnamnen inte glider iväg */
+.jss_overflow > thead > tr:first-child > td,
+.jss_worksheet  > thead > tr:first-child > td {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 4 !important;
+}
+
+/* Placera filter-raden direkt under kolumnnamnen */
+.jss_overflow > thead > tr:nth-child(2) > td,
+.jss_worksheet  > thead > tr:nth-child(2) > td {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 27px !important; /* Justera denna höjd (t.ex. 28px-35px) så det matchar höjden på din första rubrikrad */
+    z-index: 3 !important;
+}
+
+tbody tr:nth-child(even) td {
+    background-color: #dbdbdb; /* Light grey for light theme */
+}
+
+/* Sätt upp grundstrukturen för hela applikationen */
+html, body {
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  height: 100vh;
+  overflow: hidden; /* Förhindrar dubbla scrollister på hela sidan */
+}
+
+.layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Hamburgarknappens design och placering */
+.sidebar-toggle {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sidebar-toggle span {
+  width: 100%;
+  height: 2px;
+  background-color: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Sidomenyn - använder nu bredd-animering istället för fixed */
+.sidebar {
+  width: 15px; /* Helt stängd som standard */
+  min-width: 0;
+  height: 100%;
+  overflow-x: hidden; /* Döljer texten inuti när den är stängd */
+  overflow-y: auto;
+  background: #15191e; /* En nyans ljusare än din --bg för kontrast, ändra till din var(--surface) om önskas */
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 60px 0 20px 0; /* Padding i topp ger plats för hamburgarknappen */
+  border-right: 0 solid transparent;
+}
+
+/* När musen hovrar över skärmens vänstra kant (eller över själva knappen), eller om den är låst (.active) */
+.layout:has(.sidebar-toggle:hover) .sidebar,
+.sidebar:hover,
+.sidebar.active {
+  width: 260px; /* Expanderad bredd */
+  padding: 60px 20px 20px 20px; /* Ger tillbaka din padding inuti menyn */
+  border-right: 1px solid #232931; /* Din var(--border) */
+}
+
+/* Huvudinnehållet - den anpassar sig nu HELT automatiskt efter menyn */
+.content {
+  flex: 1; /* Tar upp allt resterande utrymme på skärmen */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  padding-left: 0px; /* Skapar utrymme för hamburgarknappen så den inte krockar med "Select table" */
+  padding-right: 0px; /* Nytt: Ger utrymme för den högra hamburgarknappen */
+  transition: padding-left 0.3s ease, padding-right 0.3s ease;
+}
+
+/* Om menyn är permanent öppen/aktiv, behövs inte den extra paddingen på rubriken längre */
+.sidebar.active ~ .content {
+  padding-left: 20px;
+}
+
+/* Animera hamburgarknappen till ett kryss (X) när menyn är låst (.active) */
+.sidebar-toggle.active span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.sidebar-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+.sidebar-toggle.active span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+.sync-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: var(--radius, 4px);
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: auto; /* Trycker ut den till höger i topbaren */
+    transition: all 0.3s ease;
+}
+
+/* Läge: Sparar / Synkar */
+.sync-indicator.saving {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b; /* Orange */
+}
+.sync-indicator.saving .sync-icon {
+    animation: blink 1s infinite;
+}
+
+/* Läge: Synkad och klar */
+.sync-indicator.synced {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981; /* Grön */
+}
+
+/* Läge: Felmeddelande */
+.sync-indicator.error {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444; /* Röd */
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.autocomplete-suggestion {
+    padding: 8px 12px;
+    color: #e2e8f0;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s ease;
+}
+.autocomplete-suggestion:hover {
+    background: #298BA8; /* Din accentfärg */
+    color: #fff;
+}
+
+.autocomplete-suggestion.active {
+    background: var(--accent-lo);
+    color: var(--accent-hi);
+}
+
+/* Hamburgarknapp för högersidan */
+.sidebar-toggle-right {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sidebar-toggle-right span {
+  width: 100%;
+  height: 2px;
+  background-color: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Högersidomenyn - speglad mot vänstersidan */
+.sidebar-right {
+  width: 0; /* Stängd som standard */
+  min-width: 0;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #15191e;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 60px 0 20px 0;
+  border-left: 0 solid transparent;
+}
+
+/* Triggar utfällning vid hovring på högerkanten, eller om den är låst (.active) */
+.layout:has(.sidebar-toggle-right:hover) .sidebar-right,
+.sidebar-right:hover,
+.sidebar-right.active {
+  width: 280px; /* Något bredare för att ge plats åt dropdowns */
+  padding: 60px 20px 20px 20px;
+  border-left: 1px solid #232931;
+}
+
+
+/* Om menyerna är permanent låsta (.active), minska paddingen på huvudinnehållet */
+.sidebar.active ~ .content { padding-left: 20px; }
+.content:has(~ .sidebar-right.active) { padding-right: 20px; }
+
+/* Animering till ett kryss (X) för högerknappen */
+.sidebar-toggle-right.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.sidebar-toggle-right.active span:nth-child(2) { opacity: 0; }
+.sidebar-toggle-right.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+/* Allmänna stilar för formulärelementen i widgeten */
+.sidebar-right select {
+  background: #0d0f11;
+  color: #e2e8f0;
+  border: 1px solid #232931;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}

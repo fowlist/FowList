@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="18.96615mm"
+   height="7.8268189mm"
+   viewBox="0 0 18.96615 7.8268189"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="inkporter-svg-kvk_x0y9.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.71891835"
+     inkscape:cx="397.12437"
+     inkscape:cy="561.25984"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-75.57911,-160.2532)">
+    <g
+       id="G-SdKfz231-6rad"
+       transform="translate(-240.10958,-86.18938)">
+      <circle
+         style="fill:#000000;fill-rule:evenodd;stroke-width:0.1;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill"
+         id="path18"
+         cx="318.63541"
+         cy="252.77269"
+         r="1.4967093" />
+      <circle
+         style="fill:#000000;fill-rule:evenodd;stroke-width:0.1;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill"
+         id="circle19"
+         cx="327.40518"
+         cy="252.77269"
+         r="1.4967093" />
+      <circle
+         style="fill:#000000;fill-rule:evenodd;stroke-width:0.1;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill"
+         id="circle20"
+         cx="330.56223"
+         cy="252.77269"
+         r="1.4967093" />
+      <path
+         style="fill:#000000;fill-rule:evenodd;stroke-width:0.1;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill"
+         d="m 323.59322,252.45276 3.25067,-0.0935 1.42655,0.65481 h 4.2095 l 2.1749,-1.70718 -0.93544,-2.1983 -1.52011,-0.1637 -0.32739,-0.58465 -1.82412,0.0468 -1.07574,-1.91766 -1.68381,-0.0468 -2.36199,0.79513 0.0467,0.93544 0.18712,0.25725 h -1.7072 l -0.23387,0.44433 -6.73518,0.95883 -0.79512,1.70719 0.304,0.53788 0.84191,0.11693 -0.39756,0.30402 0.0233,0.23386 0.1637,0.18709 0.21047,0.0234 0.21048,-0.14032 1.19269,-0.28063 1.75395,0.53788 0.91207,0.0468 0.8419,-0.23386 0.1637,-0.14032 h 1.54347 z"
+         id="path20" />
+      <path
+         style="fill:#000000;fill-rule:evenodd;stroke-width:0.1;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill"
+         d="m 325.62781,247.65862 -1.56686,0.0468 h -2.36199 v 0.28063 l 0.44434,-0.0702 h 1.80073 l 1.40316,0.0935 z"
+         id="path21" />
+    </g>
+  </g>
+</svg>
