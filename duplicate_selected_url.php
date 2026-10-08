@@ -1,6 +1,12 @@
 <?php
 session_start(); 
 
+header("Content-Type: application/json");
+
+if (empty($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+}
+
 if (!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id']) || (int)$_SESSION['user_id'] <= 0) {
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Not logged in']);
@@ -19,6 +25,18 @@ $response = ['success' => false, 'duplicates' => []];
 
 include "showListsFunctions.php";
 include_once 'sqlServerinfo.php';
+
+$listconn = [];
+foreach ($Periods as $period) {
+    $listconn[$period["period"]] = new mysqli(
+        $servernameArray[$period["period"]],
+        $phpUsernameArray[$period["period"]],
+        $phpPasswordArray[$period["period"]],
+        $dbnameArray[$period["period"]]
+    );
+    $listconn[$period["period"]]->set_charset("utf8mb4");
+    $listconn[$period["period"]]->options(MYSQLI_OPT_CONNECT_TIMEOUT, 30);
+}
 
 $newEntrys = [];
 
@@ -41,11 +59,14 @@ foreach ($ids as $id) {
         }
     }
 }
-$listArray = generateListArray($newEntrys, $conn);
+$listArray = generateListArray($newEntrys, $listconn, $Periods);
 $rowHtml = generateShowListRows($listArray);
 $response['success'] = true;
 $response['duplicates'] = $rowHtml;
 $pdo = null;
+foreach ($listconn as $connection) {
+    $connection->close();
+}
 $conn->close();
 echo json_encode($response);
 ?>

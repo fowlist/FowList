@@ -9,6 +9,13 @@ function logConnectionEvent($event) {
     file_put_contents($logFile, $logEntry, FILE_APPEND);
 }
 
+$servernameArray = [];
+$phpUsernameArray = [];
+$phpPasswordArray = [];
+$dbnameArray = [];
+
+$cookieSslOnly = true;
+$cookieDomain = "fowlist.com";
 $servername = "localhost";
 //$servername = "";
 //$servername = "";
@@ -20,21 +27,37 @@ $dbnameGW = "ki12570048_Fowlist_GW";
 $userDB  = "ki12570048_users";
 $dbnameEW = "dbs15153684";
 
+$servernameArray["GW"] = $servername;
+$phpUsernameArray["GW"] = $phpUsername;
+$phpPasswordArray["GW"] = $phpPassword;
+$dbnameArray["GW"] = $dbnameGW;
+
+$servernameArray["MW"] = $servername;
+$phpUsernameArray["MW"] = $phpUsername;
+$phpPasswordArray["MW"] = $phpPassword;
+$dbnameArray["MW"] = $dbname;
+
+$servernameArray["LW"] = $servername;
+$phpUsernameArray["LW"] = $phpUsername;
+$phpPasswordArray["LW"] = $phpPassword;
+$dbnameArray["LW"] = $dbname;
+
+$servernameArray["EW"] = $servername;
+$phpUsernameArray["EW"] = $phpUsername;
+$phpPasswordArray["EW"] = $phpPassword;
+$dbnameArray["EW"] = $dbnameEW;
+
+$servernameArray["LL"] = $servername;
+$phpUsernameArray["LL"] = $phpUsername;
+$phpPasswordArray["LL"] = $phpPassword;
+$dbnameArray["LL"] = $dbname;
+
 $parts1 = parse_url($_SERVER['REQUEST_URI']);
 $query1 = [];
 if (isset($parts1['query'])) {
     parse_str($parts1['query'], $query1);
 }
 
-if (($query1['pd']??"") == "GW"||($query['pd']??"") == "GW") {
-    $dbname = $dbnameGW;
-}
-if (($query1['pd']??"") == "CP"||($query['pd']??"") == "CP") {
-    $dbname = $dbnameFS;
-}
-if (($query1['pd']??"") == "EW"||($query['pd']??"") == "EW") {
-    $dbname = $dbnameEW;
-}
 unset($query1);
 unset($parts1);
 
@@ -43,8 +66,8 @@ $Periods  = [
             [ "period" => "LW",  "periodLong" => "Late War"],
             [ "period" => "EW",  "periodLong" => "Early War"],
             [ "period" => "GW",  "periodLong" => "Great War"],
-            [ "period" => "CP",  "periodLong" => "Campaing forces"],
             [ "period" => "LL",  "periodLong" => "Late War Leviathans"]
+            
 ];
 
 // Create connection
@@ -55,8 +78,9 @@ if (!isset($pdo)) {
         ];
         $pdo = new PDO("mysql:host=$servername;dbname=$userDB;charset=utf8mb4", $phpUsername, $phpPassword, $options);
     } catch(PDOException $e) {
-        $pdo = null;
+        
         echo "<!--". "User DB Connection failed: " . $e->getMessage() . "-->";
+        $pdo = null;
     }
 }
 
